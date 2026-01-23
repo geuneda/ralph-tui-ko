@@ -1,7 +1,7 @@
 /**
- * ABOUTME: Create-PRD command for ralph-tui.
- * Uses AI-powered conversation to create Product Requirements Documents.
- * After PRD generation, shows split view with PRD preview and tracker options.
+ * ABOUTME: ralph-tui의 Create-PRD 명령어.
+ * AI 기반 대화를 통해 제품 요구사항 문서를 생성합니다.
+ * PRD 생성 후 PRD 미리보기와 트래커 옵션이 있는 분할 화면을 표시합니다.
  */
 
 import { createCliRenderer } from '@opentui/core';
@@ -18,25 +18,25 @@ import type { AgentPlugin, AgentPluginConfig } from '../plugins/agents/types.js'
 import { executeRunCommand } from './run.js';
 
 /**
- * Command-line arguments for the create-prd command.
+ * create-prd 명령어의 명령줄 인자.
  */
 export interface CreatePrdArgs {
-  /** Working directory */
+  /** 작업 디렉토리 */
   cwd?: string;
 
-  /** Output directory for PRD files */
+  /** PRD 파일 출력 디렉토리 */
   output?: string;
 
-  /** Number of user stories to generate */
+  /** 생성할 사용자 스토리 수 */
   stories?: number;
 
-  /** Force overwrite of existing files */
+  /** 기존 파일 강제 덮어쓰기 */
   force?: boolean;
 
-  /** Override agent plugin */
+  /** 에이전트 플러그인 재정의 */
   agent?: string;
 
-  /** Timeout for agent calls in milliseconds */
+  /** 에이전트 호출 타임아웃 (밀리초) */
   timeout?: number;
 
   prdSkill?: string;
@@ -45,7 +45,7 @@ export interface CreatePrdArgs {
 }
 
 /**
- * Parse create-prd command arguments.
+ * create-prd 명령어 인자 파싱.
  */
 export function parseCreatePrdArgs(args: string[]): CreatePrdArgs {
   const result: CreatePrdArgs = {};
@@ -83,53 +83,53 @@ export function parseCreatePrdArgs(args: string[]): CreatePrdArgs {
 }
 
 /**
- * Print help for the create-prd command.
+ * create-prd 명령어 도움말 출력.
  */
 export function printCreatePrdHelp(): void {
   console.log(`
-ralph-tui create-prd - Create a new PRD with AI assistance
+ralph-tui create-prd - AI 지원으로 새 PRD 생성
 
-Usage: ralph-tui create-prd [options]
-       ralph-tui prime [options]
+사용법: ralph-tui create-prd [옵션]
+        ralph-tui prime [옵션]
 
-Options:
-  --cwd, -C <path>       Working directory (default: current directory)
-  --output, -o <dir>     Output directory for PRD files (default: ./tasks)
-  --agent, -a <name>     Agent plugin to use (default: from config)
-  --timeout, -t <ms>     Timeout for AI agent calls in ms (default: 0 = no timeout)
-  --prd-skill <name>     PRD skill folder inside skills_dir
-  --force, -f            Overwrite existing files without prompting
-  --help, -h             Show this help message
+옵션:
+  --cwd, -C <path>       작업 디렉토리 (기본값: 현재 디렉토리)
+  --output, -o <dir>     PRD 파일 출력 디렉토리 (기본값: ./tasks)
+  --agent, -a <name>     사용할 에이전트 플러그인 (기본값: 설정에서)
+  --timeout, -t <ms>     AI 에이전트 호출 타임아웃 (밀리초) (기본값: 0 = 타임아웃 없음)
+  --prd-skill <name>     skills_dir 내 PRD 스킬 폴더
+  --force, -f            프롬프트 없이 기존 파일 덮어쓰기
+  --help, -h             이 도움말 메시지 표시
 
-Description:
-  Creates a Product Requirements Document (PRD) through an AI-powered conversation.
+설명:
+  AI 기반 대화를 통해 제품 요구사항 문서(PRD)를 생성합니다.
 
-  The AI agent (using the ralph-tui-prd skill):
-  1. Asks about the feature you want to build
-  2. Asks contextual follow-up questions about users, requirements, and scope
-  3. Generates a markdown PRD with user stories and acceptance criteria
-  4. Offers to create tracker tasks (prd.json or beads)
+  AI 에이전트 (ralph-tui-prd 스킬 사용):
+  1. 구현하려는 기능에 대해 질문합니다
+  2. 사용자, 요구사항, 범위에 대한 후속 질문을 합니다
+  3. 사용자 스토리와 인수 기준이 포함된 마크다운 PRD를 생성합니다
+  4. 트래커 작업 생성을 제안합니다 (prd.json 또는 beads)
 
-  Requires an AI agent to be configured. Run 'ralph-tui setup' to configure one.
+  AI 에이전트가 설정되어 있어야 합니다. 'ralph-tui setup'을 실행하여 설정하세요.
 
-Examples:
-  ralph-tui create-prd                      # Start AI-powered PRD creation
-  ralph-tui prime                           # Alias for create-prd
-  ralph-tui create-prd --agent claude       # Use specific agent
-  ralph-tui create-prd --output ./docs      # Save PRD to custom directory
+예시:
+  ralph-tui create-prd                      # AI 기반 PRD 생성 시작
+  ralph-tui prime                           # create-prd의 별칭
+  ralph-tui create-prd --agent claude       # 특정 에이전트 사용
+  ralph-tui create-prd --output ./docs      # PRD를 사용자 지정 디렉토리에 저장
 `);
 }
 
 /**
- * Try to load the bundled ralph-tui-prd skill from the agent's skills directory.
- * Returns the skill source if found, undefined otherwise.
- * @internal Exported for testing
+ * 에이전트의 스킬 디렉토리에서 번들된 ralph-tui-prd 스킬 로드 시도.
+ * 발견되면 스킬 소스를 반환하고, 그렇지 않으면 undefined를 반환합니다.
+ * @internal 테스트용으로 내보냄
  */
 export async function loadBundledPrdSkill(agent: AgentPlugin): Promise<string | undefined> {
   const skillsPaths = agent.meta.skillsPaths;
   if (!skillsPaths) return undefined;
 
-  // Try personal skills directory first (e.g., ~/.kiro/skills/)
+  // 개인 스킬 디렉토리를 먼저 시도 (예: ~/.kiro/skills/)
   if (skillsPaths.personal) {
     const personalPath = skillsPaths.personal.replace(/^~/, process.env.HOME || '');
     const skillFile = join(personalPath, 'ralph-tui-prd', 'SKILL.md');
@@ -140,11 +140,11 @@ export async function loadBundledPrdSkill(agent: AgentPlugin): Promise<string | 
         return content;
       }
     } catch {
-      // Not found in personal, try repo
+      // 개인 디렉토리에 없음, repo 시도
     }
   }
 
-  // Try repo skills directory (e.g., .kiro/skills/)
+  // repo 스킬 디렉토리 시도 (예: .kiro/skills/)
   if (skillsPaths.repo) {
     const skillFile = join(process.cwd(), skillsPaths.repo, 'ralph-tui-prd', 'SKILL.md');
     try {
@@ -154,7 +154,7 @@ export async function loadBundledPrdSkill(agent: AgentPlugin): Promise<string | 
         return content;
       }
     } catch {
-      // Not found
+      // 찾을 수 없음
     }
   }
 
@@ -172,13 +172,13 @@ async function loadPrdSkillSource(
     const stats = await stat(resolvedSkillsDir);
     if (!stats.isDirectory()) {
       console.error(
-        `Error: skills_dir '${skillsDir}' is not a directory at ${resolvedSkillsDir}.`
+        `오류: skills_dir '${skillsDir}'이(가) ${resolvedSkillsDir}에서 디렉토리가 아닙니다.`
       );
       process.exit(1);
     }
   } catch {
     console.error(
-      `Error: skills_dir '${skillsDir}' was not found or not readable at ${resolvedSkillsDir}.`
+      `오류: skills_dir '${skillsDir}'을(를) ${resolvedSkillsDir}에서 찾을 수 없거나 읽을 수 없습니다.`
     );
     process.exit(1);
   }
@@ -188,11 +188,11 @@ async function loadPrdSkillSource(
   try {
     const stats = await stat(skillPath);
     if (!stats.isDirectory()) {
-      console.error(`Error: PRD skill '${prdSkill}' is not a directory in ${resolvedSkillsDir}.`);
+      console.error(`오류: PRD 스킬 '${prdSkill}'이(가) ${resolvedSkillsDir}에서 디렉토리가 아닙니다.`);
       process.exit(1);
     }
   } catch {
-    console.error(`Error: PRD skill '${prdSkill}' was not found in ${resolvedSkillsDir}.`);
+    console.error(`오류: PRD 스킬 '${prdSkill}'을(를) ${resolvedSkillsDir}에서 찾을 수 없습니다.`);
     process.exit(1);
   }
 
@@ -201,20 +201,20 @@ async function loadPrdSkillSource(
   try {
     await access(skillFile, constants.R_OK);
   } catch {
-    console.error(`Error: PRD skill '${prdSkill}' is missing SKILL.md in ${skillPath}.`);
+    console.error(`오류: PRD 스킬 '${prdSkill}'에 ${skillPath}에 SKILL.md가 없습니다.`);
     process.exit(1);
   }
 
   try {
     const skillSource = await readFile(skillFile, 'utf-8');
     if (!skillSource.trim()) {
-      console.error(`Error: PRD skill '${prdSkill}' has an empty SKILL.md in ${skillPath}.`);
+      console.error(`오류: PRD 스킬 '${prdSkill}'의 SKILL.md가 ${skillPath}에서 비어 있습니다.`);
       process.exit(1);
     }
     return skillSource;
   } catch (error) {
     console.error(
-      `Error: Failed to read PRD skill '${prdSkill}' from ${skillFile}: ${
+      `오류: ${skillFile}에서 PRD 스킬 '${prdSkill}'을(를) 읽지 못했습니다: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -223,22 +223,22 @@ async function loadPrdSkillSource(
 }
 
 /**
- * Get the configured agent plugin.
+ * 설정된 에이전트 플러그인 가져오기.
  */
 async function getAgent(agentName?: string): Promise<AgentPlugin | null> {
   try {
     const cwd = process.cwd();
     const storedConfig = await loadStoredConfig(cwd);
 
-    // Register built-in agents
+    // 내장 에이전트 등록
     registerBuiltinAgents();
     const registry = getAgentRegistry();
     await registry.initialize();
 
-    // Determine target agent
+    // 대상 에이전트 결정
     const targetAgent = agentName || storedConfig.agent || storedConfig.defaultAgent || 'claude';
 
-    // Build agent config
+    // 에이전트 설정 구성
     const agentConfig: AgentPluginConfig = {
       name: targetAgent,
       plugin: targetAgent,
@@ -247,38 +247,38 @@ async function getAgent(agentName?: string): Promise<AgentPlugin | null> {
       envExclude: storedConfig.envExclude,
     };
 
-    // Get agent instance
+    // 에이전트 인스턴스 가져오기
     const agent = await registry.getInstance(agentConfig);
 
-    // Check if agent is ready
+    // 에이전트 준비 상태 확인
     const isReady = await agent.isReady();
     if (!isReady) {
       const detection = await agent.detect();
       if (!detection.available) {
-        console.error(`Agent '${targetAgent}' is not available: ${detection.error || 'not detected'}`);
+        console.error(`에이전트 '${targetAgent}'을(를) 사용할 수 없습니다: ${detection.error || '감지되지 않음'}`);
         return null;
       }
     }
 
     return agent;
   } catch (error) {
-    console.error('Failed to load agent:', error instanceof Error ? error.message : error);
+    console.error('에이전트 로드 실패:', error instanceof Error ? error.message : error);
     return null;
   }
 }
 
 /**
- * Run the AI-powered chat mode for PRD creation.
- * Returns the creation result if successful, or null if cancelled.
+ * PRD 생성을 위한 AI 기반 채팅 모드 실행.
+ * 성공하면 생성 결과를 반환하고, 취소되면 null을 반환합니다.
  */
 async function runChatMode(parsedArgs: CreatePrdArgs): Promise<PrdCreationResult | null> {
-  // Get agent
+  // 에이전트 가져오기
   const agent = await getAgent(parsedArgs.agent);
   if (!agent) {
     console.error('');
-    console.error('Chat mode requires an AI agent. Options:');
-    console.error('  1. Run "ralph-tui setup" to configure an agent');
-    console.error('  2. Use "--agent claude" or "--agent opencode" to specify one');
+    console.error('채팅 모드에는 AI 에이전트가 필요합니다. 옵션:');
+    console.error('  1. "ralph-tui setup"을 실행하여 에이전트 설정');
+    console.error('  2. "--agent claude" 또는 "--agent opencode"로 지정');
     process.exit(1);
   }
 
@@ -286,46 +286,46 @@ async function runChatMode(parsedArgs: CreatePrdArgs): Promise<PrdCreationResult
   const outputDir = parsedArgs.output || 'tasks';
   const timeout = parsedArgs.timeout ?? 0;
 
-  console.log(`Using agent: ${agent.meta.name}`);
+  console.log(`에이전트 사용: ${agent.meta.name}`);
 
-  // Run preflight check to verify agent can respond before starting conversation
-  console.log('Verifying agent configuration...');
+  // 대화 시작 전 에이전트가 응답할 수 있는지 사전 점검 실행
+  console.log('에이전트 설정 확인 중...');
   const preflightResult = await agent.preflight({ timeout: 30000 });
 
   if (!preflightResult.success) {
     console.error('');
-    console.error('❌ Agent preflight check failed');
+    console.error('❌ 에이전트 사전 점검 실패');
     if (preflightResult.error) {
       console.error(`   ${preflightResult.error}`);
     }
     if (preflightResult.suggestion) {
       console.error('');
-      console.error('Suggestions:');
+      console.error('제안:');
       for (const line of preflightResult.suggestion.split('\n')) {
         console.error(`  ${line}`);
       }
     }
     console.error('');
-    console.error('Run "ralph-tui doctor" to diagnose agent issues.');
+    console.error('에이전트 문제를 진단하려면 "ralph-tui doctor"를 실행하세요.');
     process.exit(1);
   }
 
-  console.log('✓ Agent is ready');
+  console.log('✓ 에이전트 준비 완료');
 
-  // Auto-load bundled skill if no custom skill specified
+  // 사용자 지정 스킬이 지정되지 않은 경우 번들 스킬 자동 로드
   if (!parsedArgs.prdSkillSource) {
     const bundledSkill = await loadBundledPrdSkill(agent);
     if (bundledSkill) {
       parsedArgs.prdSkillSource = bundledSkill;
-      console.log('✓ Loaded ralph-tui-prd skill');
+      console.log('✓ ralph-tui-prd 스킬 로드됨');
     }
   }
 
   console.log('');
 
-  // Create renderer and render the chat app
+  // 렌더러 생성 및 채팅 앱 렌더링
   const renderer = await createCliRenderer({
-    exitOnCtrlC: false, // We handle Ctrl+C in the app
+    exitOnCtrlC: false, // 앱에서 Ctrl+C 처리
   });
 
   const root = createRoot(renderer);
@@ -335,7 +335,7 @@ async function runChatMode(parsedArgs: CreatePrdArgs): Promise<PrdCreationResult
       root.unmount();
       renderer.destroy();
       console.log('');
-      console.log(`PRD workflow complete: ${result.prdPath}`);
+      console.log(`PRD 워크플로우 완료: ${result.prdPath}`);
       resolve(result);
     };
 
@@ -343,12 +343,12 @@ async function runChatMode(parsedArgs: CreatePrdArgs): Promise<PrdCreationResult
       root.unmount();
       renderer.destroy();
       console.log('');
-      console.log('PRD creation cancelled.');
+      console.log('PRD 생성이 취소되었습니다.');
       resolve(null);
     };
 
     const handleError = (error: string) => {
-      console.error('Error:', error);
+      console.error('오류:', error);
     };
 
     root.render(
@@ -368,23 +368,23 @@ async function runChatMode(parsedArgs: CreatePrdArgs): Promise<PrdCreationResult
 }
 
 /**
- * Execute the create-prd command.
- * Always uses AI-powered chat mode for conversational PRD creation.
- * If a tracker format is selected, launches ralph-tui run with the tasks loaded.
+ * create-prd 명령어 실행.
+ * 대화형 PRD 생성을 위해 항상 AI 기반 채팅 모드를 사용합니다.
+ * 트래커 형식이 선택되면 작업이 로드된 상태로 ralph-tui run을 시작합니다.
  */
 export async function executeCreatePrdCommand(args: string[]): Promise<void> {
   const parsedArgs = parseCreatePrdArgs(args);
   const cwd = parsedArgs.cwd || process.cwd();
 
-  // Verify setup is complete before running
+  // 실행 전 설정 완료 여부 확인
   await requireSetup(cwd, 'ralph-tui prime');
 
   const storedConfig = await loadStoredConfig(cwd);
 
   if (parsedArgs.prdSkill) {
     if (!storedConfig.skills_dir?.trim()) {
-      console.error('Error: --prd-skill requires skills_dir to be set in config.');
-      console.error('Set skills_dir in ~/.config/ralph-tui/config.toml or .ralph-tui/config.toml.');
+      console.error('오류: --prd-skill은 설정에서 skills_dir가 설정되어 있어야 합니다.');
+      console.error('~/.config/ralph-tui/config.toml 또는 .ralph-tui/config.toml에서 skills_dir를 설정하세요.');
       process.exit(1);
     }
 
@@ -397,28 +397,28 @@ export async function executeCreatePrdCommand(args: string[]): Promise<void> {
 
   const result = await runChatMode(parsedArgs);
 
-  // If cancelled or no result, exit
+  // 취소되었거나 결과가 없으면 종료
   if (!result) {
     process.exit(0);
   }
 
-  // If a tracker format was selected, launch ralph-tui with the tasks loaded
+  // 트래커 형식이 선택된 경우 작업이 로드된 상태로 ralph-tui 시작
   if (result.selectedTracker) {
     console.log('');
-    console.log('Launching Ralph TUI with your new tasks...');
+    console.log('새 작업으로 Ralph TUI를 시작합니다...');
     console.log('');
 
     const runArgs: string[] = [];
 
     if (result.selectedTracker === 'json') {
-      // JSON tracker: pass the prd.json path (skill creates it in tasks/ alongside PRD markdown)
+      // JSON 트래커: prd.json 경로 전달 (스킬이 tasks/에 PRD 마크다운과 함께 생성)
       runArgs.push('--prd', './tasks/prd.json');
     }
-    // For beads: no args needed, epic selection will show
+    // beads의 경우: 인자 불필요, 에픽 선택이 표시됨
 
-    // Execute run command (this will show the TUI)
+    // run 명령어 실행 (TUI가 표시됨)
     await executeRunCommand(runArgs);
-    // Note: executeRunCommand handles process.exit internally
+    // 참고: executeRunCommand가 process.exit를 내부적으로 처리
   }
 
   process.exit(0);

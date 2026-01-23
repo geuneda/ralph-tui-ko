@@ -1,7 +1,7 @@
 /**
- * ABOUTME: IterationDetailView component for the Ralph TUI.
- * Displays detailed information about a single iteration including
- * status, timing, events timeline, subagent tree, and scrollable agent output with syntax highlighting.
+ * ABOUTME: Ralph TUI용 IterationDetailView 컴포넌트.
+ * 상태, 타이밍, 이벤트 타임라인, 서브에이전트 트리,
+ * 문법 강조가 적용된 스크롤 가능한 에이전트 출력을 포함한 단일 반복의 상세 정보를 표시합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -12,65 +12,64 @@ import type { SubagentHierarchyNode, SubagentTraceStats } from '../../logs/types
 import type { SandboxConfig, SandboxMode } from '../../config/types.js';
 
 /**
- * Event in the iteration timeline
+ * 반복 타임라인의 이벤트
  */
 interface TimelineEvent {
-  /** Event timestamp */
+  /** 이벤트 타임스탬프 */
   timestamp: string;
-  /** Event type for display */
+  /** 표시용 이벤트 타입 */
   type: 'started' | 'agent_running' | 'task_completed' | 'completed' | 'failed' | 'skipped' | 'interrupted';
-  /** Human-readable description */
+  /** 사람이 읽기 쉬운 설명 */
   description: string;
 }
 
 /**
- * Historic execution context from persisted log metadata.
- * Used when viewing completed iterations to show what was actually used
- * during execution, rather than current settings.
+ * 저장된 로그 메타데이터의 과거 실행 컨텍스트.
+ * 완료된 반복을 볼 때 현재 설정이 아닌 실행 중 실제로 사용된 것을 표시하는 데 사용됩니다.
  */
 export interface HistoricExecutionContext {
-  /** Agent plugin used during execution */
+  /** 실행 중 사용된 에이전트 플러그인 */
   agentPlugin?: string;
-  /** Model used during execution */
+  /** 실행 중 사용된 모델 */
   model?: string;
-  /** Sandbox mode used during execution */
+  /** 실행 중 사용된 샌드박스 모드 */
   sandboxMode?: string;
-  /** Resolved sandbox mode when configured mode was 'auto' */
+  /** 설정된 모드가 'auto'일 때 확인된 샌드박스 모드 */
   resolvedSandboxMode?: string;
-  /** Whether network access was enabled in sandbox */
+  /** 샌드박스에서 네트워크 액세스 활성화 여부 */
   sandboxNetwork?: boolean;
 }
 
 /**
- * Props for the IterationDetailView component
+ * IterationDetailView 컴포넌트 Props
  */
 export interface IterationDetailViewProps {
-  /** The iteration result to display */
+  /** 표시할 반복 결과 */
   iteration: IterationResult;
-  /** Total iterations for context (e.g., "Iteration 3 of 10") */
+  /** 컨텍스트를 위한 전체 반복 수 (예: "반복 3 / 10") */
   totalIterations: number;
-  /** Output directory for the link to persisted file */
+  /** 저장된 파일 링크용 출력 디렉토리 */
   outputDir?: string;
-  /** Current working directory */
+  /** 현재 작업 디렉토리 */
   cwd?: string;
-  /** Callback when Esc is pressed to return to list view */
+  /** Esc를 눌러 목록 뷰로 돌아갈 때 콜백 */
   onBack?: () => void;
-  /** Subagent hierarchy tree for this iteration (loaded lazily) */
+  /** 이 반복의 서브에이전트 계층 트리 (지연 로드) */
   subagentTree?: SubagentHierarchyNode[];
-  /** Subagent statistics for this iteration */
+  /** 이 반복의 서브에이전트 통계 */
   subagentStats?: SubagentTraceStats;
-  /** Loading state for subagent trace data */
+  /** 서브에이전트 트레이스 데이터 로딩 상태 */
   subagentTraceLoading?: boolean;
-  /** Sandbox configuration (if sandboxing is enabled) - used for running iterations */
+  /** 샌드박스 설정 (샌드박싱 활성화 시) - 실행 중 반복에 사용 */
   sandboxConfig?: SandboxConfig;
-  /** Resolved sandbox mode (when mode is 'auto', this shows what it resolved to) - used for running iterations */
+  /** 확인된 샌드박스 모드 (모드가 'auto'일 때 확인된 값 표시) - 실행 중 반복에 사용 */
   resolvedSandboxMode?: Exclude<SandboxMode, 'auto'>;
-  /** Historic execution context from persisted logs - used for completed iterations */
+  /** 저장된 로그의 과거 실행 컨텍스트 - 완료된 반복에 사용 */
   historicContext?: HistoricExecutionContext;
 }
 
 /**
- * Status indicator symbols for iterations
+ * 반복의 상태 표시기 심볼
  */
 const statusIndicators: Record<IterationStatus, string> = {
   completed: '✓',
@@ -81,7 +80,7 @@ const statusIndicators: Record<IterationStatus, string> = {
 };
 
 /**
- * Status colors for iterations
+ * 반복의 상태 색상
  */
 const statusColors: Record<IterationStatus, string> = {
   completed: colors.status.success,
@@ -92,18 +91,18 @@ const statusColors: Record<IterationStatus, string> = {
 };
 
 /**
- * Status labels for display
+ * 표시용 상태 라벨
  */
 const statusLabels: Record<IterationStatus, string> = {
-  completed: 'Completed',
-  running: 'Running',
-  failed: 'Failed',
-  interrupted: 'Interrupted',
-  skipped: 'Skipped',
+  completed: '완료',
+  running: '실행 중',
+  failed: '실패',
+  interrupted: '중단됨',
+  skipped: '건너뜀',
 };
 
 /**
- * Format an ISO timestamp for display
+ * 표시용 ISO 타임스탬프 포맷
  */
 function formatTimestamp(isoString: string): string {
   const date = new Date(isoString);
@@ -111,62 +110,62 @@ function formatTimestamp(isoString: string): string {
 }
 
 /**
- * Build timeline events from iteration result
+ * 반복 결과에서 타임라인 이벤트 구성
  */
 function buildTimeline(result: IterationResult): TimelineEvent[] {
   const events: TimelineEvent[] = [];
 
-  // Start event
+  // 시작 이벤트
   events.push({
     timestamp: result.startedAt,
     type: 'started',
-    description: `Started working on ${result.task.id}`,
+    description: `${result.task.id} 작업 시작`,
   });
 
-  // Agent running event (synthetic - represents agent execution phase)
+  // 에이전트 실행 이벤트 (합성 - 에이전트 실행 단계 표현)
   if (result.agentResult) {
     events.push({
       timestamp: result.startedAt,
       type: 'agent_running',
-      description: 'Agent executing prompt',
+      description: '에이전트 프롬프트 실행 중',
     });
   }
 
-  // Task completed event (if applicable)
+  // 작업 완료 이벤트 (해당하는 경우)
   if (result.taskCompleted) {
     events.push({
       timestamp: result.endedAt,
       type: 'task_completed',
       description: result.promiseComplete
-        ? 'Task marked complete (<promise>COMPLETE</promise> detected)'
-        : 'Task marked complete',
+        ? '작업 완료 표시 (<promise>COMPLETE</promise> 감지)'
+        : '작업 완료 표시',
     });
   }
 
-  // End event based on status
+  // 상태에 따른 종료 이벤트
   if (result.status === 'completed') {
     events.push({
       timestamp: result.endedAt,
       type: 'completed',
-      description: 'Iteration completed successfully',
+      description: '반복 성공적으로 완료',
     });
   } else if (result.status === 'failed') {
     events.push({
       timestamp: result.endedAt,
       type: 'failed',
-      description: result.error ?? 'Iteration failed',
+      description: result.error ?? '반복 실패',
     });
   } else if (result.status === 'interrupted') {
     events.push({
       timestamp: result.endedAt,
       type: 'interrupted',
-      description: 'Iteration interrupted by user',
+      description: '사용자에 의해 반복 중단',
     });
   } else if (result.status === 'skipped') {
     events.push({
       timestamp: result.endedAt,
       type: 'skipped',
-      description: 'Iteration skipped',
+      description: '반복 건너뜀',
     });
   }
 
@@ -174,7 +173,7 @@ function buildTimeline(result: IterationResult): TimelineEvent[] {
 }
 
 /**
- * Get the color for a timeline event type
+ * 타임라인 이벤트 타입에 따른 색상 가져오기
  */
 function getEventColor(type: TimelineEvent['type']): string {
   switch (type) {
@@ -198,7 +197,7 @@ function getEventColor(type: TimelineEvent['type']): string {
 }
 
 /**
- * Get the symbol for a timeline event type
+ * 타임라인 이벤트 타입에 따른 심볼 가져오기
  */
 function getEventSymbol(type: TimelineEvent['type']): string {
   switch (type) {
@@ -222,7 +221,7 @@ function getEventSymbol(type: TimelineEvent['type']): string {
 }
 
 /**
- * Section header component for consistent styling
+ * 일관된 스타일링을 위한 섹션 헤더 컴포넌트
  */
 function SectionHeader({ title }: { title: string }): ReactNode {
   return (
@@ -233,7 +232,7 @@ function SectionHeader({ title }: { title: string }): ReactNode {
 }
 
 /**
- * Metadata row component for label/value pairs
+ * 라벨/값 쌍을 위한 메타데이터 행 컴포넌트
  */
 function MetadataRow({
   label,
@@ -257,7 +256,7 @@ function MetadataRow({
 }
 
 /**
- * Check if a line is the start of a code block
+ * 라인이 코드 블록의 시작인지 확인
  */
 function isCodeBlockStart(line: string): { language: string } | null {
   const match = line.match(/^```(\w*)$/);
@@ -268,15 +267,15 @@ function isCodeBlockStart(line: string): { language: string } | null {
 }
 
 /**
- * Check if a line is the end of a code block
+ * 라인이 코드 블록의 끝인지 확인
  */
 function isCodeBlockEnd(line: string): boolean {
   return line === '```';
 }
 
 /**
- * Render agent output with syntax highlighting for code blocks
- * This provides visual differentiation for code vs prose content
+ * 코드 블록에 문법 강조를 적용하여 에이전트 출력 렌더링
+ * 코드와 산문 콘텐츠를 시각적으로 구분합니다
  */
 function renderOutputWithHighlighting(output: string): ReactNode[] {
   const lines = output.split('\n');
@@ -298,7 +297,7 @@ function renderOutputWithHighlighting(output: string): ReactNode[] {
         continue;
       }
 
-      // Regular text line
+      // 일반 텍스트 라인
       elements.push(
         <text key={`line-${i}`} fg={colors.fg.secondary}>
           {line}
@@ -306,9 +305,9 @@ function renderOutputWithHighlighting(output: string): ReactNode[] {
         </text>
       );
     } else {
-      // Inside code block
+      // 코드 블록 내부
       if (isCodeBlockEnd(line)) {
-        // Render the accumulated code block
+        // 누적된 코드 블록 렌더링
         const codeContent = codeBlockLines.join('\n');
         elements.push(
           <box
@@ -338,7 +337,7 @@ function renderOutputWithHighlighting(output: string): ReactNode[] {
     }
   }
 
-  // Handle unclosed code block at end of output
+  // 출력 끝에 닫히지 않은 코드 블록 처리
   if (inCodeBlock && codeBlockLines.length > 0) {
     const codeContent = codeBlockLines.join('\n');
     elements.push(
@@ -365,7 +364,7 @@ function renderOutputWithHighlighting(output: string): ReactNode[] {
 }
 
 /**
- * Generate the output file path for an iteration
+ * 반복의 출력 파일 경로 생성
  */
 function getOutputFilePath(
   iteration: number,
@@ -373,12 +372,12 @@ function getOutputFilePath(
   outputDir: string
 ): string {
   const filename = `iteration-${String(iteration).padStart(3, '0')}-${taskId}.md`;
-  // Show relative path for cleaner display
+  // 깔끔한 표시를 위해 상대 경로 표시
   return `${outputDir}/${filename}`;
 }
 
 /**
- * Get status icon for subagent based on its completion state.
+ * 완료 상태에 따른 서브에이전트 상태 아이콘 가져오기
  */
 function getSubagentStatusIcon(status: EngineSubagentStatus): string {
   switch (status) {
@@ -394,7 +393,7 @@ function getSubagentStatusIcon(status: EngineSubagentStatus): string {
 }
 
 /**
- * Get status color for subagent based on its completion state.
+ * 완료 상태에 따른 서브에이전트 상태 색상 가져오기
  */
 function getSubagentStatusColor(status: EngineSubagentStatus): string {
   switch (status) {
@@ -410,7 +409,7 @@ function getSubagentStatusColor(status: EngineSubagentStatus): string {
 }
 
 /**
- * Format duration in human-readable format for subagents.
+ * 서브에이전트용 사람이 읽기 쉬운 형식으로 지속 시간 포맷
  */
 function formatSubagentDuration(durationMs?: number): string {
   if (durationMs === undefined) return '';
@@ -423,7 +422,7 @@ function formatSubagentDuration(durationMs?: number): string {
 }
 
 /**
- * Props for expandable subagent row.
+ * 확장 가능한 서브에이전트 행 Props
  */
 interface SubagentTreeRowProps {
   node: SubagentHierarchyNode;
@@ -433,7 +432,7 @@ interface SubagentTreeRowProps {
 }
 
 /**
- * Single expandable subagent row in the tree.
+ * 트리의 단일 확장 가능한 서브에이전트 행
  */
 function SubagentTreeRowExpandable({
   node,
@@ -447,13 +446,13 @@ function SubagentTreeRowExpandable({
   const statusIcon = getSubagentStatusIcon(state.status);
   const statusColor = getSubagentStatusColor(state.status);
 
-  // Indentation based on depth
+  // 깊이에 따른 들여쓰기
   const indent = '  '.repeat(depth);
 
-  // Expand/collapse indicator
+  // 확장/축소 표시기
   const expandIcon = hasChildren ? (isExpanded ? '▼' : '▶') : ' ';
 
-  // Format agent type and description
+  // 에이전트 타입과 설명 포맷
   const agentType = `[${state.agentType}]`;
   const duration = state.durationMs !== undefined ? ` [${formatSubagentDuration(state.durationMs)}]` : '';
 
@@ -476,7 +475,7 @@ function SubagentTreeRowExpandable({
           {duration && <span fg={colors.fg.dim}>{duration}</span>}
         </text>
       </box>
-      {/* Render children if expanded */}
+      {/* 확장 시 자식 렌더링 */}
       {isExpanded &&
         node.children.map((child) => (
           <SubagentTreeRowExpandable
@@ -492,7 +491,7 @@ function SubagentTreeRowExpandable({
 }
 
 /**
- * Expandable subagent tree section component.
+ * 확장 가능한 서브에이전트 트리 섹션 컴포넌트
  */
 function SubagentTreeSection({
   tree,
@@ -503,10 +502,10 @@ function SubagentTreeSection({
   stats?: SubagentTraceStats;
   loading?: boolean;
 }): ReactNode {
-  // Track which subagent IDs are expanded (starts all expanded)
+  // 확장된 서브에이전트 ID 추적 (시작 시 모두 확장)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => {
     const ids = new Set<string>();
-    // Pre-expand all nodes initially for visibility
+    // 가시성을 위해 처음에 모든 노드 확장
     function collectIds(nodes: SubagentHierarchyNode[]) {
       for (const node of nodes) {
         ids.add(node.state.id);
@@ -529,22 +528,22 @@ function SubagentTreeSection({
     });
   };
 
-  // Build summary line
+  // 요약 라인 구성
   const summaryParts: string[] = [];
   if (stats) {
-    summaryParts.push(`${stats.totalSubagents} subagent${stats.totalSubagents === 1 ? '' : 's'}`);
+    summaryParts.push(`${stats.totalSubagents}개 서브에이전트`);
     if (stats.failureCount > 0) {
-      summaryParts.push(`${stats.failureCount} failed`);
+      summaryParts.push(`${stats.failureCount}개 실패`);
     }
     if (stats.maxDepth > 1) {
-      summaryParts.push(`max depth ${stats.maxDepth}`);
+      summaryParts.push(`최대 깊이 ${stats.maxDepth}`);
     }
   }
   const summaryText = summaryParts.join(' · ');
 
-  // Determine title with failure indicator
+  // 실패 표시기가 있는 제목 결정
   const hasFailures = stats && stats.failureCount > 0;
-  const title = hasFailures ? 'Subagent Activity ✗' : 'Subagent Activity';
+  const title = hasFailures ? '서브에이전트 활동 ✗' : '서브에이전트 활동';
 
   return (
     <box style={{ marginBottom: 2 }}>
@@ -559,12 +558,12 @@ function SubagentTreeSection({
         }}
       >
         {loading ? (
-          <text fg={colors.fg.dim}>Loading subagent trace...</text>
+          <text fg={colors.fg.dim}>서브에이전트 트레이스 로딩 중...</text>
         ) : !tree || tree.length === 0 ? (
-          <text fg={colors.fg.muted}>No subagents were spawned during this iteration</text>
+          <text fg={colors.fg.muted}>이 반복 중 서브에이전트가 생성되지 않았습니다</text>
         ) : (
           <>
-            {/* Summary line */}
+            {/* 요약 라인 */}
             {summaryText && (
               <box style={{ marginBottom: 1 }}>
                 <text fg={hasFailures ? colors.status.error : colors.fg.muted}>
@@ -572,7 +571,7 @@ function SubagentTreeSection({
                 </text>
               </box>
             )}
-            {/* Tree view */}
+            {/* 트리 뷰 */}
             {tree.map((node) => (
               <SubagentTreeRowExpandable
                 key={node.state.id}
@@ -590,9 +589,9 @@ function SubagentTreeSection({
 }
 
 /**
- * IterationDetailView component showing comprehensive iteration details.
- * Note: onBack is provided for API completeness but navigation is handled
- * by keyboard (Esc key) in the parent component.
+ * 포괄적인 반복 상세 정보를 표시하는 IterationDetailView 컴포넌트.
+ * 참고: onBack은 API 완전성을 위해 제공되지만 탐색은 부모 컴포넌트에서
+ * 키보드(Esc 키)로 처리됩니다.
  */
 export function IterationDetailView({
   iteration,
@@ -612,10 +611,10 @@ export function IterationDetailView({
   const timeline = buildTimeline(iteration);
   const durationSeconds = Math.floor(iteration.durationMs / 1000);
 
-  // Get agent output
+  // 에이전트 출력 가져오기
   const agentOutput = iteration.agentResult?.stdout ?? '';
 
-  // Generate output file path
+  // 출력 파일 경로 생성
   const outputFilePath = getOutputFilePath(
     iteration.iteration,
     iteration.task.id,
@@ -624,7 +623,7 @@ export function IterationDetailView({
 
   return (
     <box
-      title={`Iteration Details [Esc to go back]`}
+      title={`반복 상세 [Esc로 돌아가기]`}
       style={{
         width: '100%',
         height: '100%',
@@ -635,28 +634,28 @@ export function IterationDetailView({
       }}
     >
       <scrollbox style={{ flexGrow: 1, padding: 1 }}>
-        {/* Iteration header */}
+        {/* 반복 헤더 */}
         <box style={{ marginBottom: 1 }}>
           <text>
             <span fg={statusColor}>{statusIndicator}</span>
             <span fg={colors.fg.primary}>
-              {' '}Iteration {iteration.iteration} of {totalIterations}
+              {' '}반복 {iteration.iteration} / {totalIterations}
             </span>
           </text>
         </box>
 
-        {/* Task info */}
+        {/* 작업 정보 */}
         <box style={{ marginBottom: 2 }}>
-          <text fg={colors.fg.muted}>Task: </text>
+          <text fg={colors.fg.muted}>작업: </text>
           <text fg={colors.accent.primary}>{iteration.task.id}</text>
           <text fg={colors.fg.secondary}> - {iteration.task.title}</text>
         </box>
 
-        {/* Dependencies section - shows blocking relationships */}
+        {/* 의존성 섹션 - 차단 관계 표시 */}
         {((iteration.task.dependsOn && iteration.task.dependsOn.length > 0) ||
           (iteration.task.blocks && iteration.task.blocks.length > 0)) && (
           <box style={{ marginBottom: 2 }}>
-            <SectionHeader title="Dependencies" />
+            <SectionHeader title="의존성" />
             <box
               style={{
                 padding: 1,
@@ -666,18 +665,18 @@ export function IterationDetailView({
                 flexDirection: 'column',
               }}
             >
-              {/* Tasks that block this one (this task depends on them) */}
+              {/* 이 작업을 차단하는 작업 (이 작업이 그들에게 의존함) */}
               {iteration.task.dependsOn && iteration.task.dependsOn.length > 0 && (
                 <box style={{ marginBottom: iteration.task.blocks && iteration.task.blocks.length > 0 ? 1 : 0 }}>
-                  <text fg={colors.status.warning}>Blocked by: </text>
+                  <text fg={colors.status.warning}>차단 대상: </text>
                   <text fg={colors.fg.secondary}>{iteration.task.dependsOn.join(' · ')}</text>
                 </box>
               )}
 
-              {/* Tasks that this one blocks (they depend on this task) */}
+              {/* 이 작업이 차단하는 작업 (그들이 이 작업에 의존함) */}
               {iteration.task.blocks && iteration.task.blocks.length > 0 && (
                 <box>
-                  <text fg={colors.accent.tertiary}>Blocks: </text>
+                  <text fg={colors.accent.tertiary}>차단함: </text>
                   <text fg={colors.fg.secondary}>{iteration.task.blocks.join(' · ')}</text>
                 </box>
               )}
@@ -685,9 +684,9 @@ export function IterationDetailView({
           </box>
         )}
 
-        {/* Metadata section */}
+        {/* 메타데이터 섹션 */}
         <box style={{ marginBottom: 2 }}>
-          <SectionHeader title="Details" />
+          <SectionHeader title="상세" />
           <box
             style={{
               padding: 1,
@@ -697,42 +696,42 @@ export function IterationDetailView({
             }}
           >
             <MetadataRow
-              label="Status"
+              label="상태"
               value={statusLabels[iteration.status]}
               valueColor={statusColor}
             />
             <MetadataRow
-              label="Start Time"
+              label="시작 시간"
               value={formatTimestamp(iteration.startedAt)}
               valueColor={colors.fg.secondary}
             />
             <MetadataRow
-              label="End Time"
+              label="종료 시간"
               value={formatTimestamp(iteration.endedAt)}
               valueColor={colors.fg.secondary}
             />
             <MetadataRow
-              label="Duration"
+              label="소요 시간"
               value={formatElapsedTime(durationSeconds)}
               valueColor={colors.accent.primary}
             />
             {iteration.taskCompleted && (
               <MetadataRow
-                label="Task Completed"
-                value="Yes"
+                label="작업 완료"
+                value="예"
                 valueColor={colors.status.success}
               />
             )}
             {iteration.promiseComplete && (
               <MetadataRow
-                label="Promise Detected"
-                value="Yes"
+                label="Promise 감지"
+                value="예"
                 valueColor={colors.status.success}
               />
             )}
             {iteration.error && (
               <MetadataRow
-                label="Error"
+                label="오류"
                 value={iteration.error}
                 valueColor={colors.status.error}
               />
@@ -740,10 +739,10 @@ export function IterationDetailView({
           </box>
         </box>
 
-        {/* Execution Context section - shows agent and model used */}
+        {/* 실행 컨텍스트 섹션 - 사용된 에이전트와 모델 표시 */}
         {(historicContext?.agentPlugin || historicContext?.model) && (
           <box style={{ marginBottom: 2 }}>
-            <SectionHeader title="Execution Context" />
+            <SectionHeader title="실행 컨텍스트" />
             <box
               style={{
                 padding: 1,
@@ -754,14 +753,14 @@ export function IterationDetailView({
             >
               {historicContext.agentPlugin && (
                 <MetadataRow
-                  label="Agent"
+                  label="에이전트"
                   value={historicContext.agentPlugin}
                   valueColor={colors.accent.tertiary}
                 />
               )}
               {historicContext.model && (
                 <MetadataRow
-                  label="Model"
+                  label="모델"
                   value={historicContext.model}
                   valueColor={colors.accent.primary}
                 />
@@ -770,11 +769,11 @@ export function IterationDetailView({
           </box>
         )}
 
-        {/* Sandbox configuration section - shows if sandboxing was enabled */}
-        {/* For completed iterations, use historic context; for running iterations, use current config */}
+        {/* 샌드박스 설정 섹션 - 샌드박싱 활성화 여부 표시 */}
+        {/* 완료된 반복에는 과거 컨텍스트, 실행 중 반복에는 현재 설정 사용 */}
         {(historicContext?.sandboxMode && historicContext.sandboxMode !== 'off') ? (
           <box style={{ marginBottom: 2 }}>
-            <SectionHeader title="Sandbox Configuration" />
+            <SectionHeader title="샌드박스 설정" />
             <box
               style={{
                 padding: 1,
@@ -784,7 +783,7 @@ export function IterationDetailView({
               }}
             >
               <MetadataRow
-                label="Mode"
+                label="모드"
                 value={
                   historicContext.sandboxMode === 'auto' && historicContext.resolvedSandboxMode
                     ? `auto (${historicContext.resolvedSandboxMode})`
@@ -794,8 +793,8 @@ export function IterationDetailView({
               />
               {historicContext.sandboxNetwork !== undefined && (
                 <MetadataRow
-                  label="Network Access"
-                  value={historicContext.sandboxNetwork ? 'Enabled' : 'Disabled'}
+                  label="네트워크 액세스"
+                  value={historicContext.sandboxNetwork ? '활성화' : '비활성화'}
                   valueColor={historicContext.sandboxNetwork ? colors.status.success : colors.status.warning}
                 />
               )}
@@ -803,7 +802,7 @@ export function IterationDetailView({
           </box>
         ) : (sandboxConfig?.enabled && sandboxConfig.mode !== 'off' && !historicContext) && (
           <box style={{ marginBottom: 2 }}>
-            <SectionHeader title="Sandbox Configuration" />
+            <SectionHeader title="샌드박스 설정" />
             <box
               style={{
                 padding: 1,
@@ -813,7 +812,7 @@ export function IterationDetailView({
               }}
             >
               <MetadataRow
-                label="Mode"
+                label="모드"
                 value={
                   (sandboxConfig.mode ?? 'auto') === 'auto' && resolvedSandboxMode
                     ? `auto (${resolvedSandboxMode})`
@@ -822,20 +821,20 @@ export function IterationDetailView({
                 valueColor={colors.status.info}
               />
               <MetadataRow
-                label="Network Access"
-                value={sandboxConfig.network === false ? 'Disabled' : 'Enabled'}
+                label="네트워크 액세스"
+                value={sandboxConfig.network === false ? '비활성화' : '활성화'}
                 valueColor={sandboxConfig.network === false ? colors.status.warning : colors.status.success}
               />
               {sandboxConfig.allowPaths && sandboxConfig.allowPaths.length > 0 && (
                 <MetadataRow
-                  label="Writable Paths"
+                  label="쓰기 가능 경로"
                   value={sandboxConfig.allowPaths.join(', ')}
                   valueColor={colors.fg.secondary}
                 />
               )}
               {sandboxConfig.readOnlyPaths && sandboxConfig.readOnlyPaths.length > 0 && (
                 <MetadataRow
-                  label="Read-Only Paths"
+                  label="읽기 전용 경로"
                   value={sandboxConfig.readOnlyPaths.join(', ')}
                   valueColor={colors.fg.secondary}
                 />
@@ -844,9 +843,9 @@ export function IterationDetailView({
           </box>
         )}
 
-        {/* Timeline section */}
+        {/* 타임라인 섹션 */}
         <box style={{ marginBottom: 2 }}>
-          <SectionHeader title="Events Timeline" />
+          <SectionHeader title="이벤트 타임라인" />
           <box
             style={{
               padding: 1,
@@ -868,7 +867,7 @@ export function IterationDetailView({
           </box>
         </box>
 
-        {/* Subagent activity section - shows if any subagents were spawned or loading */}
+        {/* 서브에이전트 활동 섹션 - 서브에이전트 생성 또는 로딩 시 표시 */}
         {(subagentTraceLoading || (subagentTree && subagentTree.length > 0) || subagentStats) && (
           <SubagentTreeSection
             tree={subagentTree}
@@ -877,9 +876,9 @@ export function IterationDetailView({
           />
         )}
 
-        {/* Output file link */}
+        {/* 출력 파일 링크 */}
         <box style={{ marginBottom: 2 }}>
-          <SectionHeader title="Persisted Output" />
+          <SectionHeader title="저장된 출력" />
           <box
             style={{
               padding: 1,
@@ -892,10 +891,10 @@ export function IterationDetailView({
           </box>
         </box>
 
-        {/* Agent output section */}
+        {/* 에이전트 출력 섹션 */}
         {agentOutput && (
           <box style={{ marginBottom: 2 }}>
-            <SectionHeader title="Agent Output" />
+            <SectionHeader title="에이전트 출력" />
             <box
               style={{
                 padding: 1,
@@ -910,9 +909,9 @@ export function IterationDetailView({
           </box>
         )}
 
-        {/* Hint about returning */}
+        {/* 돌아가기 힌트 */}
         <box style={{ marginTop: 1 }}>
-          <text fg={colors.fg.dim}>Press Esc to return to iteration list, or 't' for task list</text>
+          <text fg={colors.fg.dim}>Esc를 눌러 반복 목록으로, 또는 't'를 눌러 작업 목록으로 돌아가기</text>
         </box>
       </scrollbox>
     </box>

@@ -1,21 +1,21 @@
 /**
- * ABOUTME: Help overlay component showing keyboard shortcuts.
- * Displays a modal overlay with all available keyboard shortcuts grouped by category.
+ * ABOUTME: 키보드 단축키를 보여주는 도움말 오버레이 컴포넌트.
+ * 카테고리별로 그룹화된 모든 사용 가능한 키보드 단축키가 있는 모달 오버레이를 표시합니다.
  */
 
 import type { ReactNode } from 'react';
 import { colors, fullKeyboardShortcuts } from '../theme.js';
 
 /**
- * Props for the HelpOverlay component
+ * HelpOverlay 컴포넌트 Props
  */
 export interface HelpOverlayProps {
-  /** Whether the overlay is visible */
+  /** 오버레이 표시 여부 */
   visible: boolean;
 }
 
 /**
- * Group shortcuts by category for display
+ * 표시를 위해 카테고리별로 단축키 그룹화
  */
 function groupShortcutsByCategory(): Map<string, Array<{ key: string; description: string }>> {
   const groups = new Map<string, Array<{ key: string; description: string }>>();
@@ -30,7 +30,7 @@ function groupShortcutsByCategory(): Map<string, Array<{ key: string; descriptio
 }
 
 /**
- * Help overlay component
+ * 도움말 오버레이 컴포넌트
  */
 export function HelpOverlay({ visible }: HelpOverlayProps): ReactNode {
   if (!visible) {
@@ -39,7 +39,7 @@ export function HelpOverlay({ visible }: HelpOverlayProps): ReactNode {
 
   const groups = groupShortcutsByCategory();
 
-  // Calculate max key width for alignment
+  // 정렬을 위한 최대 키 너비 계산
   let maxKeyWidth = 0;
   for (const shortcut of fullKeyboardShortcuts) {
     if (shortcut.key.length > maxKeyWidth) {
@@ -57,7 +57,7 @@ export function HelpOverlay({ visible }: HelpOverlayProps): ReactNode {
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#000000B3', // 70% opacity black (OpenTUI doesn't support rgba syntax)
+        backgroundColor: '#000000B3', // 70% 불투명 검정 (OpenTUI는 rgba 문법 미지원)
       }}
     >
       <box
@@ -71,18 +71,18 @@ export function HelpOverlay({ visible }: HelpOverlayProps): ReactNode {
         }}
         border
       >
-        {/* Header */}
+        {/* 헤더 */}
         <box style={{ marginBottom: 1, justifyContent: 'center' }}>
-          <text fg={colors.accent.primary}>⌨ Keyboard Shortcuts</text>
+          <text fg={colors.accent.primary}>⌨ 키보드 단축키</text>
         </box>
 
-        {/* Shortcut groups */}
+        {/* 단축키 그룹 */}
         {Array.from(groups.entries()).map(([category, shortcuts]) => (
           <box key={category} style={{ flexDirection: 'column', marginBottom: 1 }}>
-            {/* Category header */}
+            {/* 카테고리 헤더 */}
             <text fg={colors.fg.muted}>{category}</text>
 
-            {/* Shortcuts in this category */}
+            {/* 이 카테고리의 단축키 */}
             {shortcuts.map((shortcut) => (
               <box key={shortcut.key} style={{ flexDirection: 'row' }}>
                 <text fg={colors.accent.tertiary}>
@@ -94,9 +94,9 @@ export function HelpOverlay({ visible }: HelpOverlayProps): ReactNode {
           </box>
         ))}
 
-        {/* Footer */}
+        {/* 푸터 */}
         <box style={{ marginTop: 1, justifyContent: 'center' }}>
-          <text fg={colors.fg.muted}>Press ? or Esc to close</text>
+          <text fg={colors.fg.muted}>? 또는 Esc를 눌러 닫기</text>
         </box>
       </box>
     </box>

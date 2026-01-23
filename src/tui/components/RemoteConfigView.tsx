@@ -1,7 +1,7 @@
 /**
- * ABOUTME: Remote config viewer component for displaying a remote instance's configuration.
- * Shows the remote's global and/or project config in read-only mode.
- * Provides option to push local config to the remote.
+ * ABOUTME: 원격 인스턴스의 설정을 표시하는 원격 설정 뷰어 컴포넌트.
+ * 원격의 전역 및/또는 프로젝트 설정을 읽기 전용 모드로 표시합니다.
+ * 로컬 설정을 원격에 푸시하는 옵션을 제공합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -10,7 +10,7 @@ import { useKeyboard } from '@opentui/react';
 import { colors } from '../theme.js';
 
 /**
- * Remote config data returned from checkConfig
+ * checkConfig에서 반환되는 원격 설정 데이터
  */
 export interface RemoteConfigData {
   globalExists: boolean;
@@ -23,27 +23,27 @@ export interface RemoteConfigData {
 }
 
 /**
- * Props for the RemoteConfigView component
+ * RemoteConfigView 컴포넌트 Props
  */
 export interface RemoteConfigViewProps {
-  /** Whether the view is visible */
+  /** 뷰 표시 여부 */
   visible: boolean;
-  /** Remote alias/name for display */
+  /** 표시용 원격 별칭/이름 */
   remoteAlias: string;
-  /** Config data from the remote (null while loading) */
+  /** 원격에서 가져온 설정 데이터 (로딩 중에는 null) */
   configData: RemoteConfigData | null;
-  /** Whether config is currently loading */
+  /** 설정 로딩 중 여부 */
   loading: boolean;
-  /** Error message if fetch failed */
+  /** 가져오기 실패 시 오류 메시지 */
   error?: string;
-  /** Callback when view should close */
+  /** 뷰 닫기 시 콜백 */
   onClose: () => void;
-  /** Callback to push local config to remote */
+  /** 로컬 설정을 원격에 푸시할 때 콜백 */
   onPushConfig?: (scope: 'global' | 'project') => void;
 }
 
 /**
- * RemoteConfigView - displays a remote instance's configuration read-only
+ * RemoteConfigView - 원격 인스턴스의 설정을 읽기 전용으로 표시
  */
 export function RemoteConfigView({
   visible,
@@ -54,16 +54,16 @@ export function RemoteConfigView({
   onClose,
   onPushConfig,
 }: RemoteConfigViewProps): ReactNode {
-  // Tab state: 'global' or 'project'
+  // 탭 상태: 'global' 또는 'project'
   const [activeTab, setActiveTab] = useState<'global' | 'project'>('global');
-  // Scroll offset for content
+  // 콘텐츠 스크롤 오프셋
   const [scrollOffset, setScrollOffset] = useState(0);
 
-  // Reset state when opening
+  // 열 때 상태 초기화
   useEffect(() => {
     if (visible) {
       setScrollOffset(0);
-      // Default to whichever config exists
+      // 존재하는 설정으로 기본 설정
       if (configData) {
         if (configData.globalExists) {
           setActiveTab('global');
@@ -74,7 +74,7 @@ export function RemoteConfigView({
     }
   }, [visible, configData]);
 
-  // Handle keyboard input
+  // 키보드 입력 처리
   useKeyboard(
     useCallback(
       (key) => {
@@ -87,7 +87,7 @@ export function RemoteConfigView({
             break;
 
           case 'tab':
-            // Toggle between global and project tabs
+            // 전역과 프로젝트 탭 간 전환
             if (configData?.globalExists && configData?.projectExists) {
               setActiveTab((prev) => (prev === 'global' ? 'project' : 'global'));
               setScrollOffset(0);
@@ -105,17 +105,17 @@ export function RemoteConfigView({
             break;
 
           case 'g':
-            // Go to top
+            // 맨 위로 이동
             setScrollOffset(0);
             break;
 
           case 'G':
-            // Go to bottom (approximate - set high value)
+            // 맨 아래로 이동 (근사값 - 높은 값 설정)
             setScrollOffset(1000);
             break;
 
           case 'p':
-            // Push config (if handler provided)
+            // 설정 푸시 (핸들러가 제공된 경우)
             if (onPushConfig) {
               onPushConfig(activeTab);
             }
@@ -128,7 +128,7 @@ export function RemoteConfigView({
 
   if (!visible) return null;
 
-  // Get current content based on active tab
+  // 활성 탭에 따라 현재 콘텐츠 가져오기
   const currentContent = activeTab === 'global'
     ? configData?.globalContent
     : configData?.projectContent;
@@ -139,7 +139,7 @@ export function RemoteConfigView({
     ? configData?.globalExists
     : configData?.projectExists;
 
-  // Split content into lines for display
+  // 표시를 위해 콘텐츠를 줄 단위로 분리
   const contentLines = currentContent?.split('\n') ?? [];
   const visibleLines = contentLines.slice(scrollOffset, scrollOffset + 20);
   const canScrollDown = scrollOffset + 20 < contentLines.length;
@@ -160,32 +160,32 @@ export function RemoteConfigView({
         padding: 1,
       }}
     >
-      {/* Header */}
+      {/* 헤더 */}
       <box style={{ flexDirection: 'row', marginBottom: 1 }}>
         <text fg={colors.fg.primary}>
-          ⚙ Config: {remoteAlias}
+          ⚙ 설정: {remoteAlias}
         </text>
-        <text fg={colors.fg.muted}> (read-only)</text>
+        <text fg={colors.fg.muted}> (읽기 전용)</text>
       </box>
 
-      {/* Loading state */}
+      {/* 로딩 상태 */}
       {loading && (
         <box style={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <text fg={colors.fg.muted}>Loading configuration...</text>
+          <text fg={colors.fg.muted}>설정 로딩 중...</text>
         </box>
       )}
 
-      {/* Error state */}
+      {/* 오류 상태 */}
       {error && !loading && (
         <box style={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <text fg={colors.status.error}>Error: {error}</text>
+          <text fg={colors.status.error}>오류: {error}</text>
         </box>
       )}
 
-      {/* Config content */}
+      {/* 설정 콘텐츠 */}
       {!loading && !error && configData && (
         <>
-          {/* Tab bar (if both configs exist) */}
+          {/* 탭 바 (두 설정 모두 존재하는 경우) */}
           {configData.globalExists && configData.projectExists && (
             <box style={{ flexDirection: 'row', marginBottom: 1 }}>
               <box
@@ -198,7 +198,7 @@ export function RemoteConfigView({
                 }}
               >
                 <text fg={activeTab === 'global' ? colors.accent.primary : colors.fg.muted}>
-                  Global
+                  전역
                 </text>
               </box>
               <text fg={colors.fg.muted}> </text>
@@ -212,28 +212,28 @@ export function RemoteConfigView({
                 }}
               >
                 <text fg={activeTab === 'project' ? colors.accent.primary : colors.fg.muted}>
-                  Project
+                  프로젝트
                 </text>
               </box>
-              <text fg={colors.fg.muted}> (Tab to switch)</text>
+              <text fg={colors.fg.muted}> (Tab으로 전환)</text>
             </box>
           )}
 
-          {/* Config path */}
+          {/* 설정 경로 */}
           {currentPath && (
             <box style={{ marginBottom: 1 }}>
-              <text fg={colors.fg.muted}>Path: {currentPath}</text>
+              <text fg={colors.fg.muted}>경로: {currentPath}</text>
             </box>
           )}
 
-          {/* Remote CWD */}
+          {/* 원격 CWD */}
           {configData.remoteCwd && (
             <box style={{ marginBottom: 1 }}>
-              <text fg={colors.fg.muted}>Remote CWD: {configData.remoteCwd}</text>
+              <text fg={colors.fg.muted}>원격 CWD: {configData.remoteCwd}</text>
             </box>
           )}
 
-          {/* Config content area */}
+          {/* 설정 콘텐츠 영역 */}
           <box
             style={{
               flexGrow: 1,
@@ -247,30 +247,30 @@ export function RemoteConfigView({
             {!currentExists ? (
               <box style={{ padding: 1 }}>
                 <text fg={colors.fg.muted}>
-                  No {activeTab} config exists on this remote.
+                  이 원격에 {activeTab === 'global' ? '전역' : '프로젝트'} 설정이 없습니다.
                 </text>
               </box>
             ) : !currentContent ? (
               <box style={{ padding: 1 }}>
-                <text fg={colors.fg.muted}>Config file is empty.</text>
+                <text fg={colors.fg.muted}>설정 파일이 비어 있습니다.</text>
               </box>
             ) : (
               <>
-                {/* Scroll indicator (top) */}
+                {/* 스크롤 표시기 (위) */}
                 {canScrollUp && (
-                  <text fg={colors.fg.muted}>  ↑ more above (k/↑ to scroll)</text>
+                  <text fg={colors.fg.muted}>  ↑ 위에 더 있음 (k/↑로 스크롤)</text>
                 )}
 
-                {/* Content lines */}
+                {/* 콘텐츠 라인 */}
                 {visibleLines.map((line, idx) => (
                   <text key={idx} fg={colors.fg.secondary}>
                     {formatConfigLine(line)}
                   </text>
                 ))}
 
-                {/* Scroll indicator (bottom) */}
+                {/* 스크롤 표시기 (아래) */}
                 {canScrollDown && (
-                  <text fg={colors.fg.muted}>  ↓ more below (j/↓ to scroll)</text>
+                  <text fg={colors.fg.muted}>  ↓ 아래에 더 있음 (j/↓로 스크롤)</text>
                 )}
               </>
             )}
@@ -278,20 +278,20 @@ export function RemoteConfigView({
         </>
       )}
 
-      {/* No config at all */}
+      {/* 설정 없음 */}
       {!loading && !error && configData && !configData.globalExists && !configData.projectExists && (
         <box style={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <text fg={colors.fg.muted}>No configuration found on this remote.</text>
+          <text fg={colors.fg.muted}>이 원격에서 설정을 찾을 수 없습니다.</text>
         </box>
       )}
 
-      {/* Footer with controls */}
+      {/* 컨트롤이 있는 푸터 */}
       <box style={{ marginTop: 1, flexDirection: 'row' }}>
         <text fg={colors.fg.muted}>
-          [q/Esc] Close
-          {configData?.globalExists && configData?.projectExists && '  [Tab] Switch'}
-          {'  [j/k] Scroll'}
-          {onPushConfig && '  [p] Push local config'}
+          [q/Esc] 닫기
+          {configData?.globalExists && configData?.projectExists && '  [Tab] 전환'}
+          {'  [j/k] 스크롤'}
+          {onPushConfig && '  [p] 로컬 설정 푸시'}
         </text>
       </box>
     </box>
@@ -299,10 +299,10 @@ export function RemoteConfigView({
 }
 
 /**
- * Format a TOML config line with basic syntax highlighting
+ * 기본 문법 강조로 TOML 설정 라인 포맷
  */
 function formatConfigLine(line: string): string {
-  // Just return the line as-is for now
-  // Could add TOML syntax highlighting later
+  // 현재는 그대로 반환
+  // 나중에 TOML 문법 강조 추가 가능
   return '  ' + line;
 }

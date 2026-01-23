@@ -1,315 +1,315 @@
 /**
- * ABOUTME: Built-in prompt templates as embedded strings.
- * These templates are bundled with the package and used as defaults.
+ * ABOUTME: 내장 프롬프트 템플릿 (임베디드 문자열).
+ * 이 템플릿들은 패키지에 번들되어 기본값으로 사용됩니다.
  */
 
 /**
- * Default template - used when no tracker-specific template is available.
+ * 기본 템플릿 - 트래커별 템플릿이 없을 때 사용됩니다.
  */
-export const DEFAULT_TEMPLATE = `## Task
+export const DEFAULT_TEMPLATE = `## 작업
 **ID**: {{taskId}}
-**Title**: {{taskTitle}}
+**제목**: {{taskTitle}}
 
 {{#if taskDescription}}
-## Description
+## 설명
 {{taskDescription}}
 {{/if}}
 
 {{#if acceptanceCriteria}}
-## Acceptance Criteria
+## 완료 조건
 {{acceptanceCriteria}}
 {{/if}}
 
 {{#if labels}}
-**Labels**: {{labels}}
+**라벨**: {{labels}}
 {{/if}}
 
 {{#if dependsOn}}
-**Dependencies**: {{dependsOn}}
+**의존성**: {{dependsOn}}
 {{/if}}
 
 {{#if recentProgress}}
-## Previous Progress
+## 이전 진행 상황
 {{recentProgress}}
 {{/if}}
 
-## Instructions
-Complete the task described above.
+## 지침
+위에 설명된 작업을 완료하세요.
 
-**IMPORTANT**: If the work is already complete (implemented in a previous iteration or already exists), verify it works correctly and signal completion immediately.
+**중요**: 작업이 이미 완료된 경우(이전 반복에서 구현되었거나 이미 존재하는 경우), 정상 작동을 확인하고 즉시 완료 신호를 보내세요.
 
-When finished (or if already complete), signal completion with:
+완료되면 (또는 이미 완료된 경우) 다음으로 완료 신호를 보내세요:
 <promise>COMPLETE</promise>
 `;
 
 /**
- * Beads tracker template - optimized for bead-based workflows.
- * Context-first structure: PRD → Patterns → Task → Workflow
+ * Beads 트래커 템플릿 - bead 기반 워크플로우에 최적화.
+ * 컨텍스트 우선 구조: PRD → 패턴 → 작업 → 워크플로우
  */
-export const BEADS_TEMPLATE = `{{!-- Full PRD for project context (agent studies this first) --}}
+export const BEADS_TEMPLATE = `{{!-- 프로젝트 컨텍스트를 위한 전체 PRD (에이전트가 먼저 학습) --}}
 {{#if prdContent}}
 ## PRD: {{prdName}}
 {{#if prdDescription}}
 {{prdDescription}}
 {{/if}}
 
-### Progress: {{prdCompletedCount}}/{{prdTotalCount}} tasks complete
+### 진행률: {{prdCompletedCount}}/{{prdTotalCount}} 작업 완료
 
 <details>
-<summary>Full PRD Document (click to expand)</summary>
+<summary>전체 PRD 문서 (클릭하여 펼치기)</summary>
 
 {{prdContent}}
 
 </details>
 {{/if}}
 
-{{!-- Learnings from previous iterations (patterns first) --}}
+{{!-- 이전 반복에서 배운 것들 (패턴 우선) --}}
 {{#if codebasePatterns}}
-## Codebase Patterns (Study These First)
+## 코드베이스 패턴 (먼저 학습하세요)
 {{codebasePatterns}}
 {{/if}}
 
-## Bead Details
+## Bead 상세
 - **ID**: {{taskId}}
-- **Title**: {{taskTitle}}
+- **제목**: {{taskTitle}}
 {{#if epicId}}
-- **Epic**: {{epicId}}{{#if epicTitle}} - {{epicTitle}}{{/if}}
+- **에픽**: {{epicId}}{{#if epicTitle}} - {{epicTitle}}{{/if}}
 {{/if}}
 {{#if taskDescription}}
-- **Description**: {{taskDescription}}
+- **설명**: {{taskDescription}}
 {{/if}}
 
 {{#if acceptanceCriteria}}
-## Acceptance Criteria
+## 완료 조건
 {{acceptanceCriteria}}
 {{/if}}
 
 {{#if dependsOn}}
-**Prerequisites**: {{dependsOn}}
+**선행 조건**: {{dependsOn}}
 {{/if}}
 
 {{#if recentProgress}}
-## Recent Progress
+## 최근 진행 상황
 {{recentProgress}}
 {{/if}}
 
-## Workflow
-1. Study the PRD context above to understand the bigger picture (if available)
-2. Study \`.ralph-tui/progress.md\` to understand overall status, implementation progress, and learnings including codebase patterns and gotchas
-3. Implement the requirements (stay on current branch)
-4. Run your project's quality checks (typecheck, lint, etc.)
+## 워크플로우
+1. 위의 PRD 컨텍스트를 학습하여 전체 그림을 이해하세요 (가능한 경우)
+2. \`.ralph-tui/progress.md\`를 학습하여 전체 상태, 구현 진행 상황, 코드베이스 패턴과 주의사항을 포함한 배운 점을 파악하세요
+3. 요구사항을 구현하세요 (현재 브랜치에서 작업)
+4. 프로젝트의 품질 검사를 실행하세요 (타입체크, 린트 등)
 {{#if config.autoCommit}}
-5. Do NOT create git commits. Changes will be committed automatically by the engine after task completion.
+5. git 커밋을 생성하지 마세요. 작업 완료 후 엔진이 자동으로 커밋합니다.
 {{else}}
-5. Do NOT create git commits. Leave all changes uncommitted for manual review.
+5. git 커밋을 생성하지 마세요. 수동 검토를 위해 모든 변경사항을 커밋하지 않은 상태로 두세요.
 {{/if}}
-6. Close the bead: \`bd close {{taskId}} --db {{beadsDbPath}} --reason "Brief description"\`
-7. Document learnings (see below)
-8. Signal completion
+6. bead를 닫으세요: \`bd close {{taskId}} --db {{beadsDbPath}} --reason "간단한 설명"\`
+7. 배운 점을 문서화하세요 (아래 참조)
+8. 완료 신호를 보내세요
 
-## Before Completing
-APPEND to \`.ralph-tui/progress.md\`:
+## 완료 전
+\`.ralph-tui/progress.md\`에 추가하세요:
 \`\`\`
-## [Date] - {{taskId}}
-- What was implemented
-- Files changed
-- **Learnings:**
-  - Patterns discovered
-  - Gotchas encountered
+## [날짜] - {{taskId}}
+- 구현한 내용
+- 변경된 파일
+- **배운 점:**
+  - 발견한 패턴
+  - 겪은 주의사항
 ---
 \`\`\`
 
-If you discovered a **reusable pattern**, also add it to the \`## Codebase Patterns\` section at the TOP of progress.md.
+**재사용 가능한 패턴**을 발견했다면, progress.md 상단의 \`## 코드베이스 패턴\` 섹션에도 추가하세요.
 
-## Stop Condition
-**IMPORTANT**: If the work is already complete (implemented in a previous iteration or already exists), verify it works correctly and signal completion immediately.
+## 종료 조건
+**중요**: 작업이 이미 완료된 경우(이전 반복에서 구현되었거나 이미 존재하는 경우), 정상 작동을 확인하고 즉시 완료 신호를 보내세요.
 
-When finished (or if already complete), signal completion with:
+완료되면 (또는 이미 완료된 경우) 다음으로 완료 신호를 보내세요:
 <promise>COMPLETE</promise>
 `;
 
 /**
- * Beads + bv tracker template - includes extra context from intelligent selection.
- * Context-first structure: PRD → Selection Context → Patterns → Task → Workflow
+ * Beads + bv 트래커 템플릿 - 지능적 선택의 추가 컨텍스트 포함.
+ * 컨텍스트 우선 구조: PRD → 선택 컨텍스트 → 패턴 → 작업 → 워크플로우
  */
-export const BEADS_BV_TEMPLATE = `{{!-- Full PRD for project context (agent studies this first) --}}
+export const BEADS_BV_TEMPLATE = `{{!-- 프로젝트 컨텍스트를 위한 전체 PRD (에이전트가 먼저 학습) --}}
 {{#if prdContent}}
 ## PRD: {{prdName}}
 {{#if prdDescription}}
 {{prdDescription}}
 {{/if}}
 
-### Progress: {{prdCompletedCount}}/{{prdTotalCount}} tasks complete
+### 진행률: {{prdCompletedCount}}/{{prdTotalCount}} 작업 완료
 
 <details>
-<summary>Full PRD Document (click to expand)</summary>
+<summary>전체 PRD 문서 (클릭하여 펼치기)</summary>
 
 {{prdContent}}
 
 </details>
 {{/if}}
 
-{{!-- Why this task was selected (bv context) --}}
+{{!-- 이 작업이 선택된 이유 (bv 컨텍스트) --}}
 {{#if selectionReason}}
-## Why This Task Was Selected
+## 이 작업이 선택된 이유
 {{selectionReason}}
 {{/if}}
 
-{{!-- Learnings from previous iterations (patterns first) --}}
+{{!-- 이전 반복에서 배운 것들 (패턴 우선) --}}
 {{#if codebasePatterns}}
-## Codebase Patterns (Study These First)
+## 코드베이스 패턴 (먼저 학습하세요)
 {{codebasePatterns}}
 {{/if}}
 
-## Bead Details
+## Bead 상세
 - **ID**: {{taskId}}
-- **Title**: {{taskTitle}}
+- **제목**: {{taskTitle}}
 {{#if epicId}}
-- **Epic**: {{epicId}}{{#if epicTitle}} - {{epicTitle}}{{/if}}
+- **에픽**: {{epicId}}{{#if epicTitle}} - {{epicTitle}}{{/if}}
 {{/if}}
 {{#if taskDescription}}
-- **Description**: {{taskDescription}}
+- **설명**: {{taskDescription}}
 {{/if}}
 
 {{#if acceptanceCriteria}}
-## Acceptance Criteria
+## 완료 조건
 {{acceptanceCriteria}}
 {{/if}}
 
 {{#if dependsOn}}
-## Dependencies
-This task depends on: {{dependsOn}}
+## 의존성
+이 작업은 다음에 의존합니다: {{dependsOn}}
 {{/if}}
 
 {{#if blocks}}
-## Impact
-Completing this task will unblock: {{blocks}}
+## 영향
+이 작업을 완료하면 다음이 차단 해제됩니다: {{blocks}}
 {{/if}}
 
 {{#if recentProgress}}
-## Recent Progress
+## 최근 진행 상황
 {{recentProgress}}
 {{/if}}
 
-## Workflow
-1. Study the PRD context above to understand the bigger picture (if available)
-2. Study \`.ralph-tui/progress.md\` to understand overall status, implementation progress, and learnings including codebase patterns and gotchas
-3. Implement the requirements (stay on current branch)
-4. Run your project's quality checks (typecheck, lint, etc.)
+## 워크플로우
+1. 위의 PRD 컨텍스트를 학습하여 전체 그림을 이해하세요 (가능한 경우)
+2. \`.ralph-tui/progress.md\`를 학습하여 전체 상태, 구현 진행 상황, 코드베이스 패턴과 주의사항을 포함한 배운 점을 파악하세요
+3. 요구사항을 구현하세요 (현재 브랜치에서 작업)
+4. 프로젝트의 품질 검사를 실행하세요 (타입체크, 린트 등)
 {{#if config.autoCommit}}
-5. Do NOT create git commits. Changes will be committed automatically by the engine after task completion.
+5. git 커밋을 생성하지 마세요. 작업 완료 후 엔진이 자동으로 커밋합니다.
 {{else}}
-5. Do NOT create git commits. Leave all changes uncommitted for manual review.
+5. git 커밋을 생성하지 마세요. 수동 검토를 위해 모든 변경사항을 커밋하지 않은 상태로 두세요.
 {{/if}}
-6. Close the bead: \`bd close {{taskId}} --db {{beadsDbPath}} --reason "Brief description"\`
-7. Document learnings (see below)
-8. Signal completion
+6. bead를 닫으세요: \`bd close {{taskId}} --db {{beadsDbPath}} --reason "간단한 설명"\`
+7. 배운 점을 문서화하세요 (아래 참조)
+8. 완료 신호를 보내세요
 
-## Before Completing
-APPEND to \`.ralph-tui/progress.md\`:
+## 완료 전
+\`.ralph-tui/progress.md\`에 추가하세요:
 \`\`\`
-## [Date] - {{taskId}}
-- What was implemented
-- Files changed
-- **Learnings:**
-  - Patterns discovered
-  - Gotchas encountered
+## [날짜] - {{taskId}}
+- 구현한 내용
+- 변경된 파일
+- **배운 점:**
+  - 발견한 패턴
+  - 겪은 주의사항
 ---
 \`\`\`
 
-If you discovered a **reusable pattern**, also add it to the \`## Codebase Patterns\` section at the TOP of progress.md.
+**재사용 가능한 패턴**을 발견했다면, progress.md 상단의 \`## 코드베이스 패턴\` 섹션에도 추가하세요.
 
-## Stop Condition
-**IMPORTANT**: If the work is already complete (implemented in a previous iteration or already exists), verify it works correctly and signal completion immediately.
+## 종료 조건
+**중요**: 작업이 이미 완료된 경우(이전 반복에서 구현되었거나 이미 존재하는 경우), 정상 작동을 확인하고 즉시 완료 신호를 보내세요.
 
-When finished (or if already complete), signal completion with:
+완료되면 (또는 이미 완료된 경우) 다음으로 완료 신호를 보내세요:
 <promise>COMPLETE</promise>
 `;
 
 /**
- * JSON (prd.json) tracker template - structured for PRD user stories.
- * Context-first structure: PRD → Patterns → Task → Workflow
+ * JSON (prd.json) 트래커 템플릿 - PRD 사용자 스토리용 구조화.
+ * 컨텍스트 우선 구조: PRD → 패턴 → 작업 → 워크플로우
  */
-export const JSON_TEMPLATE = `{{!-- Full PRD for project context (agent studies this first) --}}
+export const JSON_TEMPLATE = `{{!-- 프로젝트 컨텍스트를 위한 전체 PRD (에이전트가 먼저 학습) --}}
 {{#if prdContent}}
 ## PRD: {{prdName}}
 {{#if prdDescription}}
 {{prdDescription}}
 {{/if}}
 
-### Progress: {{prdCompletedCount}}/{{prdTotalCount}} stories complete
+### 진행률: {{prdCompletedCount}}/{{prdTotalCount}} 스토리 완료
 
 <details>
-<summary>Full PRD Document (click to expand)</summary>
+<summary>전체 PRD 문서 (클릭하여 펼치기)</summary>
 
 {{prdContent}}
 
 </details>
 {{/if}}
 
-{{!-- Learnings from previous iterations (patterns first) --}}
+{{!-- 이전 반복에서 배운 것들 (패턴 우선) --}}
 {{#if codebasePatterns}}
-## Codebase Patterns (Study These First)
+## 코드베이스 패턴 (먼저 학습하세요)
 {{codebasePatterns}}
 {{/if}}
 
-{{!-- Task details --}}
-## Your Task: {{taskId}} - {{taskTitle}}
+{{!-- 작업 상세 --}}
+## 현재 작업: {{taskId}} - {{taskTitle}}
 
 {{#if taskDescription}}
-### Description
+### 설명
 {{taskDescription}}
 {{/if}}
 
 {{#if acceptanceCriteria}}
-### Acceptance Criteria
+### 완료 조건
 {{acceptanceCriteria}}
 {{/if}}
 
 {{#if notes}}
-### Notes
+### 참고사항
 {{notes}}
 {{/if}}
 
 {{#if dependsOn}}
-**Prerequisites**: {{dependsOn}}
+**선행 조건**: {{dependsOn}}
 {{/if}}
 
 {{#if recentProgress}}
-## Recent Progress
+## 최근 진행 상황
 {{recentProgress}}
 {{/if}}
 
-## Workflow
-1. Study the PRD context above to understand the bigger picture
-2. Study \`.ralph-tui/progress.md\` to understand overall status, implementation progress, and learnings including codebase patterns and gotchas
-3. Implement this single story following acceptance criteria
-4. Run quality checks: typecheck, lint, etc.
+## 워크플로우
+1. 위의 PRD 컨텍스트를 학습하여 전체 그림을 이해하세요
+2. \`.ralph-tui/progress.md\`를 학습하여 전체 상태, 구현 진행 상황, 코드베이스 패턴과 주의사항을 포함한 배운 점을 파악하세요
+3. 완료 조건을 따라 이 단일 스토리를 구현하세요
+4. 품질 검사 실행: 타입체크, 린트 등
 {{#if config.autoCommit}}
-5. Do NOT create git commits. Changes will be committed automatically by the engine after task completion.
+5. git 커밋을 생성하지 마세요. 작업 완료 후 엔진이 자동으로 커밋합니다.
 {{else}}
-5. Do NOT create git commits. Leave all changes uncommitted for manual review.
+5. git 커밋을 생성하지 마세요. 수동 검토를 위해 모든 변경사항을 커밋하지 않은 상태로 두세요.
 {{/if}}
-6. Document learnings (see below)
-7. Signal completion
+6. 배운 점을 문서화하세요 (아래 참조)
+7. 완료 신호를 보내세요
 
-## Before Completing
-APPEND to \`.ralph-tui/progress.md\`:
+## 완료 전
+\`.ralph-tui/progress.md\`에 추가하세요:
 \`\`\`
-## [Date] - {{taskId}}
-- What was implemented
-- Files changed
-- **Learnings:**
-  - Patterns discovered
-  - Gotchas encountered
+## [날짜] - {{taskId}}
+- 구현한 내용
+- 변경된 파일
+- **배운 점:**
+  - 발견한 패턴
+  - 겪은 주의사항
 ---
 \`\`\`
 
-If you discovered a **reusable pattern**, also add it to the \`## Codebase Patterns\` section at the TOP of progress.md.
+**재사용 가능한 패턴**을 발견했다면, progress.md 상단의 \`## 코드베이스 패턴\` 섹션에도 추가하세요.
 
-## Stop Condition
-**IMPORTANT**: If the work is already complete (implemented in a previous iteration or already exists), verify it meets the acceptance criteria and signal completion immediately.
+## 종료 조건
+**중요**: 작업이 이미 완료된 경우(이전 반복에서 구현되었거나 이미 존재하는 경우), 완료 조건을 충족하는지 확인하고 즉시 완료 신호를 보내세요.
 
-When finished (or if already complete), signal completion with:
+완료되면 (또는 이미 완료된 경우) 다음으로 완료 신호를 보내세요:
 <promise>COMPLETE</promise>
 `;

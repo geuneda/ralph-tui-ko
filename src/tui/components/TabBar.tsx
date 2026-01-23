@@ -1,8 +1,8 @@
 /**
- * ABOUTME: Tab bar component for navigating between local and remote instances.
- * Shows connection status indicators and supports keyboard navigation.
- * US-5: Extended with reconnecting state indicator and connection metrics display.
- * First tab is always "Local", remote tabs show alias with status.
+ * ABOUTME: 로컬 및 원격 인스턴스 간 탐색을 위한 탭 바 컴포넌트.
+ * 연결 상태 표시기를 보여주고 키보드 탐색을 지원합니다.
+ * US-5: 재연결 상태 표시기와 연결 메트릭 표시로 확장됨.
+ * 첫 번째 탭은 항상 "로컬"이며, 원격 탭은 상태와 함께 별칭을 표시합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -10,22 +10,22 @@ import { colors } from '../theme.js';
 import type { ConnectionStatus, InstanceTab } from '../../remote/client.js';
 
 /**
- * Props for the TabBar component
+ * TabBar 컴포넌트 Props
  */
 export interface TabBarProps {
-  /** List of instance tabs (local first, then remotes) */
+  /** 인스턴스 탭 목록 (로컬 먼저, 그 다음 원격) */
   tabs: InstanceTab[];
 
-  /** Currently selected tab index */
+  /** 현재 선택된 탭 인덱스 */
   selectedIndex: number;
 }
 
 /**
- * Connection status indicator symbols
- * - connected: solid circle (green)
- * - connecting: half-filled circle (yellow)
- * - reconnecting: double arrows (orange, indicates retry in progress)
- * - disconnected: empty circle (grey)
+ * 연결 상태 표시기 심볼
+ * - connected: 채워진 원 (녹색)
+ * - connecting: 반쯤 채워진 원 (노란색)
+ * - reconnecting: 이중 화살표 (주황색, 재시도 진행 중)
+ * - disconnected: 빈 원 (회색)
  */
 const STATUS_INDICATORS: Record<ConnectionStatus, string> = {
   connected: '●',
@@ -35,7 +35,7 @@ const STATUS_INDICATORS: Record<ConnectionStatus, string> = {
 };
 
 /**
- * Get color for connection status
+ * 연결 상태에 따른 색상 가져오기
  */
 function getStatusColor(status: ConnectionStatus): string {
   switch (status) {
@@ -44,14 +44,14 @@ function getStatusColor(status: ConnectionStatus): string {
     case 'connecting':
       return colors.status.warning;
     case 'reconnecting':
-      return colors.status.warning; // Orange/yellow for reconnecting
+      return colors.status.warning; // 재연결 중에는 주황색/노란색
     case 'disconnected':
       return colors.fg.muted;
   }
 }
 
 /**
- * Format connection duration in compact human-readable format.
+ * 연결 지속 시간을 컴팩트하고 사람이 읽기 쉬운 형식으로 포맷.
  */
 function formatDuration(seconds: number): string {
   if (seconds < 60) {
@@ -68,7 +68,7 @@ function formatDuration(seconds: number): string {
 }
 
 /**
- * Single tab component
+ * 단일 탭 컴포넌트
  */
 function Tab({
   tab,
@@ -82,16 +82,16 @@ function Tab({
   const statusIndicator = STATUS_INDICATORS[tab.status];
   const statusColor = getStatusColor(tab.status);
 
-  // Show number key hint (1-9) for quick navigation
+  // 빠른 탐색을 위한 숫자 키 힌트 (1-9) 표시
   const keyHint = index < 9 ? `${index + 1}` : '';
 
-  // Use visual separator instead of borderRight (not supported)
+  // borderRight가 지원되지 않아 시각적 구분자 사용
   const separator = '│';
 
-  // Selected tabs use different styling for emphasis
+  // 선택된 탭은 강조를 위해 다른 스타일 사용
   const labelColor = isSelected ? colors.fg.primary : colors.fg.secondary;
 
-  // Build metrics string for connected remote tabs (US-5)
+  // 연결된 원격 탭의 메트릭 문자열 구성 (US-5)
   let metricsStr = '';
   if (!tab.isLocal && tab.status === 'connected' && tab.metrics && isSelected) {
     const parts: string[] = [];
@@ -116,27 +116,27 @@ function Tab({
       }}
     >
       <text>
-        {/* Status indicator (skip for local since always connected) */}
+        {/* 상태 표시기 (로컬은 항상 연결되어 있으므로 생략) */}
         {!tab.isLocal && (
           <span fg={statusColor}>{statusIndicator} </span>
         )}
 
-        {/* Tab label - use uppercase for selected to indicate emphasis */}
+        {/* 탭 라벨 - 선택 시 강조를 위해 대문자 사용 */}
         <span fg={labelColor}>
           {isSelected ? tab.label.toUpperCase() : tab.label}
         </span>
 
-        {/* Connection metrics for selected connected remote tabs (US-5) */}
+        {/* 선택된 연결된 원격 탭의 연결 메트릭 (US-5) */}
         {metricsStr && (
           <span fg={colors.fg.dim}>{metricsStr}</span>
         )}
 
-        {/* Key hint */}
+        {/* 키 힌트 */}
         {keyHint && (
           <span fg={colors.fg.dim}> [{keyHint}]</span>
         )}
 
-        {/* Separator */}
+        {/* 구분자 */}
         <span fg={colors.border.muted}> {separator}</span>
       </text>
     </box>
@@ -144,7 +144,7 @@ function Tab({
 }
 
 /**
- * Add remote button (subtle "+" affordance)
+ * 원격 추가 버튼 (미묘한 "+" 어포던스)
  */
 function AddRemoteButton(): ReactNode {
   return (
@@ -160,16 +160,16 @@ function AddRemoteButton(): ReactNode {
 }
 
 /**
- * Tab bar for navigating between instances.
- * Shows tabs at the top of the TUI with connection status.
+ * 인스턴스 간 탐색을 위한 탭 바.
+ * TUI 상단에 연결 상태와 함께 탭을 표시합니다.
  *
- * Note: Tab selection is handled via keyboard shortcuts in the parent component,
- * not click handlers (the terminal UI library doesn't support pointer events).
+ * 참고: 탭 선택은 부모 컴포넌트에서 키보드 단축키로 처리되며,
+ * 클릭 핸들러가 아닙니다 (터미널 UI 라이브러리가 포인터 이벤트를 지원하지 않음).
  *
- * Keybindings (handled by parent):
- * - Number keys (1-9): Jump to tab
- * - Ctrl+Tab / ]: Next tab
- * - Ctrl+Shift+Tab / [: Previous tab
+ * 키바인딩 (부모에서 처리):
+ * - 숫자 키 (1-9): 탭으로 이동
+ * - Ctrl+Tab / ]: 다음 탭
+ * - Ctrl+Shift+Tab / [: 이전 탭
  */
 export function TabBar({
   tabs,
@@ -184,7 +184,7 @@ export function TabBar({
         backgroundColor: colors.bg.secondary,
       }}
     >
-      {/* Tab list */}
+      {/* 탭 목록 */}
       <box
         style={{
           flexDirection: 'row',
@@ -201,7 +201,7 @@ export function TabBar({
         ))}
       </box>
 
-      {/* Add remote button */}
+      {/* 원격 추가 버튼 */}
       <AddRemoteButton />
     </box>
   );

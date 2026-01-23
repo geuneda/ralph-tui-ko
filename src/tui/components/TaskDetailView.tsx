@@ -1,7 +1,7 @@
 /**
- * ABOUTME: TaskDetailView component for the Ralph TUI.
- * Displays full task details including description, acceptance criteria,
- * dependencies, and metadata. Supports scrolling for long content.
+ * ABOUTME: Ralph TUI용 TaskDetailView 컴포넌트.
+ * 설명, 완료 조건, 의존성, 메타데이터를 포함한 전체 작업 상세를 표시합니다.
+ * 긴 콘텐츠에 대한 스크롤을 지원합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -9,18 +9,18 @@ import { colors, getTaskStatusColor, getTaskStatusIndicator } from '../theme.js'
 import type { TaskDetailViewProps, TaskPriority } from '../types.js';
 
 /**
- * Priority label mapping for display
+ * 표시용 우선순위 라벨 매핑
  */
 const priorityLabels: Record<TaskPriority, string> = {
-  0: 'P0 - Critical',
-  1: 'P1 - High',
-  2: 'P2 - Medium',
-  3: 'P3 - Low',
-  4: 'P4 - Backlog',
+  0: 'P0 - 긴급',
+  1: 'P1 - 높음',
+  2: 'P2 - 중간',
+  3: 'P3 - 낮음',
+  4: 'P4 - 백로그',
 };
 
 /**
- * Get color for priority display
+ * 우선순위 표시용 색상 가져오기
  */
 function getPriorityColor(priority: TaskPriority): string {
   switch (priority) {
@@ -38,16 +38,16 @@ function getPriorityColor(priority: TaskPriority): string {
 }
 
 /**
- * Parse acceptance criteria from description, dedicated field, or metadata array.
- * Looks for markdown checklist items (- [ ] or - [x])
- * JSON tracker stores criteria in metadata.acceptanceCriteria as string array.
+ * 설명, 전용 필드, 또는 메타데이터 배열에서 완료 조건 파싱.
+ * 마크다운 체크리스트 항목 (- [ ] 또는 - [x]) 찾기
+ * JSON 트래커는 metadata.acceptanceCriteria에 문자열 배열로 저장.
  */
 function parseAcceptanceCriteria(
   description?: string,
   acceptanceCriteria?: string,
   metadataCriteria?: unknown
 ): Array<{ text: string; checked: boolean }> {
-  // If metadata contains criteria array (from JSON tracker), use that
+  // 메타데이터에 criteria 배열이 있으면 (JSON 트래커에서) 사용
   if (Array.isArray(metadataCriteria) && metadataCriteria.length > 0) {
     return metadataCriteria
       .filter((c): c is string => typeof c === 'string')
@@ -58,17 +58,17 @@ function parseAcceptanceCriteria(
   const lines = content.split('\n');
   const criteria: Array<{ text: string; checked: boolean }> = [];
 
-  // Look for acceptance criteria section
+  // 완료 조건 섹션 찾기
   let inCriteriaSection = false;
 
   for (const line of lines) {
-    // Check for section header
+    // 섹션 헤더 확인
     if (line.toLowerCase().includes('acceptance criteria')) {
       inCriteriaSection = true;
       continue;
     }
 
-    // Parse checklist items (anywhere in content if no section, or only in section)
+    // 체크리스트 항목 파싱 (섹션이 없으면 콘텐츠 어디서든, 있으면 섹션 내에서만)
     const checkboxMatch = line.match(/^\s*-\s*\[([ xX])\]\s*(.+)$/);
     if (checkboxMatch) {
       criteria.push({
@@ -77,7 +77,7 @@ function parseAcceptanceCriteria(
       });
     }
 
-    // Also accept bullet points in the criteria section
+    // criteria 섹션 내의 글머리 기호도 허용
     if (inCriteriaSection) {
       const bulletMatch = line.match(/^\s*[-*]\s+(.+)$/);
       if (bulletMatch && !checkboxMatch) {
@@ -93,7 +93,7 @@ function parseAcceptanceCriteria(
 }
 
 /**
- * Extract description without acceptance criteria section
+ * 완료 조건 섹션 없이 설명 추출
  */
 function extractDescription(description?: string): string {
   if (!description) return '';
@@ -108,8 +108,8 @@ function extractDescription(description?: string): string {
       continue;
     }
 
-    // Stop including lines once we hit the acceptance criteria section
-    // unless we encounter another section header
+    // 완료 조건 섹션에 도달하면 라인 포함 중지
+    // 다른 섹션 헤더를 만나면 다시 포함
     if (inCriteriaSection && line.match(/^#+\s/)) {
       inCriteriaSection = false;
     }
@@ -123,7 +123,7 @@ function extractDescription(description?: string): string {
 }
 
 /**
- * Section header component for consistent styling
+ * 일관된 스타일링을 위한 섹션 헤더 컴포넌트
  */
 function SectionHeader({ title }: { title: string }): ReactNode {
   return (
@@ -136,7 +136,7 @@ function SectionHeader({ title }: { title: string }): ReactNode {
 }
 
 /**
- * Metadata row component for label/value pairs
+ * 라벨/값 쌍을 위한 메타데이터 행 컴포넌트
  */
 function MetadataRow({
   label,
@@ -160,21 +160,21 @@ function MetadataRow({
 }
 
 /**
- * TaskDetailView component showing comprehensive task details.
- * Note: onBack is provided for API completeness but navigation is handled
- * by keyboard (Esc key) in the parent component.
+ * 포괄적인 작업 상세를 보여주는 TaskDetailView 컴포넌트.
+ * 참고: onBack은 API 완전성을 위해 제공되지만 탐색은
+ * 부모 컴포넌트에서 키보드 (Esc 키)로 처리됩니다.
  */
 export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): ReactNode {
   const statusColor = getTaskStatusColor(task.status);
   const statusIndicator = getTaskStatusIndicator(task.status);
-  // Check metadata for acceptance criteria (JSON tracker stores it there)
+  // 메타데이터에서 완료 조건 확인 (JSON 트래커는 여기에 저장)
   const metadataCriteria = task.metadata?.acceptanceCriteria;
   const criteria = parseAcceptanceCriteria(task.description, undefined, metadataCriteria);
   const cleanDescription = extractDescription(task.description);
 
   return (
     <box
-      title={`Task Details [Esc to go back]`}
+      title={`작업 상세 [Esc로 뒤로가기]`}
       style={{
         width: '100%',
         height: '100%',
@@ -185,7 +185,7 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
       }}
     >
       <scrollbox style={{ flexGrow: 1, padding: 1 }}>
-        {/* Task title and ID */}
+        {/* 작업 제목과 ID */}
         <box style={{ marginBottom: 1 }}>
           <text>
             <span fg={statusColor}>{statusIndicator}</span>
@@ -200,9 +200,9 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
           <text fg={colors.fg.muted}>ID: {task.id}</text>
         </box>
 
-        {/* Metadata section */}
+        {/* 메타데이터 섹션 */}
         <box style={{ marginBottom: 2 }}>
-          <SectionHeader title="Metadata" />
+          <SectionHeader title="메타데이터" />
           <box
             style={{
               padding: 1,
@@ -211,23 +211,23 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
               borderColor: colors.border.muted,
             }}
           >
-            <MetadataRow label="Status" value={task.status} valueColor={statusColor} />
+            <MetadataRow label="상태" value={task.status} valueColor={statusColor} />
 
             {task.priority !== undefined && (
               <MetadataRow
-                label="Priority"
+                label="우선순위"
                 value={priorityLabels[task.priority]}
                 valueColor={getPriorityColor(task.priority)}
               />
             )}
 
-            {task.type && <MetadataRow label="Type" value={task.type} />}
+            {task.type && <MetadataRow label="유형" value={task.type} />}
 
-            {task.assignee && <MetadataRow label="Assignee" value={task.assignee} />}
+            {task.assignee && <MetadataRow label="담당자" value={task.assignee} />}
 
             {task.labels && task.labels.length > 0 && (
               <MetadataRow
-                label="Labels"
+                label="라벨"
                 value={
                   <text>
                     {task.labels.map((label, i) => (
@@ -243,7 +243,7 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
 
             {task.iteration !== undefined && (
               <MetadataRow
-                label="Iteration"
+                label="반복"
                 value={task.iteration.toString()}
                 valueColor={colors.accent.primary}
               />
@@ -251,10 +251,10 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
           </box>
         </box>
 
-        {/* Description section */}
+        {/* 설명 섹션 */}
         {cleanDescription && (
           <box style={{ marginBottom: 2 }}>
-            <SectionHeader title="Description" />
+            <SectionHeader title="설명" />
             <box
               style={{
                 padding: 1,
@@ -268,10 +268,10 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
           </box>
         )}
 
-        {/* Acceptance criteria section */}
+        {/* 완료 조건 섹션 */}
         {criteria.length > 0 && (
           <box style={{ marginBottom: 2 }}>
-            <SectionHeader title="Acceptance Criteria" />
+            <SectionHeader title="완료 조건" />
             <box
               style={{
                 padding: 1,
@@ -298,12 +298,12 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
           </box>
         )}
 
-        {/* Dependencies section */}
+        {/* 의존성 섹션 */}
         {((task.dependsOn && task.dependsOn.length > 0) ||
           (task.blocks && task.blocks.length > 0) ||
           (task.blockedByTasks && task.blockedByTasks.length > 0)) && (
           <box style={{ marginBottom: 2 }}>
-            <SectionHeader title="Dependencies" />
+            <SectionHeader title="의존성" />
             <box
               style={{
                 padding: 1,
@@ -313,10 +313,10 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
                 flexDirection: 'column',
               }}
             >
-              {/* Show detailed blocker info if available (with title and status) */}
+              {/* 상세 차단 정보 표시 (가능한 경우 제목과 상태 포함) */}
               {task.blockedByTasks && task.blockedByTasks.length > 0 && (
                 <box style={{ marginBottom: 1 }}>
-                  <text fg={colors.status.error}>⊘ Blocked by (unresolved):</text>
+                  <text fg={colors.status.error}>⊘ 차단됨 (미해결):</text>
                   {task.blockedByTasks.map((blocker) => (
                     <text key={blocker.id} fg={colors.fg.secondary}>
                       {'  '}- {blocker.id}: {blocker.title}
@@ -326,11 +326,11 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
                 </box>
               )}
 
-              {/* Fallback to dependsOn IDs if blockedByTasks not available */}
+              {/* blockedByTasks 없으면 dependsOn ID로 폴백 */}
               {(!task.blockedByTasks || task.blockedByTasks.length === 0) &&
                 task.dependsOn && task.dependsOn.length > 0 && (
                 <box style={{ marginBottom: 1 }}>
-                  <text fg={colors.status.warning}>Depends on:</text>
+                  <text fg={colors.status.warning}>선행 작업:</text>
                   {task.dependsOn.map((dep) => (
                     <text key={dep} fg={colors.fg.secondary}>
                       {'  '}- {dep}
@@ -341,7 +341,7 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
 
               {task.blocks && task.blocks.length > 0 && (
                 <box>
-                  <text fg={colors.accent.tertiary}>Blocks:</text>
+                  <text fg={colors.accent.tertiary}>차단하는 작업:</text>
                   {task.blocks.map((dep) => (
                     <text key={dep} fg={colors.fg.secondary}>
                       {'  '}- {dep}
@@ -353,10 +353,10 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
           </box>
         )}
 
-        {/* Completion notes section */}
+        {/* 완료 노트 섹션 */}
         {task.closeReason && (
           <box style={{ marginBottom: 2 }}>
-            <SectionHeader title="Completion Notes" />
+            <SectionHeader title="완료 노트" />
             <box
               style={{
                 padding: 1,
@@ -370,18 +370,18 @@ export function TaskDetailView({ task, onBack: _onBack }: TaskDetailViewProps): 
           </box>
         )}
 
-        {/* Timestamps */}
+        {/* 타임스탬프 */}
         {(task.createdAt || task.updatedAt) && (
           <box style={{ marginTop: 1 }}>
             {task.createdAt && (
               <text fg={colors.fg.dim}>
-                Created: {new Date(task.createdAt).toLocaleString()}
+                생성: {new Date(task.createdAt).toLocaleString()}
               </text>
             )}
             {task.updatedAt && (
               <text fg={colors.fg.dim}>
                 {' '}
-                | Updated: {new Date(task.updatedAt).toLocaleString()}
+                | 수정: {new Date(task.updatedAt).toLocaleString()}
               </text>
             )}
           </box>

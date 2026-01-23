@@ -1,6 +1,6 @@
 /**
- * ABOUTME: CLI commands for managing plugins.
- * Provides commands to list, inspect, and manage tracker and agent plugins.
+ * ABOUTME: 플러그인 관리를 위한 CLI 명령어.
+ * 트래커 및 에이전트 플러그인을 나열, 검사, 관리하는 명령어를 제공합니다.
  */
 
 import {
@@ -13,45 +13,45 @@ import {
 } from '../plugins/agents/index.js';
 
 /**
- * Print help for the plugins command.
+ * plugins 명령어 도움말 출력
  */
 export function printPluginsHelp(): void {
   console.log(`
-ralph-tui plugins - Manage and inspect plugins
+ralph-tui plugins - 플러그인 관리 및 검사
 
-Usage: ralph-tui plugins <subcommand>
+사용법: ralph-tui plugins <하위명령어>
 
-Subcommands:
-  agents     List all available agent plugins
-  trackers   List all available tracker plugins
+하위 명령어:
+  agents     사용 가능한 모든 에이전트 플러그인 나열
+  trackers   사용 가능한 모든 트래커 플러그인 나열
 
-Options:
-  --help, -h   Show this help message
+옵션:
+  --help, -h   이 도움말 표시
 
-Description:
-  Ralph TUI uses a plugin system for both AI agents and task trackers.
+설명:
+  Ralph TUI는 AI 에이전트와 작업 트래커 모두에 플러그인 시스템을 사용합니다.
 
-  Agent plugins execute prompts via AI coding assistants:
-    - claude: Claude Code CLI (claude command)
-    - opencode: OpenCode CLI (opencode command)
+  에이전트 플러그인은 AI 코딩 어시스턴트를 통해 프롬프트를 실행합니다:
+    - claude: Claude Code CLI (claude 명령어)
+    - opencode: OpenCode CLI (opencode 명령어)
 
-  Tracker plugins manage task lists and progress:
-    - beads: Git-backed issue tracker (.beads/ directory)
-    - beads-bv: Beads with bv graph analysis for smart task selection
-    - json: Simple prd.json file-based tracking
+  트래커 플러그인은 작업 목록과 진행 상황을 관리합니다:
+    - beads: Git 기반 이슈 트래커 (.beads/ 디렉토리)
+    - beads-bv: 스마트 작업 선택을 위한 bv 그래프 분석이 포함된 Beads
+    - json: 간단한 prd.json 파일 기반 추적
 
-  Custom plugins can be added to:
+  커스텀 플러그인 추가 위치:
     ~/.config/ralph-tui/plugins/agents/
     ~/.config/ralph-tui/plugins/trackers/
 
-Examples:
-  ralph-tui plugins agents      # List agent plugins
-  ralph-tui plugins trackers    # List tracker plugins
+예시:
+  ralph-tui plugins agents      # 에이전트 플러그인 나열
+  ralph-tui plugins trackers    # 트래커 플러그인 나열
 `);
 }
 
 /**
- * Output format for tracker plugin CLI commands
+ * 트래커 플러그인 CLI 명령어의 출력 형식
  */
 interface TrackerPluginInfo {
   id: string;
@@ -67,7 +67,7 @@ interface TrackerPluginInfo {
 }
 
 /**
- * Output format for agent plugin CLI commands
+ * 에이전트 플러그인 CLI 명령어의 출력 형식
  */
 interface AgentPluginInfo {
   id: string;
@@ -84,19 +84,19 @@ interface AgentPluginInfo {
 }
 
 /**
- * List all available tracker plugins.
- * Called via: ralph-tui plugins trackers
+ * 사용 가능한 모든 트래커 플러그인 나열.
+ * 호출: ralph-tui plugins trackers
  */
 export async function listTrackerPlugins(): Promise<TrackerPluginInfo[]> {
   const registry = getTrackerRegistry();
 
-  // Register built-in plugins if not already registered
+  // 아직 등록되지 않은 경우 내장 플러그인 등록
   registerBuiltinTrackers();
 
-  // Discover user plugins
+  // 사용자 플러그인 검색
   await registry.initialize();
 
-  // Get all registered plugins
+  // 등록된 모든 플러그인 가져오기
   const plugins = registry.getRegisteredPlugins();
 
   return plugins.map((meta) => ({
@@ -114,52 +114,52 @@ export async function listTrackerPlugins(): Promise<TrackerPluginInfo[]> {
 }
 
 /**
- * Print tracker plugins to console in a formatted table.
+ * 포맷된 테이블로 콘솔에 트래커 플러그인 출력
  */
 export async function printTrackerPlugins(): Promise<void> {
   const plugins = await listTrackerPlugins();
 
   if (plugins.length === 0) {
-    console.log('No tracker plugins found.');
+    console.log('트래커 플러그인을 찾을 수 없습니다.');
     return;
   }
 
-  console.log('\nAvailable Tracker Plugins:\n');
+  console.log('\n사용 가능한 트래커 플러그인:\n');
   console.log('─'.repeat(80));
 
   for (const plugin of plugins) {
-    const typeLabel = plugin.builtin ? '(built-in)' : '(user)';
+    const typeLabel = plugin.builtin ? '(내장)' : '(사용자)';
     console.log(`  ${plugin.id} ${typeLabel}`);
-    console.log(`    Name:        ${plugin.name}`);
-    console.log(`    Description: ${plugin.description}`);
-    console.log(`    Version:     ${plugin.version}`);
+    console.log(`    이름:        ${plugin.name}`);
+    console.log(`    설명:        ${plugin.description}`);
+    console.log(`    버전:        ${plugin.version}`);
 
     const features: string[] = [];
-    if (plugin.features.bidirectionalSync) features.push('sync');
-    if (plugin.features.hierarchy) features.push('hierarchy');
-    if (plugin.features.dependencies) features.push('dependencies');
-    console.log(`    Features:    ${features.join(', ') || 'none'}`);
+    if (plugin.features.bidirectionalSync) features.push('동기화');
+    if (plugin.features.hierarchy) features.push('계층구조');
+    if (plugin.features.dependencies) features.push('의존성');
+    console.log(`    기능:        ${features.join(', ') || '없음'}`);
 
     console.log('─'.repeat(80));
   }
 
-  console.log(`\nTotal: ${plugins.length} plugin(s)\n`);
+  console.log(`\n총: ${plugins.length}개 플러그인\n`);
 }
 
 /**
- * List all available agent plugins.
- * Called via: ralph-tui plugins agents
+ * 사용 가능한 모든 에이전트 플러그인 나열.
+ * 호출: ralph-tui plugins agents
  */
 export async function listAgentPlugins(): Promise<AgentPluginInfo[]> {
   const registry = getAgentRegistry();
 
-  // Register built-in plugins if not already registered
+  // 아직 등록되지 않은 경우 내장 플러그인 등록
   registerBuiltinAgents();
 
-  // Discover user plugins
+  // 사용자 플러그인 검색
   await registry.initialize();
 
-  // Get all registered plugins
+  // 등록된 모든 플러그인 가져오기
   const plugins = registry.getRegisteredPlugins();
 
   return plugins.map((meta) => ({
@@ -178,35 +178,35 @@ export async function listAgentPlugins(): Promise<AgentPluginInfo[]> {
 }
 
 /**
- * Print agent plugins to console in a formatted table.
+ * 포맷된 테이블로 콘솔에 에이전트 플러그인 출력
  */
 export async function printAgentPlugins(): Promise<void> {
   const plugins = await listAgentPlugins();
 
   if (plugins.length === 0) {
-    console.log('No agent plugins found.');
+    console.log('에이전트 플러그인을 찾을 수 없습니다.');
     return;
   }
 
-  console.log('\nAvailable Agent Plugins:\n');
+  console.log('\n사용 가능한 에이전트 플러그인:\n');
   console.log('─'.repeat(80));
 
   for (const plugin of plugins) {
-    const typeLabel = plugin.builtin ? '(built-in)' : '(user)';
+    const typeLabel = plugin.builtin ? '(내장)' : '(사용자)';
     console.log(`  ${plugin.id} ${typeLabel}`);
-    console.log(`    Name:        ${plugin.name}`);
-    console.log(`    Description: ${plugin.description}`);
-    console.log(`    Version:     ${plugin.version}`);
-    console.log(`    Command:     ${plugin.defaultCommand}`);
+    console.log(`    이름:        ${plugin.name}`);
+    console.log(`    설명:        ${plugin.description}`);
+    console.log(`    버전:        ${plugin.version}`);
+    console.log(`    명령어:      ${plugin.defaultCommand}`);
 
     const features: string[] = [];
-    if (plugin.features.streaming) features.push('streaming');
-    if (plugin.features.interrupt) features.push('interrupt');
-    if (plugin.features.fileContext) features.push('file-context');
-    console.log(`    Features:    ${features.join(', ') || 'none'}`);
+    if (plugin.features.streaming) features.push('스트리밍');
+    if (plugin.features.interrupt) features.push('인터럽트');
+    if (plugin.features.fileContext) features.push('파일 컨텍스트');
+    console.log(`    기능:        ${features.join(', ') || '없음'}`);
 
     console.log('─'.repeat(80));
   }
 
-  console.log(`\nTotal: ${plugins.length} plugin(s)\n`);
+  console.log(`\n총: ${plugins.length}개 플러그인\n`);
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * ABOUTME: CLI entry point for the Ralph TUI application.
- * Handles subcommands (plugins, run, etc.) and defaults to 'run' when no subcommand given.
+ * ABOUTME: Ralph TUI 애플리케이션의 CLI 진입점.
+ * 하위 명령어(plugins, run 등)를 처리하고 하위 명령어가 없으면 'run'을 기본값으로 사용합니다.
  */
 
 import {
@@ -25,114 +25,114 @@ import {
 } from './commands/index.js';
 
 /**
- * Show CLI help message.
+ * CLI 도움말 메시지 표시.
  */
 function showHelp(): void {
   console.log(`
-Ralph TUI - AI Agent Loop Orchestrator
+Ralph TUI - AI 에이전트 루프 오케스트레이터
 
-Usage: ralph-tui [command] [options]
+사용법: ralph-tui [명령어] [옵션]
 
-Commands:
-  (none)              Start Ralph execution (same as 'run')
-  create-prd [opts]   Create a new PRD interactively (alias: prime)
-  convert [options]   Convert PRD markdown to JSON format
-  run [options]       Start Ralph execution
-  resume [options]    Resume an interrupted session
-  status [options]    Check session status (headless, for CI/scripts)
-  remote [subcommand] Manage remote server configurations
-  logs [options]      View/manage iteration output logs
-  setup [options]     Run interactive project setup (alias: init)
-  doctor [options]    Diagnose agent configuration issues
-  config show         Display merged configuration
-  template show       Display current prompt template
-  template init       Copy default template for customization
-  template install    Alias for template init
-  skills list         List bundled skills
-  skills install      Install skills to ~/.claude/skills/
-  plugins agents      List available agent plugins
-  plugins trackers    List available tracker plugins
-  docs [section]      Open documentation in browser
-  info [options]      Display system information for bug reports
-  help, --help, -h    Show this help message
-  version, --version, -v  Show version number
+명령어:
+  (없음)              Ralph 실행 시작 ('run'과 동일)
+  create-prd [옵션]   대화형으로 새 PRD 생성 (별칭: prime)
+  convert [옵션]      PRD 마크다운을 JSON 형식으로 변환
+  run [옵션]          Ralph 실행 시작
+  resume [옵션]       중단된 세션 재개
+  status [옵션]       세션 상태 확인 (headless, CI/스크립트용)
+  remote [하위명령]   원격 서버 설정 관리
+  logs [옵션]         반복 출력 로그 보기/관리
+  setup [옵션]        대화형 프로젝트 설정 실행 (별칭: init)
+  doctor [옵션]       에이전트 설정 문제 진단
+  config show         병합된 설정 표시
+  template show       현재 프롬프트 템플릿 표시
+  template init       커스터마이징을 위해 기본 템플릿 복사
+  template install    template init의 별칭
+  skills list         번들 스킬 목록
+  skills install      ~/.claude/skills/에 스킬 설치
+  plugins agents      사용 가능한 에이전트 플러그인 목록
+  plugins trackers    사용 가능한 트래커 플러그인 목록
+  docs [섹션]         브라우저에서 문서 열기
+  info [옵션]         버그 리포트용 시스템 정보 표시
+  help, --help, -h    이 도움말 메시지 표시
+  version, --version, -v  버전 번호 표시
 
-Run Options:
-  --epic <id>         Epic ID for beads tracker
-  --prd <path>        PRD file path (auto-switches to json tracker)
-  --agent <name>      Override agent plugin (e.g., claude, opencode)
-  --model <name>      Override model (e.g., opus, sonnet)
-  --tracker <name>    Override tracker plugin (e.g., beads, beads-bv, json)
-  --iterations <n>    Maximum iterations (0 = unlimited)
-  --resume            Resume existing session (deprecated, use 'resume' command)
-  --headless          Run without TUI (alias: --no-tui)
-  --no-tui            Run without TUI, output structured logs to stdout
-  --no-setup          Skip interactive setup even if no config exists
-  --verify            Run agent preflight check before starting
-  --notify            Force enable desktop notifications
-  --no-notify         Force disable desktop notifications
-  --sandbox           Enable sandboxing (auto mode)
-  --sandbox=bwrap     Force Bubblewrap sandboxing (Linux)
-  --sandbox=sandbox-exec  Force sandbox-exec (macOS)
-  --no-sandbox        Disable sandboxing
-  --no-network        Disable network access in sandbox
-  --listen            Enable remote listener (WebSocket server)
-  --listen-port <n>   Port for remote listener (default: 7890)
-  --rotate-token      Rotate server token before starting listener
+Run 옵션:
+  --epic <id>         Beads 트래커용 Epic ID
+  --prd <path>        PRD 파일 경로 (자동으로 json 트래커로 전환)
+  --agent <name>      에이전트 플러그인 재정의 (예: claude, opencode)
+  --model <name>      모델 재정의 (예: opus, sonnet)
+  --tracker <name>    트래커 플러그인 재정의 (예: beads, beads-bv, json)
+  --iterations <n>    최대 반복 횟수 (0 = 무제한)
+  --resume            기존 세션 재개 (사용 중단, 'resume' 명령어 사용)
+  --headless          TUI 없이 실행 (별칭: --no-tui)
+  --no-tui            TUI 없이 실행, 구조화된 로그를 stdout으로 출력
+  --no-setup          설정이 없어도 대화형 설정 건너뛰기
+  --verify            시작 전 에이전트 사전 검사 실행
+  --notify            데스크톱 알림 강제 활성화
+  --no-notify         데스크톱 알림 강제 비활성화
+  --sandbox           샌드박싱 활성화 (자동 모드)
+  --sandbox=bwrap     Bubblewrap 샌드박싱 강제 (Linux)
+  --sandbox=sandbox-exec  sandbox-exec 강제 (macOS)
+  --no-sandbox        샌드박싱 비활성화
+  --no-network        샌드박스에서 네트워크 접근 비활성화
+  --listen            원격 리스너 활성화 (WebSocket 서버)
+  --listen-port <n>   원격 리스너 포트 (기본값: 7890)
+  --rotate-token      리스너 시작 전 서버 토큰 교체
 
-Resume Options:
-  --cwd <path>        Working directory
-  --headless          Run without TUI
-  --force             Override stale lock
+Resume 옵션:
+  --cwd <path>        작업 디렉토리
+  --headless          TUI 없이 실행
+  --force             오래된 잠금 무시
 
-Status Options:
-  --json              Output in JSON format for CI/scripts
-  --cwd <path>        Working directory
+Status 옵션:
+  --json              CI/스크립트용 JSON 형식으로 출력
+  --cwd <path>        작업 디렉토리
 
-Convert Options:
-  --to <format>       Target format: json
-  --output, -o <path> Output file path (default: ./prd.json)
-  --branch, -b <name> Git branch name (prompts if not provided)
-  --force, -f         Overwrite existing files
+Convert 옵션:
+  --to <format>       대상 형식: json
+  --output, -o <path> 출력 파일 경로 (기본값: ./prd.json)
+  --branch, -b <name> Git 브랜치 이름 (미지정시 프롬프트)
+  --force, -f         기존 파일 덮어쓰기
 
-Examples:
-  ralph-tui                              # Start execution (same as 'run')
-  ralph-tui create-prd                   # Create a new PRD interactively
-  ralph-tui create-prd --chat            # Create PRD with AI chat mode
-  ralph-tui convert --to json ./prd.md   # Convert PRD to JSON
-  ralph-tui run                          # Start execution with defaults
-  ralph-tui run --epic myproject-epic    # Run with specific epic
-  ralph-tui run --prd ./prd.json         # Run with PRD file
-  ralph-tui resume                       # Resume interrupted session
-  ralph-tui status                       # Check session status
-  ralph-tui status --json                # JSON output for CI/scripts
-  ralph-tui logs                         # List iteration logs
-  ralph-tui logs --iteration 5           # View specific iteration
-  ralph-tui logs --task US-005           # View logs for a task
-  ralph-tui logs --clean --keep 10       # Clean up old logs
-  ralph-tui plugins agents               # List agent plugins
-  ralph-tui plugins trackers             # List tracker plugins
-  ralph-tui template show                # Show current prompt template
-  ralph-tui template init                # Create custom template
-  ralph-tui doctor                       # Check if agent is properly configured
-  ralph-tui doctor --json                # JSON output for scripts
-  ralph-tui docs                         # Open documentation in browser
-  ralph-tui docs quickstart              # Open quick start guide
-  ralph-tui info                         # Display system info for bug reports
-  ralph-tui info -c                      # Copyable format for GitHub issues
-  ralph-tui skills list                  # List bundled skills
-  ralph-tui skills install --force       # Force reinstall all skills
-  ralph-tui run --listen                 # Run with remote listener enabled
-  ralph-tui run --listen --rotate-token  # Rotate token and start listener
-  ralph-tui remote add prod server:7890 --token abc  # Add remote
-  ralph-tui remote list                  # List remotes with status
-  ralph-tui remote test prod             # Test connectivity
+예시:
+  ralph-tui                              # 실행 시작 ('run'과 동일)
+  ralph-tui create-prd                   # 대화형으로 새 PRD 생성
+  ralph-tui create-prd --chat            # AI 채팅 모드로 PRD 생성
+  ralph-tui convert --to json ./prd.md   # PRD를 JSON으로 변환
+  ralph-tui run                          # 기본값으로 실행 시작
+  ralph-tui run --epic myproject-epic    # 특정 epic으로 실행
+  ralph-tui run --prd ./prd.json         # PRD 파일로 실행
+  ralph-tui resume                       # 중단된 세션 재개
+  ralph-tui status                       # 세션 상태 확인
+  ralph-tui status --json                # CI/스크립트용 JSON 출력
+  ralph-tui logs                         # 반복 로그 목록
+  ralph-tui logs --iteration 5           # 특정 반복 보기
+  ralph-tui logs --task US-005           # 작업의 로그 보기
+  ralph-tui logs --clean --keep 10       # 오래된 로그 정리
+  ralph-tui plugins agents               # 에이전트 플러그인 목록
+  ralph-tui plugins trackers             # 트래커 플러그인 목록
+  ralph-tui template show                # 현재 프롬프트 템플릿 표시
+  ralph-tui template init                # 커스텀 템플릿 생성
+  ralph-tui doctor                       # 에이전트 설정 확인
+  ralph-tui doctor --json                # 스크립트용 JSON 출력
+  ralph-tui docs                         # 브라우저에서 문서 열기
+  ralph-tui docs quickstart              # 빠른 시작 가이드 열기
+  ralph-tui info                         # 버그 리포트용 시스템 정보 표시
+  ralph-tui info -c                      # GitHub 이슈용 복사 가능 형식
+  ralph-tui skills list                  # 번들 스킬 목록
+  ralph-tui skills install --force       # 모든 스킬 강제 재설치
+  ralph-tui run --listen                 # 원격 리스너 활성화하여 실행
+  ralph-tui run --listen --rotate-token  # 토큰 교체 후 리스너 시작
+  ralph-tui remote add prod server:7890 --token abc  # 원격 추가
+  ralph-tui remote list                  # 상태와 함께 원격 목록
+  ralph-tui remote test prod             # 연결 테스트
 `);
 }
 
 /**
- * Handle subcommands before launching TUI.
- * @returns true if a subcommand was handled and we should exit
+ * TUI 실행 전 하위 명령어 처리.
+ * @returns 하위 명령어가 처리되어 종료해야 하면 true
  */
 async function handleSubcommand(args: string[]): Promise<boolean> {
   const command = args[0];
@@ -260,17 +260,17 @@ async function handleSubcommand(args: string[]): Promise<boolean> {
       return true;
     }
 
-    // Unknown or missing plugins subcommand
+    // 알 수 없거나 누락된 plugins 하위 명령어
     if (subcommand) {
-      console.error(`Unknown plugins subcommand: ${subcommand}`);
+      console.error(`알 수 없는 plugins 하위 명령어: ${subcommand}`);
     }
     printPluginsHelp();
     return true;
   }
 
-  // Unknown command
+  // 알 수 없는 명령어
   if (command && !command.startsWith('-')) {
-    console.error(`Unknown command: ${command}`);
+    console.error(`알 수 없는 명령어: ${command}`);
     showHelp();
     process.exit(1);
   }
@@ -279,24 +279,24 @@ async function handleSubcommand(args: string[]): Promise<boolean> {
 }
 
 /**
- * Main entry point
+ * 메인 진입점
  */
 async function main(): Promise<void> {
-  // Get command-line arguments (skip node and script path)
+  // 명령줄 인자 가져오기 (node와 스크립트 경로 건너뛰기)
   const args = process.argv.slice(2);
 
-  // Handle subcommands
+  // 하위 명령어 처리
   const handled = await handleSubcommand(args);
   if (handled) {
     return;
   }
 
-  // No subcommand - default to 'run' command
+  // 하위 명령어 없음 - 'run' 명령어를 기본값으로
   await executeRunCommand(args);
 }
 
-// Run the main function
+// 메인 함수 실행
 main().catch((error: unknown) => {
-  console.error('Failed to start Ralph TUI:', error);
+  console.error('Ralph TUI 시작 실패:', error);
   process.exit(1);
 });

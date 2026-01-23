@@ -1,42 +1,42 @@
 /**
- * ABOUTME: Toast notification component for temporary feedback messages.
- * Displays auto-dismissing notifications at the bottom of the screen.
- * US-5: Used for connection resilience feedback (reconnecting, reconnected, failed).
+ * ABOUTME: 임시 피드백 메시지를 위한 토스트 알림 컴포넌트.
+ * 화면 하단에 자동 사라지는 알림을 표시합니다.
+ * US-5: 연결 복원 피드백에 사용 (재연결 중, 재연결됨, 실패).
  */
 
 import type { ReactNode } from 'react';
 import { colors } from '../theme.js';
 
 /**
- * Toast variant types that determine styling.
+ * 스타일링을 결정하는 토스트 변형 타입.
  */
 export type ToastVariant = 'success' | 'warning' | 'error' | 'info';
 
 /**
- * Props for the Toast component
+ * Toast 컴포넌트 Props
  */
 export interface ToastProps {
-  /** Whether the toast is visible */
+  /** 토스트 표시 여부 */
   visible: boolean;
 
-  /** The message to display */
+  /** 표시할 메시지 */
   message: string;
 
-  /** Optional icon to display before the message */
+  /** 메시지 앞에 표시할 선택적 아이콘 */
   icon?: string;
 
-  /** Toast variant for styling (default: 'info') */
+  /** 스타일링을 위한 토스트 변형 (기본값: 'info') */
   variant?: ToastVariant;
 
-  /** Position from right edge (default: 2) */
+  /** 오른쪽 가장자리로부터의 위치 (기본값: 2) */
   right?: number;
 
-  /** Position from bottom edge (default: 2) */
+  /** 아래쪽 가장자리로부터의 위치 (기본값: 2) */
   bottom?: number;
 }
 
 /**
- * Get border and text color for a toast variant.
+ * 토스트 변형에 대한 테두리 및 텍스트 색상 가져오기.
  */
 function getVariantColors(variant: ToastVariant): { border: string; text: string } {
   switch (variant) {
@@ -52,7 +52,7 @@ function getVariantColors(variant: ToastVariant): { border: string; text: string
 }
 
 /**
- * Default icons for toast variants.
+ * 토스트 변형의 기본 아이콘.
  */
 const DEFAULT_ICONS: Record<ToastVariant, string> = {
   success: '✓',
@@ -62,8 +62,8 @@ const DEFAULT_ICONS: Record<ToastVariant, string> = {
 };
 
 /**
- * Toast component for displaying temporary notifications.
- * Positioned absolutely at the bottom-right of the screen.
+ * 임시 알림을 표시하는 토스트 컴포넌트.
+ * 화면 우측 하단에 절대 위치로 배치됩니다.
  */
 export function Toast({
   visible,
@@ -101,7 +101,7 @@ export function Toast({
 }
 
 /**
- * Connection-specific toast message type (used by InstanceManager).
+ * 연결 관련 토스트 메시지 타입 (InstanceManager에서 사용).
  */
 export type ConnectionToastMessage =
   | { type: 'reconnecting'; alias: string; attempt: number; maxRetries: number }
@@ -110,7 +110,7 @@ export type ConnectionToastMessage =
   | { type: 'connection_error'; alias: string; error: string };
 
 /**
- * Format a connection toast message for display.
+ * 연결 토스트 메시지를 표시용으로 포맷.
  */
 export function formatConnectionToast(toast: ConnectionToastMessage): {
   message: string;
@@ -120,19 +120,19 @@ export function formatConnectionToast(toast: ConnectionToastMessage): {
   switch (toast.type) {
     case 'reconnecting':
       return {
-        message: `${toast.alias}: Reconnecting (${toast.attempt}/${toast.maxRetries})...`,
+        message: `${toast.alias}: 재연결 중 (${toast.attempt}/${toast.maxRetries})...`,
         variant: 'warning',
         icon: '⟳',
       };
     case 'reconnected':
       return {
-        message: `${toast.alias}: Reconnected after ${toast.totalAttempts} ${toast.totalAttempts === 1 ? 'attempt' : 'attempts'}`,
+        message: `${toast.alias}: ${toast.totalAttempts}번 시도 후 재연결됨`,
         variant: 'success',
         icon: '●',
       };
     case 'reconnect_failed':
       return {
-        message: `${toast.alias}: Connection failed after ${toast.attempts} attempts`,
+        message: `${toast.alias}: ${toast.attempts}번 시도 후 연결 실패`,
         variant: 'error',
         icon: '○',
       };

@@ -1,7 +1,7 @@
 /**
- * ABOUTME: Resume command for ralph-tui.
- * Continues execution from a previously interrupted or paused session.
- * Supports cross-directory resume via session registry.
+ * ABOUTME: ralph-tui의 Resume 명령어.
+ * 이전에 중단되거나 일시 정지된 세션에서 실행을 계속합니다.
+ * 세션 레지스트리를 통한 디렉토리 간 재개를 지원합니다.
  */
 
 import { createCliRenderer } from '@opentui/core';
@@ -44,25 +44,25 @@ import { getTrackerRegistry } from '../plugins/trackers/registry.js';
 import { RunApp } from '../tui/components/RunApp.js';
 
 /**
- * Parsed resume command arguments
+ * 파싱된 resume 명령어 인자
  */
 export interface ResumeArgs {
-  /** Working directory (overrides session registry) */
+  /** 작업 디렉토리 (세션 레지스트리 우선) */
   cwd: string;
-  /** Run in headless mode */
+  /** 헤드리스 모드로 실행 */
   headless: boolean;
-  /** Force resume even if locked */
+  /** 잠긴 경우에도 강제 재개 */
   force: boolean;
-  /** List available sessions */
+  /** 사용 가능한 세션 나열 */
   list: boolean;
-  /** Clean up stale registry entries */
+  /** 오래된 레지스트리 항목 정리 */
   cleanup: boolean;
-  /** Session ID to resume (can be partial prefix) */
+  /** 재개할 세션 ID (부분 접두사 가능) */
   sessionId?: string;
 }
 
 /**
- * Parse CLI arguments for the resume command
+ * resume 명령어의 CLI 인자 파싱
  */
 export function parseResumeArgs(args: string[]): ResumeArgs {
   let cwd = process.cwd();
@@ -114,7 +114,7 @@ export function parseResumeArgs(args: string[]): ResumeArgs {
 }
 
 /**
- * Initialize plugin registries
+ * 플러그인 레지스트리 초기화
  */
 async function initializePlugins(): Promise<void> {
   registerBuiltinAgents();
@@ -127,7 +127,7 @@ async function initializePlugins(): Promise<void> {
 }
 
 /**
- * Format a session entry for display
+ * 표시용 세션 항목 포맷
  */
 export function formatSessionEntry(entry: SessionRegistryEntry, index?: number): string {
   const prefix = index !== undefined ? `${index + 1}. ` : '';
@@ -143,21 +143,21 @@ export function formatSessionEntry(entry: SessionRegistryEntry, index?: number):
 }
 
 /**
- * List available resumable sessions
+ * 사용 가능한 재개 가능 세션 나열
  */
 export async function listSessions(): Promise<void> {
   const sessions = await listResumableSessions();
 
   if (sessions.length === 0) {
-    console.log('No resumable sessions found.');
+    console.log('재개 가능한 세션을 찾을 수 없습니다.');
     console.log('');
-    console.log('Start a new session with: ralph-tui run');
+    console.log('새 세션 시작: ralph-tui run');
     return;
   }
 
-  console.log('Resumable sessions:');
+  console.log('재개 가능한 세션:');
   console.log('');
-  console.log('   ID        Status       Agent       Tracker');
+  console.log('   ID        상태         에이전트    트래커');
   console.log('   ─────────────────────────────────────────────────');
 
   for (let i = 0; i < sessions.length; i++) {
@@ -165,124 +165,124 @@ export async function listSessions(): Promise<void> {
     console.log('');
   }
 
-  console.log('To resume a session:');
-  console.log('  ralph-tui resume <session-id>    # Resume by ID (first 8 chars is enough)');
-  console.log('  ralph-tui resume                 # Resume session in current directory');
+  console.log('세션 재개:');
+  console.log('  ralph-tui resume <session-id>    # ID로 재개 (처음 8자면 충분)');
+  console.log('  ralph-tui resume                 # 현재 디렉토리의 세션 재개');
 }
 
 /**
- * Clean up stale registry entries
+ * 오래된 레지스트리 항목 정리
  */
 export async function cleanupRegistry(): Promise<void> {
-  console.log('Cleaning up stale session registry entries...');
+  console.log('오래된 세션 레지스트리 항목 정리 중...');
 
   const cleaned = await cleanupStaleRegistryEntries(hasPersistedSession);
 
   if (cleaned === 0) {
-    console.log('No stale entries found.');
+    console.log('오래된 항목을 찾을 수 없습니다.');
   } else {
-    console.log(`Removed ${cleaned} stale session${cleaned !== 1 ? 's' : ''} from registry.`);
+    console.log(`레지스트리에서 ${cleaned}개의 오래된 세션 제거됨.`);
   }
 
-  console.log(`Registry file: ${getRegistryFilePath()}`);
+  console.log(`레지스트리 파일: ${getRegistryFilePath()}`);
 }
 
 /**
- * Resolve session to resume - either from session ID, current directory, or registry
+ * 재개할 세션 해석 - 세션 ID, 현재 디렉토리 또는 레지스트리에서
  */
 export async function resolveSession(args: ResumeArgs): Promise<{
   cwd: string;
   registryEntry?: SessionRegistryEntry;
 } | null> {
-  // If session ID provided, look it up in registry
+  // 세션 ID가 제공된 경우 레지스트리에서 조회
   if (args.sessionId) {
-    // Try exact match first
+    // 먼저 정확한 일치 시도
     let entry = await getSessionById(args.sessionId);
 
-    // Try prefix match if exact match fails
+    // 정확한 일치가 실패하면 접두사 일치 시도
     if (!entry) {
       const matches = await findSessionsByPrefix(args.sessionId);
       if (matches.length === 1) {
         entry = matches[0];
       } else if (matches.length > 1) {
-        console.error(`Multiple sessions match prefix '${args.sessionId}':`);
+        console.error(`접두사 '${args.sessionId}'와 일치하는 세션이 여러 개 있습니다:`);
         console.error('');
         for (const match of matches) {
           console.error(`  ${match.sessionId.slice(0, 8)}  ${match.cwd}`);
         }
         console.error('');
-        console.error('Please provide a more specific session ID.');
+        console.error('더 구체적인 세션 ID를 제공하세요.');
         return null;
       }
     }
 
     if (!entry) {
-      console.error(`Session '${args.sessionId}' not found in registry.`);
+      console.error(`세션 '${args.sessionId}'을(를) 레지스트리에서 찾을 수 없습니다.`);
       console.error('');
-      console.error('Use "ralph-tui resume --list" to see available sessions.');
+      console.error('사용 가능한 세션을 보려면 "ralph-tui resume --list"를 사용하세요.');
       return null;
     }
 
-    // Validate the session file still exists at the entry's cwd
+    // 세션 파일이 entry의 cwd에 여전히 존재하는지 확인
     const sessionFileExists = await hasPersistedSession(entry.cwd);
     if (!sessionFileExists) {
-      console.error(`Session '${args.sessionId}' found in registry, but session file is missing.`);
-      console.error(`Expected session file at: ${entry.cwd}/.ralph-tui/session.json`);
+      console.error(`세션 '${args.sessionId}'이(가) 레지스트리에서 발견되었지만 세션 파일이 없습니다.`);
+      console.error(`예상 세션 파일 위치: ${entry.cwd}/.ralph-tui/session.json`);
       console.error('');
-      console.error('The session file may have been deleted. Run --cleanup to update the registry.');
+      console.error('세션 파일이 삭제되었을 수 있습니다. 레지스트리를 업데이트하려면 --cleanup을 실행하세요.');
       return null;
     }
 
     return { cwd: entry.cwd, registryEntry: entry };
   }
 
-  // Check current directory for session
+  // 현재 디렉토리에서 세션 확인
   const hasSession = await hasPersistedSession(args.cwd);
   if (hasSession) {
-    // Also try to get registry entry for this cwd
+    // 이 cwd에 대한 레지스트리 항목도 가져오기 시도
     const registryEntry = await getSessionByCwd(args.cwd) ?? undefined;
     return { cwd: args.cwd, registryEntry };
   }
 
-  // No session in current directory - check registry for helpful suggestions
+  // 현재 디렉토리에 세션 없음 - 도움이 될 제안을 위해 레지스트리 확인
   const registryEntry = await getSessionByCwd(args.cwd);
   if (registryEntry) {
-    // Registry has an entry but session file is missing
-    console.error('Session file not found, but registry entry exists.');
-    console.error(`Expected session file at: ${args.cwd}/.ralph-tui/session.json`);
+    // 레지스트리에 항목이 있지만 세션 파일이 없음
+    console.error('세션 파일을 찾을 수 없지만 레지스트리 항목이 존재합니다.');
+    console.error(`예상 세션 파일 위치: ${args.cwd}/.ralph-tui/session.json`);
     console.error('');
-    console.error('The session file may have been deleted. Run --cleanup to update the registry.');
+    console.error('세션 파일이 삭제되었을 수 있습니다. 레지스트리를 업데이트하려면 --cleanup을 실행하세요.');
     return null;
   }
 
-  // Check if there are any sessions available
+  // 사용 가능한 세션이 있는지 확인
   const sessions = await listResumableSessions();
 
-  console.error('No session to resume in current directory.');
-  console.error(`Looked for session at: ${args.cwd}/.ralph-tui/session.json`);
+  console.error('현재 디렉토리에서 재개할 세션이 없습니다.');
+  console.error(`세션 검색 위치: ${args.cwd}/.ralph-tui/session.json`);
   console.error('');
 
   if (sessions.length > 0) {
-    console.error('Available sessions in other directories:');
+    console.error('다른 디렉토리의 사용 가능한 세션:');
     console.error('');
     for (const session of sessions.slice(0, 3)) {
       console.error(`  ${session.sessionId.slice(0, 8)}  ${session.cwd}`);
     }
     if (sessions.length > 3) {
-      console.error(`  ... and ${sessions.length - 3} more`);
+      console.error(`  ... 그리고 ${sessions.length - 3}개 더`);
     }
     console.error('');
-    console.error('Use "ralph-tui resume <session-id>" to resume a specific session.');
-    console.error('Use "ralph-tui resume --list" to see all sessions.');
+    console.error('특정 세션을 재개하려면 "ralph-tui resume <session-id>"를 사용하세요.');
+    console.error('모든 세션을 보려면 "ralph-tui resume --list"를 사용하세요.');
   } else {
-    console.error('Start a new session with: ralph-tui run');
+    console.error('새 세션 시작: ralph-tui run');
   }
 
   return null;
 }
 
 /**
- * Run the execution engine with TUI (resume mode)
+ * TUI로 실행 엔진 실행 (재개 모드)
  */
 async function runWithTui(
   engine: ExecutionEngine,
@@ -299,24 +299,24 @@ async function runWithTui(
 
   const root = createRoot(renderer);
 
-  // Subscribe to engine events to save state
+  // 상태 저장을 위해 엔진 이벤트 구독
   engine.on((event) => {
     if (event.type === 'iteration:completed') {
       currentState = updateSessionAfterIteration(currentState, event.result);
       savePersistedSession(currentState).catch(() => {
-        // Log but don't fail on save errors
+        // 저장 오류 시 로그만 남기고 실패하지 않음
       });
     } else if (event.type === 'engine:paused') {
-      // Save paused state to session file
+      // 일시 정지 상태를 세션 파일에 저장
       currentState = pauseSession(currentState);
       savePersistedSession(currentState).catch(() => {
-        // Log but don't fail on save errors
+        // 저장 오류 시 로그만 남기고 실패하지 않음
       });
     } else if (event.type === 'engine:resumed') {
-      // Clear paused state when resuming
+      // 재개 시 일시 정지 상태 해제
       currentState = { ...currentState, status: 'running', isPaused: false, pausedAt: undefined };
       savePersistedSession(currentState).catch(() => {
-        // Log but don't fail on save errors
+        // 저장 오류 시 로그만 남기고 실패하지 않음
       });
     }
   });
@@ -328,7 +328,7 @@ async function runWithTui(
   };
 
   const handleSignal = async (): Promise<void> => {
-    // Save interrupted state
+    // 중단 상태 저장
     currentState = { ...currentState, status: 'interrupted' };
     await savePersistedSession(currentState);
     await cleanup();
@@ -338,11 +338,11 @@ async function runWithTui(
   process.on('SIGINT', handleSignal);
   process.on('SIGTERM', handleSignal);
 
-  // Handler to update persisted state and save it
+  // 지속 상태를 업데이트하고 저장하는 핸들러
   const handleSubagentPanelVisibilityChange = (visible: boolean): void => {
     currentState = setSubagentPanelVisible(currentState, visible);
     savePersistedSession(currentState).catch(() => {
-      // Log but don't fail on save errors
+      // 저장 오류 시 로그만 남기고 실패하지 않음
     });
   };
 
@@ -351,7 +351,7 @@ async function runWithTui(
       engine={engine}
       cwd={cwd}
       onQuit={async () => {
-        // Save interrupted state
+        // 중단 상태 저장
         currentState = { ...currentState, status: 'interrupted' };
         await savePersistedSession(currentState);
         await cleanup();
@@ -370,7 +370,7 @@ async function runWithTui(
 }
 
 /**
- * Run in headless mode (resume)
+ * 헤드리스 모드로 실행 (재개)
  */
 async function runHeadless(
   engine: ExecutionEngine,
@@ -382,61 +382,61 @@ async function runHeadless(
   engine.on((event) => {
     switch (event.type) {
       case 'engine:started':
-        console.log(`\nResumed Ralph. Total tasks: ${event.totalTasks}`);
+        console.log(`\nRalph 재개됨. 총 작업: ${event.totalTasks}개`);
         break;
 
       case 'iteration:started':
-        console.log(`\n--- Iteration ${event.iteration}: ${event.task.title} ---`);
+        console.log(`\n--- 반복 ${event.iteration}: ${event.task.title} ---`);
         break;
 
       case 'iteration:completed':
         console.log(
-          `Iteration ${event.result.iteration} completed. ` +
-            `Task ${event.result.taskCompleted ? 'DONE' : 'in progress'}. ` +
-            `Duration: ${Math.round(event.result.durationMs / 1000)}s`
+          `반복 ${event.result.iteration} 완료. ` +
+            `작업 ${event.result.taskCompleted ? '완료' : '진행 중'}. ` +
+            `소요 시간: ${Math.round(event.result.durationMs / 1000)}초`
         );
-        // Save state after each iteration
+        // 각 반복 후 상태 저장
         currentState = updateSessionAfterIteration(currentState, event.result);
         savePersistedSession(currentState).catch(() => {
-          // Log but don't fail on save errors
+          // 저장 오류 시 로그만 남기고 실패하지 않음
         });
         break;
 
       case 'iteration:failed':
-        console.error(`Iteration ${event.iteration} FAILED: ${event.error}`);
+        console.error(`반복 ${event.iteration} 실패: ${event.error}`);
         break;
 
       case 'engine:paused':
-        console.log('\nPaused. Use "ralph-tui resume" to continue.');
+        console.log('\n일시 정지됨. 계속하려면 "ralph-tui resume"을 사용하세요.');
         currentState = pauseSession(currentState);
         savePersistedSession(currentState).catch(() => {
-          // Log but don't fail on save errors
+          // 저장 오류 시 로그만 남기고 실패하지 않음
         });
         break;
 
       case 'engine:resumed':
-        console.log('\nResumed...');
+        console.log('\n재개됨...');
         currentState = { ...currentState, status: 'running', isPaused: false, pausedAt: undefined };
         savePersistedSession(currentState).catch(() => {
-          // Log but don't fail on save errors
+          // 저장 오류 시 로그만 남기고 실패하지 않음
         });
         break;
 
       case 'engine:stopped':
-        console.log(`\nRalph stopped. Reason: ${event.reason}`);
-        console.log(`Total iterations: ${event.totalIterations}`);
-        console.log(`Tasks completed: ${event.tasksCompleted}`);
+        console.log(`\nRalph 중지됨. 사유: ${event.reason}`);
+        console.log(`총 반복: ${event.totalIterations}회`);
+        console.log(`완료된 작업: ${event.tasksCompleted}개`);
         break;
 
       case 'all:complete':
-        console.log('\nAll tasks complete!');
+        console.log('\n모든 작업 완료!');
         break;
     }
   });
 
   const handleSignal = async (): Promise<void> => {
-    console.log('\nInterrupted, stopping...');
-    // Save interrupted state
+    console.log('\n중단됨, 중지 중...');
+    // 중단 상태 저장
     currentState = { ...currentState, status: 'interrupted' };
     await savePersistedSession(currentState);
     await engine.dispose();
@@ -454,10 +454,10 @@ async function runHeadless(
 }
 
 /**
- * Execute the resume command
+ * resume 명령어 실행
  */
 export async function executeResumeCommand(args: string[]): Promise<void> {
-  // Check for help
+  // 도움말 확인
   if (args.includes('--help') || args.includes('-h')) {
     printResumeHelp();
     return;
@@ -465,19 +465,19 @@ export async function executeResumeCommand(args: string[]): Promise<void> {
 
   const parsedArgs = parseResumeArgs(args);
 
-  // Handle --list
+  // --list 처리
   if (parsedArgs.list) {
     await listSessions();
     return;
   }
 
-  // Handle --cleanup
+  // --cleanup 처리
   if (parsedArgs.cleanup) {
     await cleanupRegistry();
     return;
   }
 
-  // Resolve which session to resume
+  // 재개할 세션 해석
   const resolved = await resolveSession(parsedArgs);
   if (!resolved) {
     process.exit(1);
@@ -486,60 +486,60 @@ export async function executeResumeCommand(args: string[]): Promise<void> {
   const { cwd, registryEntry } = resolved;
   const { headless, force } = parsedArgs;
 
-  // Detect and recover stale sessions EARLY
-  // This fixes the issue where killing the TUI mid-task leaves activeTaskIds populated
+  // 오래된 세션 조기 감지 및 복구
+  // TUI 중간에 종료하면 activeTaskIds가 채워진 상태로 남는 문제 수정
   const staleRecovery = await detectAndRecoverStaleSession(cwd, checkLock);
   if (staleRecovery.wasStale) {
     console.log('');
-    console.log('⚠️  Recovered stale session');
+    console.log('⚠️  오래된 세션 복구됨');
     if (staleRecovery.clearedTaskCount > 0) {
-      console.log(`   Cleared ${staleRecovery.clearedTaskCount} stuck in-progress task(s)`);
+      console.log(`   ${staleRecovery.clearedTaskCount}개의 멈춘 진행 중 작업 정리됨`);
     }
-    console.log('   Session status set to "interrupted" (resumable)');
+    console.log('   세션 상태가 "interrupted" (재개 가능)로 설정됨');
     console.log('');
   }
 
-  // Load session
+  // 세션 로드
   const persistedState = await loadPersistedSession(cwd);
   if (!persistedState) {
-    console.error('Failed to load session data.');
+    console.error('세션 데이터를 로드하지 못했습니다.');
     process.exit(1);
   }
 
-  // Check if resumable
+  // 재개 가능 여부 확인
   if (!isSessionResumable(persistedState)) {
     const summary = getSessionSummary(persistedState);
-    console.error(`Cannot resume session in '${summary.status}' state.`);
+    console.error(`'${summary.status}' 상태의 세션은 재개할 수 없습니다.`);
     console.error('');
     if (summary.status === 'completed') {
-      console.error('Session has already completed. Start a new session with: ralph-tui run');
+      console.error('세션이 이미 완료되었습니다. 새 세션 시작: ralph-tui run');
     } else {
-      console.error('Session cannot be resumed. Start a new session with: ralph-tui run --force');
+      console.error('세션을 재개할 수 없습니다. 새 세션 시작: ralph-tui run --force');
     }
     process.exit(1);
   }
 
-  // Check for lock conflicts
+  // 잠금 충돌 확인
   const sessionCheck = await checkSession(cwd);
   if (sessionCheck.isLocked && !sessionCheck.isStale && !force) {
-    console.error('Another Ralph instance is already running.');
+    console.error('다른 Ralph 인스턴스가 이미 실행 중입니다.');
     console.error(`  PID: ${sessionCheck.lock?.pid}`);
-    console.error('Use --force to override.');
+    console.error('재정의하려면 --force를 사용하세요.');
     process.exit(1);
   }
 
-  // Clean stale lock if needed
+  // 필요한 경우 오래된 잠금 정리
   if (sessionCheck.isStale) {
     await cleanStaleLock(cwd);
   }
 
-  console.log('Resuming Ralph TUI session...');
+  console.log('Ralph TUI 세션 재개 중...');
   console.log('');
 
-  // Initialize plugins
+  // 플러그인 초기화
   await initializePlugins();
 
-  // Build config from persisted state
+  // 지속 상태에서 설정 빌드
   const options: RuntimeOptions = {
     agent: persistedState.agentPlugin,
     tracker: persistedState.trackerState.plugin,
@@ -556,58 +556,58 @@ export async function executeResumeCommand(args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  // Validate configuration
+  // 설정 검증
   const validation = await validateConfig(config);
   if (!validation.valid) {
-    console.error('Configuration errors:');
+    console.error('설정 오류:');
     for (const error of validation.errors) {
       console.error(`  - ${error}`);
     }
     process.exit(1);
   }
 
-  // Acquire lock
+  // 잠금 획득
   const lockAcquired = await acquireLock(cwd, persistedState.sessionId);
   if (!lockAcquired && !force) {
-    console.error('Failed to acquire session lock.');
+    console.error('세션 잠금을 획득하지 못했습니다.');
     process.exit(1);
   }
 
-  // Update persisted state to running
+  // 지속 상태를 실행 중으로 업데이트
   const resumedState = resumePersistedSession(persistedState);
   await savePersistedSession(resumedState);
 
   const summary = getSessionSummary(resumedState);
 
-  // Set session ID on config for use in iteration log filenames
+  // 반복 로그 파일명에 사용할 세션 ID를 설정에 지정
   config.sessionId = summary.sessionId;
 
-  console.log(`Session:    ${summary.sessionId.slice(0, 8)}...`);
-  console.log(`Agent:      ${summary.agentPlugin}`);
-  console.log(`Tracker:    ${summary.trackerPlugin}`);
-  console.log(`Progress:   ${summary.tasksCompleted}/${summary.totalTasks} tasks complete`);
-  console.log(`Iteration:  ${summary.currentIteration}${summary.maxIterations > 0 ? `/${summary.maxIterations}` : ''}`);
+  console.log(`세션:       ${summary.sessionId.slice(0, 8)}...`);
+  console.log(`에이전트:   ${summary.agentPlugin}`);
+  console.log(`트래커:     ${summary.trackerPlugin}`);
+  console.log(`진행:       ${summary.tasksCompleted}/${summary.totalTasks}개 작업 완료`);
+  console.log(`반복:       ${summary.currentIteration}${summary.maxIterations > 0 ? `/${summary.maxIterations}` : ''}`);
   console.log('');
 
-  // Create and initialize engine
+  // 엔진 생성 및 초기화
   const engine = new ExecutionEngine(config);
 
   try {
     await engine.initialize();
   } catch (error) {
     console.error(
-      'Failed to initialize engine:',
+      '엔진 초기화 실패:',
       error instanceof Error ? error.message : error
     );
     await releaseLock(cwd);
     process.exit(1);
   }
 
-  // Restore engine state from persisted session
-  // The engine will start fresh but the session tracks what was already done
-  // Task statuses are read from the tracker which should be in sync
+  // 지속 세션에서 엔진 상태 복원
+  // 엔진은 새로 시작하지만 세션이 이미 수행된 작업을 추적
+  // 작업 상태는 동기화되어야 하는 트래커에서 읽음
 
-  // Run with TUI or headless
+  // TUI 또는 헤드리스로 실행
   let finalState: PersistedSessionState;
   try {
     if (!headless && config.showTui) {
@@ -617,80 +617,80 @@ export async function executeResumeCommand(args: string[]): Promise<void> {
     }
   } catch (error) {
     console.error(
-      'Execution error:',
+      '실행 오류:',
       error instanceof Error ? error.message : error
     );
     await releaseLock(cwd);
     process.exit(1);
   }
 
-  // Clean up session file on successful completion
+  // 성공적 완료 시 세션 파일 정리
   if (finalState.status === 'completed') {
     await deletePersistedSession(cwd);
-    // Remove from registry on completion
+    // 완료 시 레지스트리에서 제거
     if (registryEntry) {
       await unregisterSession(registryEntry.sessionId);
     }
-    console.log('Session completed and cleaned up.');
+    console.log('세션 완료 및 정리됨.');
   } else if (finalState.status === 'paused') {
-    // Update registry status
+    // 레지스트리 상태 업데이트
     if (registryEntry) {
       await updateRegistryStatus(registryEntry.sessionId, 'paused');
     }
-    console.log('\nSession paused. Use "ralph-tui resume" to continue.');
+    console.log('\n세션 일시 정지됨. 계속하려면 "ralph-tui resume"을 사용하세요.');
   } else {
-    // Update registry with current status
+    // 현재 상태로 레지스트리 업데이트
     if (registryEntry) {
       await updateRegistryStatus(registryEntry.sessionId, finalState.status);
     }
-    console.log('\nSession state saved. Use "ralph-tui resume" to continue.');
+    console.log('\n세션 상태 저장됨. 계속하려면 "ralph-tui resume"을 사용하세요.');
   }
 
-  console.log('\nRalph TUI finished.');
+  console.log('\nRalph TUI 종료됨.');
 }
 
 /**
- * Print resume command help
+ * resume 명령어 도움말 출력
  */
 export function printResumeHelp(): void {
   console.log(`
-ralph-tui resume - Continue from a previous session
+ralph-tui resume - 이전 세션에서 계속
 
-Usage: ralph-tui resume [session-id] [options]
+사용법: ralph-tui resume [session-id] [옵션]
 
-Arguments:
-  session-id        Session ID to resume (first 8 characters is enough)
-                    If not provided, resumes session in current directory
+인자:
+  session-id        재개할 세션 ID (처음 8자면 충분)
+                    미제공 시 현재 디렉토리의 세션 재개
 
-Options:
-  --list, -l        List all resumable sessions
-  --cleanup         Remove stale entries from session registry
-  --cwd <path>      Working directory (default: current directory)
-  --headless        Run without TUI
-  --force           Force resume even if another instance appears to be running
+옵션:
+  --list, -l        모든 재개 가능한 세션 나열
+  --cleanup         세션 레지스트리에서 오래된 항목 제거
+  --cwd <path>      작업 디렉토리 (기본값: 현재 디렉토리)
+  --headless        TUI 없이 실행
+  --force           다른 인스턴스가 실행 중인 것처럼 보여도 강제 재개
 
-Description:
-  Resumes execution from a previously interrupted or paused session.
-  The session state is stored in .ralph-tui/session.json.
+설명:
+  이전에 중단되거나 일시 정지된 세션에서 실행을 재개합니다.
+  세션 상태는 .ralph-tui/session.json에 저장됩니다.
 
-  Sessions can be resumed if they are in one of these states:
-  - paused: Manually paused by user
-  - running: Crashed or interrupted unexpectedly
-  - interrupted: Stopped by signal (Ctrl+C)
+  다음 상태 중 하나인 세션을 재개할 수 있습니다:
+  - paused: 사용자가 수동으로 일시 정지
+  - running: 예기치 않게 충돌 또는 중단됨
+  - interrupted: 시그널(Ctrl+C)로 중지됨
 
-  Cross-directory Resume:
-  Sessions are registered in a global registry (~/.config/ralph-tui/sessions.json)
-  allowing you to resume sessions from any directory using the session ID.
+  디렉토리 간 재개:
+  세션은 전역 레지스트리(~/.config/ralph-tui/sessions.json)에 등록되어
+  세션 ID를 사용하여 모든 디렉토리에서 세션을 재개할 수 있습니다.
 
-  Completed or failed sessions cannot be resumed. Use 'ralph-tui run --force'
-  to start a new session.
+  완료되거나 실패한 세션은 재개할 수 없습니다. 새 세션을 시작하려면
+  'ralph-tui run --force'를 사용하세요.
 
-Examples:
-  ralph-tui resume              # Resume session in current directory
-  ralph-tui resume --list       # List all resumable sessions
-  ralph-tui resume a1b2c3d4     # Resume session by ID (from any directory)
-  ralph-tui resume --headless   # Resume without TUI
-  ralph-tui resume --force      # Force resume (override stale lock)
-  ralph-tui resume --cleanup    # Clean up stale registry entries
+예시:
+  ralph-tui resume              # 현재 디렉토리의 세션 재개
+  ralph-tui resume --list       # 모든 재개 가능한 세션 나열
+  ralph-tui resume a1b2c3d4     # ID로 세션 재개 (모든 디렉토리에서)
+  ralph-tui resume --headless   # TUI 없이 재개
+  ralph-tui resume --force      # 강제 재개 (오래된 잠금 재정의)
+  ralph-tui resume --cleanup    # 오래된 레지스트리 항목 정리
 `);
 }

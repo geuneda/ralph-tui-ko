@@ -1,7 +1,7 @@
 /**
- * ABOUTME: SubagentSection component for rendering collapsible subagent output sections.
- * Displays subagent activity inline in the output panel with collapsible sections,
- * allowing users to expand/collapse to see subagent details.
+ * ABOUTME: 접을 수 있는 서브에이전트 출력 섹션 렌더링을 위한 SubagentSection 컴포넌트.
+ * 접을 수 있는 섹션으로 출력 패널에 서브에이전트 활동을 인라인으로 표시하여
+ * 사용자가 서브에이전트 세부 정보를 확장/축소할 수 있습니다.
  */
 
 import type { ReactNode } from 'react';
@@ -10,7 +10,7 @@ import type { EngineSubagentState, SubagentTreeNode } from '../../engine/types.j
 import type { SubagentDetailLevel } from '../../config/types.js';
 
 /**
- * Status color for subagent based on its completion state
+ * 완료 상태에 따른 서브에이전트의 상태 색상
  */
 function getSubagentStatusColor(status: EngineSubagentState['status']): string {
   switch (status) {
@@ -26,7 +26,7 @@ function getSubagentStatusColor(status: EngineSubagentState['status']): string {
 }
 
 /**
- * Status indicator symbol for subagent
+ * 서브에이전트의 상태 표시기 심볼
  */
 function getSubagentStatusIndicator(status: EngineSubagentState['status']): string {
   switch (status) {
@@ -42,7 +42,7 @@ function getSubagentStatusIndicator(status: EngineSubagentState['status']): stri
 }
 
 /**
- * Format duration in human-readable format
+ * 사람이 읽기 쉬운 형식으로 지속 시간 포맷
  */
 function formatDuration(durationMs?: number): string {
   if (durationMs === undefined) return '';
@@ -55,22 +55,22 @@ function formatDuration(durationMs?: number): string {
 }
 
 /**
- * Props for the SubagentSectionHeader component
+ * SubagentSectionHeader 컴포넌트 Props
  */
 interface SubagentSectionHeaderProps {
-  /** The subagent state to display */
+  /** 표시할 서브에이전트 상태 */
   subagent: EngineSubagentState;
-  /** Whether this section is collapsed */
+  /** 이 섹션이 접혀 있는지 여부 */
   isCollapsed: boolean;
-  /** Whether this section is currently focused/selected */
+  /** 이 섹션이 현재 포커스/선택되어 있는지 여부 */
   isFocused: boolean;
-  /** Callback when section is toggled */
+  /** 섹션 토글 시 콜백 */
   onToggle?: () => void;
 }
 
 /**
- * Renders the header line for a subagent section.
- * Format: [▼/▶] [status] [Subagent: type] description [duration]
+ * 서브에이전트 섹션의 헤더 라인을 렌더링합니다.
+ * 형식: [▼/▶] [상태] [서브에이전트: 타입] 설명 [지속 시간]
  */
 function SubagentSectionHeader({
   subagent,
@@ -82,7 +82,7 @@ function SubagentSectionHeader({
   const collapseIndicator = isCollapsed ? '▶' : '▼';
   const durationStr = subagent.durationMs !== undefined ? ` [${formatDuration(subagent.durationMs)}]` : '';
 
-  // Indent based on depth (each level adds 2 spaces)
+  // 깊이에 따른 들여쓰기 (각 레벨당 2칸 추가)
   const indent = '  '.repeat(Math.max(0, subagent.depth - 1));
 
   return (
@@ -96,7 +96,7 @@ function SubagentSectionHeader({
         <span fg={colors.fg.dim}>{indent}</span>
         <span fg={colors.accent.secondary}>{collapseIndicator} </span>
         <span fg={statusColor}>{statusIndicator} </span>
-        <span fg={colors.accent.tertiary}>[Subagent: {subagent.type}]</span>
+        <span fg={colors.accent.tertiary}>[서브에이전트: {subagent.type}]</span>
         <span fg={colors.fg.secondary}> {subagent.description}</span>
         <span fg={colors.fg.muted}>{durationStr}</span>
       </text>
@@ -105,23 +105,23 @@ function SubagentSectionHeader({
 }
 
 /**
- * Props for the CollapsedSummary component
+ * CollapsedSummary 컴포넌트 Props
  */
 interface CollapsedSummaryProps {
-  /** The subagent state */
+  /** 서브에이전트 상태 */
   subagent: EngineSubagentState;
-  /** Number of child subagents */
+  /** 하위 서브에이전트 수 */
   childCount: number;
 }
 
 /**
- * Renders a one-line summary when the section is collapsed.
+ * 섹션이 접혀 있을 때 한 줄 요약을 렌더링합니다.
  */
 function CollapsedSummary({ subagent, childCount }: CollapsedSummaryProps): ReactNode {
   const indent = '  '.repeat(Math.max(0, subagent.depth));
   const statusColor = getSubagentStatusColor(subagent.status);
-  const statusText = subagent.status === 'running' ? 'running...' : subagent.status;
-  const childText = childCount > 0 ? ` (${childCount} nested)` : '';
+  const statusText = subagent.status === 'running' ? '실행 중...' : subagent.status;
+  const childText = childCount > 0 ? ` (${childCount}개 중첩)` : '';
 
   return (
     <box style={{ paddingLeft: 1 }}>
@@ -135,23 +135,23 @@ function CollapsedSummary({ subagent, childCount }: CollapsedSummaryProps): Reac
 }
 
 /**
- * Props for a single SubagentSection
+ * 단일 SubagentSection Props
  */
 export interface SubagentSectionProps {
-  /** The subagent tree node to render */
+  /** 렌더링할 서브에이전트 트리 노드 */
   node: SubagentTreeNode;
-  /** Set of collapsed subagent IDs */
+  /** 접힌 서브에이전트 ID 집합 */
   collapsedSet: Set<string>;
-  /** ID of the currently focused subagent section (for keyboard navigation) */
+  /** 현재 포커스된 서브에이전트 섹션 ID (키보드 탐색용) */
   focusedId?: string;
-  /** Detail level for rendering */
+  /** 렌더링 상세 레벨 */
   detailLevel: SubagentDetailLevel;
-  /** Callback when a section needs to toggle */
+  /** 섹션 토글이 필요할 때 콜백 */
   onToggle?: (id: string) => void;
 }
 
 /**
- * Renders a single subagent section with its children recursively.
+ * 하위 항목과 함께 단일 서브에이전트 섹션을 재귀적으로 렌더링합니다.
  */
 export function SubagentSection({
   node,
@@ -164,7 +164,7 @@ export function SubagentSection({
   const isCollapsed = collapsedSet.has(subagent.id);
   const isFocused = focusedId === subagent.id;
 
-  // For 'minimal' level, just show start/complete events as single lines
+  // 'minimal' 레벨의 경우, 시작/완료 이벤트만 단일 라인으로 표시
   if (detailLevel === 'minimal') {
     return (
       <SubagentSectionHeader
@@ -176,7 +176,7 @@ export function SubagentSection({
     );
   }
 
-  // For 'moderate' and 'full' levels, show collapsible sections
+  // 'moderate'와 'full' 레벨의 경우, 접을 수 있는 섹션 표시
   return (
     <box style={{ flexDirection: 'column', width: '100%' }}>
       <SubagentSectionHeader
@@ -190,7 +190,7 @@ export function SubagentSection({
         <CollapsedSummary subagent={subagent} childCount={children.length} />
       ) : (
         <>
-          {/* Show children when expanded */}
+          {/* 확장 시 하위 항목 표시 */}
           {children.map((child) => (
             <SubagentSection
               key={child.state.id}
@@ -208,24 +208,24 @@ export function SubagentSection({
 }
 
 /**
- * Props for the SubagentSections container
+ * SubagentSections 컨테이너 Props
  */
 export interface SubagentSectionsProps {
-  /** Array of root-level subagent tree nodes */
+  /** 루트 레벨 서브에이전트 트리 노드 배열 */
   tree: SubagentTreeNode[];
-  /** Set of collapsed subagent IDs */
+  /** 접힌 서브에이전트 ID 집합 */
   collapsedSet: Set<string>;
-  /** ID of the currently focused subagent section */
+  /** 현재 포커스된 서브에이전트 섹션 ID */
   focusedId?: string;
-  /** Detail level for rendering */
+  /** 렌더링 상세 레벨 */
   detailLevel: SubagentDetailLevel;
-  /** Callback when a section is toggled */
+  /** 섹션 토글 시 콜백 */
   onToggle?: (id: string) => void;
 }
 
 /**
- * Renders all subagent sections from a tree.
- * This is the main entry point for rendering subagent output.
+ * 트리에서 모든 서브에이전트 섹션을 렌더링합니다.
+ * 서브에이전트 출력 렌더링의 메인 진입점입니다.
  */
 export function SubagentSections({
   tree,
@@ -255,8 +255,8 @@ export function SubagentSections({
 }
 
 /**
- * End marker component for a completed/errored subagent.
- * Shows: [indent][status] Subagent complete [duration]
+ * 완료/오류 서브에이전트의 끝 마커 컴포넌트.
+ * 표시: [들여쓰기][상태] 서브에이전트 완료 [지속 시간]
  */
 export function SubagentEndMarker({
   subagent,
@@ -268,7 +268,7 @@ export function SubagentEndMarker({
   }
 
   const statusColor = getSubagentStatusColor(subagent.status);
-  const statusText = subagent.status === 'completed' ? 'complete' : 'failed';
+  const statusText = subagent.status === 'completed' ? '완료' : '실패';
   const durationStr = formatDuration(subagent.durationMs);
   const indent = '  '.repeat(Math.max(0, subagent.depth - 1));
 

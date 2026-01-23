@@ -1,7 +1,7 @@
 /**
- * ABOUTME: Listen command for ralph-tui remote listener.
- * Starts a WebSocket server for remote control without local TUI.
- * Supports daemon mode and token rotation.
+ * ABOUTME: ralph-tui 원격 리스너의 listen 명령어.
+ * 로컬 TUI 없이 원격 제어를 위한 WebSocket 서버를 시작합니다.
+ * 데몬 모드와 토큰 로테이션을 지원합니다.
  */
 
 import { spawn } from 'node:child_process';
@@ -19,12 +19,12 @@ import type { ListenOptions, ServerToken } from '../remote/types.js';
 import { DEFAULT_LISTEN_OPTIONS, TOKEN_LIFETIMES } from '../remote/types.js';
 
 /**
- * Path to the daemon PID file
+ * 데몬 PID 파일 경로
  */
 const DAEMON_PID_PATH = join(homedir(), '.config', 'ralph-tui', 'listen.pid');
 
 /**
- * Parse listen command arguments.
+ * listen 명령어 인자 파싱.
  */
 export function parseListenArgs(args: string[]): Partial<ListenOptions> & { help?: boolean } {
   const options: Partial<ListenOptions> & { help?: boolean } = {};
@@ -37,7 +37,7 @@ export function parseListenArgs(args: string[]): Partial<ListenOptions> & { help
       if (!isNaN(port) && port > 0 && port < 65536) {
         options.port = port;
       } else {
-        console.error(`Invalid port: ${args[i + 1]}`);
+        console.error(`유효하지 않은 포트: ${args[i + 1]}`);
         process.exit(1);
       }
       i++;
@@ -54,10 +54,10 @@ export function parseListenArgs(args: string[]): Partial<ListenOptions> & { help
 }
 
 /**
- * Format a date for display.
+ * 표시용 날짜 포맷.
  */
 function formatDate(isoDate: string): string {
-  return new Date(isoDate).toLocaleDateString('en-US', {
+  return new Date(isoDate).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -65,47 +65,47 @@ function formatDate(isoDate: string): string {
 }
 
 /**
- * Display token information.
- * Token is only shown in full when newly generated.
+ * 토큰 정보 표시.
+ * 토큰은 새로 생성되었을 때만 전체가 표시됩니다.
  */
 async function displayToken(token: ServerToken, isNew: boolean): Promise<void> {
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');
-  console.log('                   Server Authentication Token                  ');
+  console.log('                   서버 인증 토큰                               ');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
 
   if (isNew) {
-    console.log('  A new server token has been generated:');
+    console.log('  새 서버 토큰이 생성되었습니다:');
     console.log('');
     console.log(`  ${token.value}`);
     console.log('');
-    console.log('  ⚠️  IMPORTANT: This token is shown only once. Save it securely.');
-    console.log('     You will need it to connect remote clients to this instance.');
+    console.log('  ⚠️  중요: 이 토큰은 한 번만 표시됩니다. 안전하게 저장하세요.');
+    console.log('     원격 클라이언트를 이 인스턴스에 연결하는 데 필요합니다.');
   } else {
-    console.log('  Using existing server token (use --rotate-token to generate new)');
+    console.log('  기존 서버 토큰 사용 중 (새로 생성하려면 --rotate-token 사용)');
     console.log('');
-    console.log(`  Preview: ${token.value.slice(0, 8)}...`);
+    console.log(`  미리보기: ${token.value.slice(0, 8)}...`);
   }
 
   console.log('');
-  console.log('  Token Details:');
-  console.log(`    Version:  ${token.version}`);
-  console.log(`    Created:  ${formatDate(token.createdAt)}`);
-  console.log(`    Expires:  ${formatDate(token.expiresAt)}`);
+  console.log('  토큰 상세:');
+  console.log(`    버전:     ${token.version}`);
+  console.log(`    생성일:   ${formatDate(token.createdAt)}`);
+  console.log(`    만료일:   ${formatDate(token.expiresAt)}`);
 
   const expiresAt = new Date(token.expiresAt);
   const daysRemaining = Math.ceil((expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
   if (daysRemaining <= 7) {
-    console.log(`    ⚠️  Expires in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}!`);
+    console.log(`    ⚠️  ${daysRemaining}일 후 만료됩니다!`);
   } else {
-    console.log(`    Lifetime: ${TOKEN_LIFETIMES.SERVER_TOKEN_DAYS} days`);
+    console.log(`    수명:     ${TOKEN_LIFETIMES.SERVER_TOKEN_DAYS}일`);
   }
 
   console.log('');
 
   if (isNew) {
-    console.log('  To rotate this token later, run:');
+    console.log('  나중에 이 토큰을 교체하려면 다음을 실행하세요:');
     console.log('    ralph-tui listen --rotate-token');
     console.log('');
   }
@@ -115,42 +115,42 @@ async function displayToken(token: ServerToken, isNew: boolean): Promise<void> {
 }
 
 /**
- * Display server status information.
+ * 서버 상태 정보 표시.
  */
 function displayServerStatus(state: RemoteServerState): void {
   console.log('');
   console.log('───────────────────────────────────────────────────────────────');
-  console.log('                     Remote Listener Started                    ');
+  console.log('                     원격 리스너 시작됨                         ');
   console.log('───────────────────────────────────────────────────────────────');
   console.log('');
-  console.log(`  Status:     Running`);
-  console.log(`  Port:       ${state.port}`);
-  console.log(`  Host:       ${state.host}`);
+  console.log(`  상태:       실행 중`);
+  console.log(`  포트:       ${state.port}`);
+  console.log(`  호스트:     ${state.host}`);
   console.log(`  PID:        ${state.pid ?? process.pid}`);
   console.log('');
 
   if (state.host === '127.0.0.1') {
-    console.log('  ⚠️  Binding to localhost only (no token configured)');
-    console.log('     Remote connections will not be accepted.');
+    console.log('  ⚠️  localhost에만 바인딩됨 (토큰 미설정)');
+    console.log('     원격 연결이 허용되지 않습니다.');
     console.log('');
   } else {
-    console.log('  ✓  Accepting connections from all interfaces');
+    console.log('  ✓  모든 인터페이스에서 연결 허용');
     console.log('');
   }
 
-  console.log('  Connect URL:');
+  console.log('  연결 URL:');
   console.log(`    ws://${state.host === '0.0.0.0' ? '<hostname>' : state.host}:${state.port}`);
   console.log('');
-  console.log('  Press Ctrl+C to stop the server');
+  console.log('  서버를 중지하려면 Ctrl+C를 누르세요');
   console.log('───────────────────────────────────────────────────────────────');
   console.log('');
 }
 
 /**
- * Fork the current process as a daemon.
+ * 현재 프로세스를 데몬으로 포크.
  */
 async function forkAsDaemon(port: number): Promise<void> {
-  // Write out the arguments we want to pass
+  // 전달할 인자 작성
   const scriptPath = process.argv[1];
   const args = ['listen', '--port', port.toString()];
 
@@ -163,119 +163,119 @@ async function forkAsDaemon(port: number): Promise<void> {
     },
   });
 
-  // Unref the child so parent can exit
+  // 부모가 종료할 수 있도록 자식 참조 해제
   child.unref();
 
-  // Write PID file
+  // PID 파일 작성
   await mkdir(dirname(DAEMON_PID_PATH), { recursive: true });
   await writeFile(DAEMON_PID_PATH, child.pid?.toString() ?? '', 'utf-8');
 
   console.log('');
-  console.log(`Ralph remote listener started as daemon (PID: ${child.pid})`);
-  console.log(`Port: ${port}`);
+  console.log(`Ralph 원격 리스너가 데몬으로 시작됨 (PID: ${child.pid})`);
+  console.log(`포트: ${port}`);
   console.log('');
-  console.log('To check token info: ralph-tui listen --help');
-  console.log('To stop: kill $(cat ~/.config/ralph-tui/listen.pid)');
+  console.log('토큰 정보 확인: ralph-tui listen --help');
+  console.log('중지: kill $(cat ~/.config/ralph-tui/listen.pid)');
   console.log('');
 }
 
 /**
- * Execute the listen command.
+ * listen 명령어 실행.
  */
 export async function executeListenCommand(args: string[]): Promise<void> {
   const options = parseListenArgs(args);
 
-  // Handle help
+  // 도움말 처리
   if (options.help) {
     printListenHelp();
     return;
   }
 
-  // Handle token rotation
+  // 토큰 교체 처리
   if (options.rotateToken) {
     const newToken = await rotateServerToken();
     console.log('');
     console.log('═══════════════════════════════════════════════════════════════');
-    console.log('                      Token Rotated Successfully                ');
+    console.log('                      토큰 교체 완료                            ');
     console.log('═══════════════════════════════════════════════════════════════');
     console.log('');
-    console.log('  New server token (save this securely):');
+    console.log('  새 서버 토큰 (안전하게 저장하세요):');
     console.log('');
     console.log(`  ${newToken.value}`);
     console.log('');
-    console.log('  Token Details:');
-    console.log(`    Version:  ${newToken.version}`);
-    console.log(`    Created:  ${formatDate(newToken.createdAt)}`);
-    console.log(`    Expires:  ${formatDate(newToken.expiresAt)}`);
+    console.log('  토큰 상세:');
+    console.log(`    버전:     ${newToken.version}`);
+    console.log(`    생성일:   ${formatDate(newToken.createdAt)}`);
+    console.log(`    만료일:   ${formatDate(newToken.expiresAt)}`);
     console.log('');
-    console.log('  ⚠️  All existing connections using the old token will be rejected.');
-    console.log('     This token is shown only once. Save it now.');
+    console.log('  ⚠️  이전 토큰을 사용하는 모든 기존 연결이 거부됩니다.');
+    console.log('     이 토큰은 한 번만 표시됩니다. 지금 저장하세요.');
     console.log('');
     console.log('═══════════════════════════════════════════════════════════════');
     console.log('');
     return;
   }
 
-  // Merge with defaults
+  // 기본값과 병합
   const listenOptions: ListenOptions = {
     ...DEFAULT_LISTEN_OPTIONS,
     ...options,
   };
 
-  // Check if we're already in daemon mode (forked)
+  // 이미 데몬 모드인지 확인 (포크됨)
   const isDaemon = process.env.RALPH_DAEMON === '1';
 
-  // If daemon mode requested but not yet forked, fork and exit
+  // 데몬 모드가 요청되었지만 아직 포크되지 않은 경우, 포크하고 종료
   if (listenOptions.daemon && !isDaemon) {
     await forkAsDaemon(listenOptions.port);
     return;
   }
 
-  // Get or create token
+  // 토큰 가져오기 또는 생성
   const { token, isNew } = await getOrCreateServerToken();
 
-  // Display token on first run (not in daemon mode)
+  // 첫 실행 시 토큰 표시 (데몬 모드 아닌 경우)
   if (isNew && !isDaemon) {
     await displayToken(token, true);
   } else if (!isDaemon) {
-    // Show token preview with expiration info
+    // 만료 정보와 함께 토큰 미리보기 표시
     const tokenInfo = await getServerTokenInfo();
     if (tokenInfo.exists) {
       console.log('');
-      console.log(`Using token: ${tokenInfo.preview} (v${tokenInfo.version})`);
+      console.log(`토큰 사용 중: ${tokenInfo.preview} (v${tokenInfo.version})`);
       if (tokenInfo.daysRemaining !== undefined && tokenInfo.daysRemaining <= 7) {
-        console.log(`  ⚠️  Token expires in ${tokenInfo.daysRemaining} day${tokenInfo.daysRemaining !== 1 ? 's' : ''}!`);
+        console.log(`  ⚠️  토큰이 ${tokenInfo.daysRemaining}일 후 만료됩니다!`);
       }
     }
   }
 
-  // Create and start server
+  // 서버 생성 및 시작
   const server = await createRemoteServer({
     port: listenOptions.port,
     onConnect: (clientId) => {
       if (!isDaemon) {
-        console.log(`[connect] Client ${clientId} connected`);
+        console.log(`[연결] 클라이언트 ${clientId} 연결됨`);
       }
     },
     onDisconnect: (clientId) => {
       if (!isDaemon) {
-        console.log(`[disconnect] Client ${clientId} disconnected`);
+        console.log(`[연결 해제] 클라이언트 ${clientId} 연결 해제됨`);
       }
     },
   });
 
   const state = await server.start();
 
-  // Display status (not in daemon mode)
+  // 상태 표시 (데몬 모드 아닌 경우)
   if (!isDaemon) {
     displayServerStatus(state);
   }
 
-  // Handle shutdown signals
+  // 종료 시그널 처리
   const shutdown = async () => {
     if (!isDaemon) {
       console.log('');
-      console.log('Shutting down...');
+      console.log('종료 중...');
     }
     await server.stop();
     process.exit(0);
@@ -284,59 +284,59 @@ export async function executeListenCommand(args: string[]): Promise<void> {
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
 
-  // Keep the process running
+  // 프로세스 계속 실행
   await new Promise(() => {
-    // This promise never resolves, keeping the event loop alive
+    // 이 Promise는 절대 해결되지 않아 이벤트 루프를 유지함
   });
 }
 
 /**
- * Print listen command help.
+ * listen 명령어 도움말 출력.
  */
 export function printListenHelp(): void {
   console.log(`
-ralph-tui listen - Start remote listener
+ralph-tui listen - 원격 리스너 시작
 
-Usage: ralph-tui listen [options]
+사용법: ralph-tui listen [옵션]
 
-Options:
-  --port <port>     Port to bind to (default: 7890)
-  --daemon, -d      Run as a background daemon
-  --rotate-token    Generate a new token and invalidate the old one
-  -h, --help        Show this help message
+옵션:
+  --port <port>     바인딩할 포트 (기본값: 7890)
+  --daemon, -d      백그라운드 데몬으로 실행
+  --rotate-token    새 토큰 생성 및 이전 토큰 무효화
+  -h, --help        이 도움말 메시지 표시
 
-Description:
-  Starts a WebSocket server for remote control of ralph-tui instances.
-  This allows monitoring and controlling ralph-tui from a remote client.
+설명:
+  ralph-tui 인스턴스를 원격 제어하기 위한 WebSocket 서버를 시작합니다.
+  이를 통해 원격 클라이언트에서 ralph-tui를 모니터링하고 제어할 수 있습니다.
 
-  On first run, a secure authentication token is generated and displayed.
-  Store this token securely - you will need it to connect remote clients.
+  첫 실행 시 보안 인증 토큰이 생성되어 표시됩니다.
+  이 토큰을 안전하게 저장하세요 - 원격 클라이언트를 연결하는 데 필요합니다.
 
-Security:
-  - If no token is configured, the server binds only to localhost (127.0.0.1)
-  - With a token configured, the server binds to all interfaces (0.0.0.0)
-  - All connections must authenticate with the token
-  - All actions are logged to ~/.config/ralph-tui/audit.log
+보안:
+  - 토큰이 설정되지 않은 경우 서버는 localhost (127.0.0.1)에만 바인딩됨
+  - 토큰이 설정된 경우 서버는 모든 인터페이스 (0.0.0.0)에 바인딩됨
+  - 모든 연결은 토큰으로 인증해야 함
+  - 모든 작업은 ~/.config/ralph-tui/audit.log에 기록됨
 
-Token Management:
-  - Token is stored in ~/.config/ralph-tui/remote.json
-  - Use --rotate-token to generate a new token
-  - Old tokens are immediately invalidated on rotation
+토큰 관리:
+  - 토큰은 ~/.config/ralph-tui/remote.json에 저장됨
+  - --rotate-token을 사용하여 새 토큰 생성
+  - 교체 시 이전 토큰은 즉시 무효화됨
 
-Examples:
-  ralph-tui listen                    # Start on default port 7890
-  ralph-tui listen --port 8080        # Start on custom port
-  ralph-tui listen --daemon           # Start as background daemon
-  ralph-tui listen --rotate-token     # Rotate authentication token
+예시:
+  ralph-tui listen                    # 기본 포트 7890에서 시작
+  ralph-tui listen --port 8080        # 사용자 지정 포트에서 시작
+  ralph-tui listen --daemon           # 백그라운드 데몬으로 시작
+  ralph-tui listen --rotate-token     # 인증 토큰 교체
 
-Daemon Management:
-  # Start daemon
+데몬 관리:
+  # 데몬 시작
   ralph-tui listen --daemon
 
-  # Stop daemon
+  # 데몬 중지
   kill $(cat ~/.config/ralph-tui/listen.pid)
 
-  # Check if running
-  ps -p $(cat ~/.config/ralph-tui/listen.pid) 2>/dev/null && echo "Running"
+  # 실행 중인지 확인
+  ps -p $(cat ~/.config/ralph-tui/listen.pid) 2>/dev/null && echo "실행 중"
 `);
 }

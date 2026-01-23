@@ -1,6 +1,6 @@
 /**
- * ABOUTME: Logs command for ralph-tui.
- * List, view, filter, and clean up iteration output logs.
+ * ABOUTME: ralph-tui의 logs 명령어.
+ * 반복 실행 출력 로그를 나열, 조회, 필터링, 정리합니다.
  */
 
 import {
@@ -16,7 +16,7 @@ import {
 import type { IterationLogSummary, IterationLog } from '../logs/index.js';
 
 /**
- * Format duration in human-readable form.
+ * 사람이 읽기 쉬운 형식으로 시간 포맷
  */
 function formatDuration(ms: number): string {
   const seconds = Math.floor(ms / 1000);
@@ -33,7 +33,7 @@ function formatDuration(ms: number): string {
 }
 
 /**
- * Format date for display.
+ * 표시용 날짜 포맷
  */
 function formatDate(isoString: string): string {
   const date = new Date(isoString);
@@ -41,7 +41,7 @@ function formatDate(isoString: string): string {
 }
 
 /**
- * Format file size in human-readable form.
+ * 사람이 읽기 쉬운 형식으로 파일 크기 포맷
  */
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -50,7 +50,7 @@ function formatSize(bytes: number): string {
 }
 
 /**
- * Get status icon for iteration status.
+ * 반복 상태에 대한 상태 아이콘 가져오기
  */
 function getStatusIcon(status: string): string {
   switch (status) {
@@ -70,7 +70,7 @@ function getStatusIcon(status: string): string {
 }
 
 /**
- * Truncate text with ellipsis.
+ * 말줄임표로 텍스트 자르기
  */
 function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
@@ -78,33 +78,33 @@ function truncate(text: string, maxLength: number): string {
 }
 
 /**
- * Parse command line arguments for logs command.
+ * logs 명령어의 명령줄 인자 파싱
  */
 export interface LogsArgs {
-  /** View specific iteration by number */
+  /** 번호로 특정 반복 조회 */
   iteration?: number;
 
-  /** View iterations for a specific task */
+  /** 특정 작업의 반복 조회 */
   taskId?: string;
 
-  /** Clean up old logs */
+  /** 오래된 로그 정리 */
   clean: boolean;
 
-  /** Number of logs to keep when cleaning */
+  /** 정리 시 유지할 로그 수 */
   keep: number;
 
-  /** Dry run for clean operation */
+  /** 정리 작업의 드라이 런 */
   dryRun: boolean;
 
-  /** Working directory */
+  /** 작업 디렉토리 */
   cwd: string;
 
-  /** Show detailed output */
+  /** 상세 출력 표시 */
   verbose: boolean;
 }
 
 /**
- * Parse logs command arguments.
+ * logs 명령어 인자 파싱
  */
 export function parseLogsArgs(args: string[]): LogsArgs {
   const result: LogsArgs = {
@@ -155,48 +155,48 @@ export function parseLogsArgs(args: string[]): LogsArgs {
 }
 
 /**
- * Display a single iteration log in detail.
+ * 단일 반복 로그를 상세히 표시
  */
 function displayIterationLog(log: IterationLog, verbose: boolean): void {
   const { metadata, stdout, stderr } = log;
 
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');
-  console.log(`  Iteration ${metadata.iteration}: ${metadata.taskTitle}`);
+  console.log(`  반복 ${metadata.iteration}: ${metadata.taskTitle}`);
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
 
-  // Metadata section
-  console.log('  Metadata');
+  // 메타데이터 섹션
+  console.log('  메타데이터');
   console.log('  ────────');
-  console.log(`  Task ID:        ${metadata.taskId}`);
-  console.log(`  Status:         ${getStatusIcon(metadata.status)} ${metadata.status}`);
-  console.log(`  Task Completed: ${metadata.taskCompleted ? 'Yes' : 'No'}`);
-  console.log(`  Promise Found:  ${metadata.promiseComplete ? 'Yes' : 'No'}`);
-  console.log(`  Started:        ${formatDate(metadata.startedAt)}`);
-  console.log(`  Ended:          ${formatDate(metadata.endedAt)}`);
-  console.log(`  Duration:       ${formatDuration(metadata.durationMs)}`);
+  console.log(`  작업 ID:        ${metadata.taskId}`);
+  console.log(`  상태:           ${getStatusIcon(metadata.status)} ${metadata.status}`);
+  console.log(`  작업 완료:      ${metadata.taskCompleted ? '예' : '아니오'}`);
+  console.log(`  약속 발견:      ${metadata.promiseComplete ? '예' : '아니오'}`);
+  console.log(`  시작:           ${formatDate(metadata.startedAt)}`);
+  console.log(`  종료:           ${formatDate(metadata.endedAt)}`);
+  console.log(`  소요 시간:      ${formatDuration(metadata.durationMs)}`);
 
   if (metadata.error) {
-    console.log(`  Error:          ${metadata.error}`);
+    console.log(`  오류:           ${metadata.error}`);
   }
 
   if (metadata.agentPlugin) {
-    console.log(`  Agent:          ${metadata.agentPlugin}`);
+    console.log(`  에이전트:       ${metadata.agentPlugin}`);
   }
   if (metadata.model) {
-    console.log(`  Model:          ${metadata.model}`);
+    console.log(`  모델:           ${metadata.model}`);
   }
   if (metadata.epicId) {
-    console.log(`  Epic:           ${metadata.epicId}`);
+    console.log(`  에픽:           ${metadata.epicId}`);
   }
 
   console.log('');
-  console.log(`  Log File: ${log.filePath}`);
+  console.log(`  로그 파일: ${log.filePath}`);
   console.log('');
 
-  // Output section
-  console.log('  Agent Output');
+  // 출력 섹션
+  console.log('  에이전트 출력');
   console.log('  ────────────');
   console.log('');
 
@@ -204,17 +204,17 @@ function displayIterationLog(log: IterationLog, verbose: boolean): void {
     if (verbose) {
       console.log(stdout);
     } else {
-      // Show first 50 lines in non-verbose mode
+      // 상세 모드가 아닌 경우 처음 50줄만 표시
       const lines = stdout.split('\n');
       const preview = lines.slice(0, 50).join('\n');
       console.log(preview);
       if (lines.length > 50) {
         console.log('');
-        console.log(`  ... (${lines.length - 50} more lines, use --verbose to see all)`);
+        console.log(`  ... (${lines.length - 50}줄 더 있음, 전체 보기는 --verbose 사용)`);
       }
     }
   } else {
-    console.log('  (no stdout output)');
+    console.log('  (stdout 출력 없음)');
   }
 
   if (stderr && stderr.trim()) {
@@ -230,7 +230,7 @@ function displayIterationLog(log: IterationLog, verbose: boolean): void {
       console.log(preview);
       if (lines.length > 20) {
         console.log('');
-        console.log(`  ... (${lines.length - 20} more lines)`);
+        console.log(`  ... (${lines.length - 20}줄 더 있음)`);
       }
     }
   }
@@ -241,22 +241,22 @@ function displayIterationLog(log: IterationLog, verbose: boolean): void {
 }
 
 /**
- * Display a list of iteration log summaries.
+ * 반복 로그 요약 목록 표시
  */
 function displayLogList(summaries: IterationLogSummary[]): void {
   if (summaries.length === 0) {
-    console.log('No iteration logs found.');
+    console.log('반복 로그를 찾을 수 없습니다.');
     return;
   }
 
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');
-  console.log('                     Iteration Logs                            ');
+  console.log('                       반복 로그                                ');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
 
-  // Table header
-  console.log('  #    Status  Task ID              Title                        Duration');
+  // 테이블 헤더
+  console.log('  #    상태    작업 ID              제목                         소요시간');
   console.log('  ─────────────────────────────────────────────────────────────────────────');
 
   for (const summary of summaries) {
@@ -271,56 +271,56 @@ function displayLogList(summaries: IterationLogSummary[]): void {
   }
 
   console.log('');
-  console.log(`  Total: ${summaries.length} iteration(s)`);
+  console.log(`  총: ${summaries.length}개 반복`);
   console.log('');
 }
 
 /**
- * Execute the logs command.
+ * logs 명령어 실행
  */
 export async function executeLogsCommand(args: string[]): Promise<void> {
   const parsedArgs = parseLogsArgs(args);
   const { cwd, iteration, taskId, clean, keep, dryRun, verbose } = parsedArgs;
 
-  // Handle --clean operation
+  // --clean 작업 처리
   if (clean) {
     await executeCleanLogs(cwd, keep, dryRun);
     return;
   }
 
-  // Check if any logs exist
+  // 로그 존재 여부 확인
   const hasLogs = await hasIterationLogs(cwd);
   if (!hasLogs) {
     console.log('');
-    console.log('No iteration logs found.');
+    console.log('반복 로그를 찾을 수 없습니다.');
     console.log('');
-    console.log(`Logs are saved to: ${getIterationsDir(cwd)}`);
-    console.log('Run ralph-tui to generate logs.');
+    console.log(`로그 저장 위치: ${getIterationsDir(cwd)}`);
+    console.log('ralph-tui를 실행하여 로그를 생성하세요.');
     console.log('');
     return;
   }
 
-  // View specific iteration
+  // 특정 반복 조회
   if (iteration !== undefined) {
     const log = await getIterationLogByNumber(cwd, iteration);
     if (!log) {
-      console.error(`Iteration ${iteration} not found.`);
+      console.error(`반복 ${iteration}을(를) 찾을 수 없습니다.`);
       process.exit(1);
     }
     displayIterationLog(log, verbose);
     return;
   }
 
-  // View iterations for a specific task
+  // 특정 작업의 반복 조회
   if (taskId !== undefined) {
     const logs = await getIterationLogsByTask(cwd, taskId);
     if (logs.length === 0) {
-      console.log(`No iterations found for task: ${taskId}`);
+      console.log(`작업에 대한 반복을 찾을 수 없음: ${taskId}`);
       return;
     }
 
     console.log('');
-    console.log(`Found ${logs.length} iteration(s) for task: ${taskId}`);
+    console.log(`작업 ${taskId}에 대해 ${logs.length}개 반복 발견`);
     console.log('');
 
     for (const log of logs) {
@@ -329,35 +329,35 @@ export async function executeLogsCommand(args: string[]): Promise<void> {
     return;
   }
 
-  // Default: list all logs
+  // 기본: 모든 로그 나열
   const summaries = await listIterationLogs(cwd);
   displayLogList(summaries);
 
-  // Show disk usage
+  // 디스크 사용량 표시
   const diskUsage = await getIterationLogsDiskUsage(cwd);
   const count = await getIterationLogCount(cwd);
-  console.log(`  Disk usage: ${formatSize(diskUsage)} in ${count} log file(s)`);
+  console.log(`  디스크 사용량: ${formatSize(diskUsage)} (${count}개 로그 파일)`);
   console.log('');
-  console.log('  Commands:');
-  console.log('    ralph-tui logs --iteration 5        View iteration 5');
-  console.log('    ralph-tui logs --task US-005        View logs for task');
-  console.log('    ralph-tui logs --clean --keep 10    Clean old logs');
+  console.log('  명령어:');
+  console.log('    ralph-tui logs --iteration 5        반복 5 조회');
+  console.log('    ralph-tui logs --task US-005        작업의 로그 조회');
+  console.log('    ralph-tui logs --clean --keep 10    오래된 로그 정리');
   console.log('');
 }
 
 /**
- * Execute the logs clean operation.
+ * logs 정리 작업 실행
  */
 async function executeCleanLogs(cwd: string, keep: number, dryRun: boolean): Promise<void> {
   const count = await getIterationLogCount(cwd);
 
   if (count === 0) {
-    console.log('No iteration logs to clean.');
+    console.log('정리할 반복 로그가 없습니다.');
     return;
   }
 
   if (count <= keep) {
-    console.log(`Only ${count} log(s) found, keeping all (threshold: ${keep}).`);
+    console.log(`${count}개 로그만 발견됨, 모두 유지 (임계값: ${keep}).`);
     return;
   }
 
@@ -365,58 +365,58 @@ async function executeCleanLogs(cwd: string, keep: number, dryRun: boolean): Pro
 
   if (dryRun) {
     console.log('');
-    console.log('Dry run - no files deleted.');
+    console.log('드라이 런 - 파일이 삭제되지 않았습니다.');
     console.log('');
-    console.log(`Would delete: ${result.deletedCount} log(s)`);
-    console.log(`Would keep:   ${result.keptCount} log(s)`);
+    console.log(`삭제 예정: ${result.deletedCount}개 로그`);
+    console.log(`유지 예정: ${result.keptCount}개 로그`);
     console.log('');
     if (result.deletedFiles.length > 0) {
-      console.log('Files that would be deleted:');
+      console.log('삭제될 파일:');
       for (const file of result.deletedFiles) {
         console.log(`  - ${file}`);
       }
     }
   } else {
     console.log('');
-    console.log(`Deleted: ${result.deletedCount} log(s)`);
-    console.log(`Kept:    ${result.keptCount} log(s)`);
+    console.log(`삭제됨: ${result.deletedCount}개 로그`);
+    console.log(`유지됨: ${result.keptCount}개 로그`);
     console.log('');
   }
 }
 
 /**
- * Print logs command help.
+ * logs 명령어 도움말 출력
  */
 export function printLogsHelp(): void {
   console.log(`
-ralph-tui logs - View and manage iteration output logs
+ralph-tui logs - 반복 실행 출력 로그 조회 및 관리
 
-Usage: ralph-tui logs [options]
+사용법: ralph-tui logs [옵션]
 
-Options:
-  --iteration, -i <n>   View a specific iteration by number
-  --task, -t <id>       View all iterations for a task ID
-  --clean               Clean up old logs
-  --keep <n>            Number of logs to keep when cleaning (default: 10)
-  --dry-run             Show what would be deleted without deleting
-  --verbose, -v         Show full output (not truncated)
-  --cwd <path>          Working directory (default: current directory)
+옵션:
+  --iteration, -i <n>   번호로 특정 반복 조회
+  --task, -t <id>       작업 ID의 모든 반복 조회
+  --clean               오래된 로그 정리
+  --keep <n>            정리 시 유지할 로그 수 (기본값: 10)
+  --dry-run             삭제하지 않고 삭제될 항목 표시
+  --verbose, -v         전체 출력 표시 (잘리지 않음)
+  --cwd <path>          작업 디렉토리 (기본값: 현재 디렉토리)
 
-Description:
-  Lists iteration output logs saved during ralph-tui execution.
-  Logs are stored in .ralph-tui/iterations/ and include:
-  - Timestamp and duration
-  - Task ID and title
-  - Full agent stdout/stderr
-  - Completion status and outcome
+설명:
+  ralph-tui 실행 중 저장된 반복 실행 출력 로그를 나열합니다.
+  로그는 .ralph-tui/iterations/에 저장되며 다음을 포함합니다:
+  - 타임스탬프 및 소요 시간
+  - 작업 ID 및 제목
+  - 전체 에이전트 stdout/stderr
+  - 완료 상태 및 결과
 
-Examples:
-  ralph-tui logs                        # List all iteration logs
-  ralph-tui logs --iteration 5          # View iteration 5 in detail
-  ralph-tui logs -i 5                   # Shorthand for above
-  ralph-tui logs --task US-005          # View all iterations for US-005
-  ralph-tui logs -t US-005              # Shorthand for above
-  ralph-tui logs --clean --keep 10      # Delete all but 10 most recent logs
-  ralph-tui logs --clean --dry-run      # Preview cleanup without deleting
+예시:
+  ralph-tui logs                        # 모든 반복 로그 나열
+  ralph-tui logs --iteration 5          # 반복 5 상세 조회
+  ralph-tui logs -i 5                   # 위의 축약형
+  ralph-tui logs --task US-005          # US-005의 모든 반복 조회
+  ralph-tui logs -t US-005              # 위의 축약형
+  ralph-tui logs --clean --keep 10      # 최근 10개를 제외한 모든 로그 삭제
+  ralph-tui logs --clean --dry-run      # 삭제하지 않고 정리 미리보기
 `);
 }

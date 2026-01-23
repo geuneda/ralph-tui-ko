@@ -1,8 +1,8 @@
 /**
- * ABOUTME: RightPanel component for the Ralph TUI.
- * Displays the current iteration details or selected task details.
- * Supports toggling between details view and output view with 'o' key.
- * Includes collapsible subagent sections when subagent tracing is enabled.
+ * ABOUTME: Ralph TUI용 RightPanel 컴포넌트.
+ * 현재 반복 상세 또는 선택된 작업 상세를 표시합니다.
+ * 'o' 키로 상세 뷰와 출력 뷰 간 전환을 지원합니다.
+ * 서브에이전트 추적이 활성화된 경우 접을 수 있는 서브에이전트 섹션을 포함합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -14,18 +14,18 @@ import { formatElapsedTime } from '../theme.js';
 import { parseAgentOutput } from '../output-parser.js';
 
 /**
- * Priority label mapping for display
+ * 표시용 우선순위 라벨 매핑
  */
 const priorityLabels: Record<TaskPriority, string> = {
-  0: 'P0 - Critical',
-  1: 'P1 - High',
-  2: 'P2 - Medium',
-  3: 'P3 - Low',
-  4: 'P4 - Backlog',
+  0: 'P0 - 긴급',
+  1: 'P1 - 높음',
+  2: 'P2 - 중간',
+  3: 'P3 - 낮음',
+  4: 'P4 - 백로그',
 };
 
 /**
- * Get color for priority display
+ * 우선순위 표시용 색상 가져오기
  */
 function getPriorityColor(priority: TaskPriority): string {
   switch (priority) {
@@ -43,16 +43,16 @@ function getPriorityColor(priority: TaskPriority): string {
 }
 
 /**
- * Parse acceptance criteria from description, dedicated field, or metadata array.
- * Looks for markdown checklist items (- [ ] or - [x])
- * JSON tracker stores criteria in metadata.acceptanceCriteria as string array.
+ * 설명, 전용 필드, 또는 메타데이터 배열에서 완료 조건 파싱.
+ * 마크다운 체크리스트 항목 (- [ ] 또는 - [x]) 찾기
+ * JSON 트래커는 criteria를 metadata.acceptanceCriteria에 문자열 배열로 저장.
  */
 function parseAcceptanceCriteria(
   description?: string,
   acceptanceCriteria?: string,
   metadataCriteria?: unknown
 ): Array<{ text: string; checked: boolean }> {
-  // If metadata contains criteria array (from JSON tracker), use that
+  // 메타데이터에 criteria 배열이 있으면 (JSON 트래커에서) 사용
   if (Array.isArray(metadataCriteria) && metadataCriteria.length > 0) {
     return metadataCriteria
       .filter((c): c is string => typeof c === 'string')
@@ -63,17 +63,17 @@ function parseAcceptanceCriteria(
   const lines = content.split('\n');
   const criteria: Array<{ text: string; checked: boolean }> = [];
 
-  // Look for acceptance criteria section
+  // 완료 조건 섹션 찾기
   let inCriteriaSection = false;
 
   for (const line of lines) {
-    // Check for section header
+    // 섹션 헤더 확인
     if (line.toLowerCase().includes('acceptance criteria')) {
       inCriteriaSection = true;
       continue;
     }
 
-    // Parse checklist items (anywhere in content if no section, or only in section)
+    // 체크리스트 항목 파싱 (섹션이 없으면 콘텐츠 어디서든, 있으면 섹션 내에서만)
     const checkboxMatch = line.match(/^\s*-\s*\[([ xX])\]\s*(.+)$/);
     if (checkboxMatch) {
       criteria.push({
@@ -82,7 +82,7 @@ function parseAcceptanceCriteria(
       });
     }
 
-    // Also accept bullet points in the criteria section
+    // criteria 섹션 내의 글머리 기호도 허용
     if (inCriteriaSection) {
       const bulletMatch = line.match(/^\s*[-*]\s+(.+)$/);
       if (bulletMatch && !checkboxMatch) {
@@ -98,7 +98,7 @@ function parseAcceptanceCriteria(
 }
 
 /**
- * Extract description without acceptance criteria section
+ * 완료 조건 섹션 없이 설명 추출
  */
 function extractDescription(description?: string): string {
   if (!description) return '';
@@ -113,8 +113,8 @@ function extractDescription(description?: string): string {
       continue;
     }
 
-    // Stop including lines once we hit the acceptance criteria section
-    // unless we encounter another section header
+    // 완료 조건 섹션에 도달하면 라인 포함 중지
+    // 다른 섹션 헤더를 만나면 다시 포함
     if (inCriteriaSection && line.match(/^#+\s/)) {
       inCriteriaSection = false;
     }
@@ -128,8 +128,8 @@ function extractDescription(description?: string): string {
 }
 
 /**
- * Format an ISO 8601 timestamp to a human-readable time string.
- * Returns time in HH:MM:SS format.
+ * ISO 8601 타임스탬프를 사람이 읽을 수 있는 시간 문자열로 포맷.
+ * HH:MM:SS 형식으로 시간 반환.
  */
 function formatTimestamp(isoString: string): string {
   const date = new Date(isoString);
@@ -137,8 +137,8 @@ function formatTimestamp(isoString: string): string {
 }
 
 /**
- * Display when no task is selected.
- * Shows connection status for remote instances, or setup instructions for local.
+ * 작업이 선택되지 않았을 때 표시.
+ * 원격 인스턴스의 연결 상태 또는 로컬의 설정 안내를 표시합니다.
  */
 function NoSelection({
   isViewingRemote = false,
@@ -149,7 +149,7 @@ function NoSelection({
   remoteConnectionStatus?: 'connected' | 'connecting' | 'disconnected' | 'reconnecting';
   remoteAlias?: string;
 }): ReactNode {
-  // Show connection-specific help for remote instances
+  // 원격 인스턴스에 대한 연결별 도움말 표시
   if (isViewingRemote && remoteConnectionStatus !== 'connected') {
     return (
       <box
@@ -161,9 +161,9 @@ function NoSelection({
       >
         <box style={{ marginBottom: 1 }}>
           <text fg={colors.status.warning}>
-            {remoteConnectionStatus === 'connecting' && '◐ Connecting...'}
-            {remoteConnectionStatus === 'reconnecting' && '⟳ Reconnecting...'}
-            {remoteConnectionStatus === 'disconnected' && '○ Not Connected'}
+            {remoteConnectionStatus === 'connecting' && '◐ 연결 중...'}
+            {remoteConnectionStatus === 'reconnecting' && '⟳ 재연결 중...'}
+            {remoteConnectionStatus === 'disconnected' && '○ 연결되지 않음'}
           </text>
         </box>
 
@@ -171,38 +171,38 @@ function NoSelection({
           <>
             <box style={{ marginBottom: 2 }}>
               <text fg={colors.fg.secondary}>
-                Remote "{remoteAlias}" is not connected.
+                원격 "{remoteAlias}"이(가) 연결되지 않았습니다.
               </text>
             </box>
             <box style={{ flexDirection: 'column', gap: 1 }}>
-              <text fg={colors.fg.muted}>Possible causes:</text>
+              <text fg={colors.fg.muted}>가능한 원인:</text>
               <text fg={colors.fg.muted}>
-                <span fg={colors.accent.primary}>•</span> Remote server is not running
+                <span fg={colors.accent.primary}>•</span> 원격 서버가 실행 중이 아님
               </text>
               <text fg={colors.fg.muted}>
-                <span fg={colors.accent.primary}>•</span> Network connectivity issues
+                <span fg={colors.accent.primary}>•</span> 네트워크 연결 문제
               </text>
               <text fg={colors.fg.muted}>
-                <span fg={colors.accent.primary}>•</span> Incorrect host/port configuration
+                <span fg={colors.accent.primary}>•</span> 잘못된 호스트/포트 설정
               </text>
               <text fg={colors.fg.muted}>
-                <span fg={colors.accent.primary}>•</span> Authentication token mismatch
+                <span fg={colors.accent.primary}>•</span> 인증 토큰 불일치
               </text>
             </box>
             <box style={{ marginTop: 2, flexDirection: 'column', gap: 1 }}>
-              <text fg={colors.fg.muted}>Try:</text>
+              <text fg={colors.fg.muted}>시도해 보세요:</text>
               <text fg={colors.fg.muted}>
-                <span fg={colors.accent.primary}>•</span> Press{' '}
-                <span fg={colors.fg.secondary}>[</span> or{' '}
-                <span fg={colors.fg.secondary}>]</span> to switch tabs
+                <span fg={colors.accent.primary}>•</span>{' '}
+                <span fg={colors.fg.secondary}>[</span> 또는{' '}
+                <span fg={colors.fg.secondary}>]</span> 키로 탭 전환
               </text>
               <text fg={colors.fg.muted}>
-                <span fg={colors.accent.primary}>•</span> Press{' '}
-                <span fg={colors.fg.secondary}>e</span> to edit remote config
+                <span fg={colors.accent.primary}>•</span>{' '}
+                <span fg={colors.fg.secondary}>e</span> 키로 원격 설정 편집
               </text>
               <text fg={colors.fg.muted}>
-                <span fg={colors.accent.primary}>•</span> Press{' '}
-                <span fg={colors.fg.secondary}>x</span> to delete this remote
+                <span fg={colors.accent.primary}>•</span>{' '}
+                <span fg={colors.fg.secondary}>x</span> 키로 이 원격 삭제
               </text>
             </box>
           </>
@@ -211,7 +211,7 @@ function NoSelection({
         {(remoteConnectionStatus === 'connecting' || remoteConnectionStatus === 'reconnecting') && (
           <box style={{ marginTop: 1 }}>
             <text fg={colors.fg.muted}>
-              Attempting to connect to {remoteAlias}...
+              {remoteAlias}에 연결 시도 중...
             </text>
           </box>
         )}
@@ -219,7 +219,7 @@ function NoSelection({
     );
   }
 
-  // Default: show setup instructions for local instance
+  // 기본값: 로컬 인스턴스에 대한 설정 안내 표시
   return (
     <box
       style={{
@@ -229,38 +229,38 @@ function NoSelection({
       }}
     >
       <box style={{ marginBottom: 1 }}>
-        <text fg={colors.fg.primary}>Getting Started</text>
+        <text fg={colors.fg.primary}>시작하기</text>
       </box>
       <box style={{ marginBottom: 2 }}>
         <text fg={colors.fg.secondary}>
-          No tasks available. To start working with Ralph:
+          사용 가능한 작업이 없습니다. Ralph로 작업을 시작하려면:
         </text>
       </box>
       <box style={{ flexDirection: 'column', gap: 1 }}>
         <text fg={colors.fg.muted}>
-          <span fg={colors.accent.primary}>1.</span> Run{' '}
-          <span fg={colors.fg.secondary}>ralph-tui setup</span> to configure your project
+          <span fg={colors.accent.primary}>1.</span>{' '}
+          <span fg={colors.fg.secondary}>ralph-tui setup</span> 실행하여 프로젝트 설정
         </text>
         <text fg={colors.fg.muted}>
-          <span fg={colors.accent.primary}>2.</span> Run{' '}
-          <span fg={colors.fg.secondary}>ralph-tui run</span> to start execution
+          <span fg={colors.accent.primary}>2.</span>{' '}
+          <span fg={colors.fg.secondary}>ralph-tui run</span> 실행하여 시작
         </text>
         <text fg={colors.fg.muted}>
-          <span fg={colors.accent.primary}>3.</span> Or run{' '}
-          <span fg={colors.fg.secondary}>ralph-tui --help</span> for more options
+          <span fg={colors.accent.primary}>3.</span> 또는{' '}
+          <span fg={colors.fg.secondary}>ralph-tui --help</span>로 더 많은 옵션 확인
         </text>
       </box>
       <box style={{ marginTop: 2 }}>
-        <text fg={colors.fg.dim}>Press 'q' or Esc to quit</text>
+        <text fg={colors.fg.dim}>'q' 또는 Esc를 눌러 종료</text>
       </box>
     </box>
   );
 }
 
 /**
- * Full task details view - shows comprehensive task information including
- * metadata, description, acceptance criteria, dependencies, and timestamps.
- * This replaces the previous minimal TaskMetadataView.
+ * 전체 작업 상세 뷰 - 메타데이터, 설명, 완료 조건, 의존성, 타임스탬프를 포함한
+ * 포괄적인 작업 정보를 표시합니다.
+ * 이전의 최소 TaskMetadataView를 대체합니다.
  */
 function TaskMetadataView({
   task,
@@ -269,7 +269,7 @@ function TaskMetadataView({
 }): ReactNode {
   const statusColor = getTaskStatusColor(task.status);
   const statusIndicator = getTaskStatusIndicator(task.status);
-  // Check metadata for acceptance criteria (JSON tracker stores it there)
+  // 메타데이터에서 완료 조건 확인 (JSON 트래커는 여기에 저장)
   const metadataCriteria = task.metadata?.acceptanceCriteria;
   const criteria = parseAcceptanceCriteria(task.description, undefined, metadataCriteria);
   const cleanDescription = extractDescription(task.description);
@@ -277,7 +277,7 @@ function TaskMetadataView({
   return (
     <box style={{ flexDirection: 'column', padding: 1, flexGrow: 1 }}>
       <scrollbox style={{ flexGrow: 1 }}>
-        {/* Task title and status */}
+        {/* 작업 제목과 상태 */}
         <box style={{ marginBottom: 1 }}>
           <text>
             <span fg={statusColor}>{statusIndicator}</span>
@@ -285,12 +285,12 @@ function TaskMetadataView({
           </text>
         </box>
 
-        {/* Task ID */}
+        {/* 작업 ID */}
         <box style={{ marginBottom: 1 }}>
           <text fg={colors.fg.muted}>ID: {task.id}</text>
         </box>
 
-        {/* Metadata section - compact row of key info */}
+        {/* 메타데이터 섹션 - 핵심 정보의 압축된 행 */}
         <box
           style={{
             marginBottom: 1,
@@ -301,40 +301,40 @@ function TaskMetadataView({
             flexDirection: 'column',
           }}
         >
-          {/* Status row */}
+          {/* 상태 행 */}
           <box style={{ flexDirection: 'row', marginBottom: 0 }}>
-            <text fg={colors.fg.muted}>Status: </text>
+            <text fg={colors.fg.muted}>상태: </text>
             <text fg={statusColor}>{task.status}</text>
           </box>
 
-          {/* Priority row */}
+          {/* 우선순위 행 */}
           {task.priority !== undefined && (
             <box style={{ flexDirection: 'row', marginBottom: 0 }}>
-              <text fg={colors.fg.muted}>Priority: </text>
+              <text fg={colors.fg.muted}>우선순위: </text>
               <text fg={getPriorityColor(task.priority)}>{priorityLabels[task.priority]}</text>
             </box>
           )}
 
-          {/* Type row */}
+          {/* 유형 행 */}
           {task.type && (
             <box style={{ flexDirection: 'row', marginBottom: 0 }}>
-              <text fg={colors.fg.muted}>Type: </text>
+              <text fg={colors.fg.muted}>유형: </text>
               <text fg={colors.fg.secondary}>{task.type}</text>
             </box>
           )}
 
-          {/* Assignee row */}
+          {/* 담당자 행 */}
           {task.assignee && (
             <box style={{ flexDirection: 'row', marginBottom: 0 }}>
-              <text fg={colors.fg.muted}>Assignee: </text>
+              <text fg={colors.fg.muted}>담당자: </text>
               <text fg={colors.fg.secondary}>{task.assignee}</text>
             </box>
           )}
 
-          {/* Labels row */}
+          {/* 라벨 행 */}
           {task.labels && task.labels.length > 0 && (
             <box style={{ flexDirection: 'row', marginBottom: 0 }}>
-              <text fg={colors.fg.muted}>Labels: </text>
+              <text fg={colors.fg.muted}>라벨: </text>
               <text>
                 {task.labels.map((label, i) => (
                   <span key={label}>
@@ -346,20 +346,20 @@ function TaskMetadataView({
             </box>
           )}
 
-          {/* Iteration row */}
+          {/* 반복 행 */}
           {task.iteration !== undefined && (
             <box style={{ flexDirection: 'row', marginBottom: 0 }}>
-              <text fg={colors.fg.muted}>Iteration: </text>
+              <text fg={colors.fg.muted}>반복: </text>
               <text fg={colors.accent.primary}>{task.iteration}</text>
             </box>
           )}
         </box>
 
-        {/* Description section */}
+        {/* 설명 섹션 */}
         {cleanDescription && (
           <box style={{ marginBottom: 1 }}>
             <box style={{ marginBottom: 0 }}>
-              <text fg={colors.accent.primary}>Description</text>
+              <text fg={colors.accent.primary}>설명</text>
             </box>
             <box
               style={{
@@ -374,11 +374,11 @@ function TaskMetadataView({
           </box>
         )}
 
-        {/* Acceptance criteria section */}
+        {/* 완료 조건 섹션 */}
         {criteria.length > 0 && (
           <box style={{ marginBottom: 1 }}>
             <box style={{ marginBottom: 0 }}>
-              <text fg={colors.accent.primary}>Acceptance Criteria</text>
+              <text fg={colors.accent.primary}>완료 조건</text>
             </box>
             <box
               style={{
@@ -406,13 +406,13 @@ function TaskMetadataView({
           </box>
         )}
 
-        {/* Dependencies section */}
+        {/* 의존성 섹션 */}
         {((task.dependsOn && task.dependsOn.length > 0) ||
           (task.blocks && task.blocks.length > 0) ||
           (task.blockedByTasks && task.blockedByTasks.length > 0)) && (
           <box style={{ marginBottom: 1 }}>
             <box style={{ marginBottom: 0 }}>
-              <text fg={colors.accent.primary}>Dependencies</text>
+              <text fg={colors.accent.primary}>의존성</text>
             </box>
             <box
               style={{
@@ -423,10 +423,10 @@ function TaskMetadataView({
                 flexDirection: 'column',
               }}
             >
-              {/* Show detailed blocker info if available (with title and status) */}
+              {/* 상세 차단 정보 표시 (가능한 경우 제목과 상태 포함) */}
               {task.blockedByTasks && task.blockedByTasks.length > 0 && (
                 <box style={{ marginBottom: 1 }}>
-                  <text fg={colors.status.error}>⊘ Blocked by (unresolved):</text>
+                  <text fg={colors.status.error}>⊘ 차단됨 (미해결):</text>
                   {task.blockedByTasks.map((blocker) => (
                     <text key={blocker.id} fg={colors.fg.secondary}>
                       {'  '}- {blocker.id}: {blocker.title}
@@ -436,11 +436,11 @@ function TaskMetadataView({
                 </box>
               )}
 
-              {/* Fallback to dependsOn IDs if blockedByTasks not available */}
+              {/* blockedByTasks 없으면 dependsOn ID로 폴백 */}
               {(!task.blockedByTasks || task.blockedByTasks.length === 0) &&
                 task.dependsOn && task.dependsOn.length > 0 && (
                 <box style={{ marginBottom: 1 }}>
-                  <text fg={colors.status.warning}>Depends on:</text>
+                  <text fg={colors.status.warning}>선행 작업:</text>
                   {task.dependsOn.map((dep) => (
                     <text key={dep} fg={colors.fg.secondary}>
                       {'  '}- {dep}
@@ -451,7 +451,7 @@ function TaskMetadataView({
 
               {task.blocks && task.blocks.length > 0 && (
                 <box>
-                  <text fg={colors.accent.tertiary}>Blocks:</text>
+                  <text fg={colors.accent.tertiary}>차단하는 작업:</text>
                   {task.blocks.map((dep) => (
                     <text key={dep} fg={colors.fg.secondary}>
                       {'  '}- {dep}
@@ -463,11 +463,11 @@ function TaskMetadataView({
           </box>
         )}
 
-        {/* Completion notes section */}
+        {/* 완료 노트 섹션 */}
         {task.closeReason && (
           <box style={{ marginBottom: 1 }}>
             <box style={{ marginBottom: 0 }}>
-              <text fg={colors.accent.primary}>Completion Notes</text>
+              <text fg={colors.accent.primary}>완료 노트</text>
             </box>
             <box
               style={{
@@ -482,17 +482,17 @@ function TaskMetadataView({
           </box>
         )}
 
-        {/* Timestamps */}
+        {/* 타임스탬프 */}
         {(task.createdAt || task.updatedAt) && (
           <box style={{ marginTop: 1 }}>
             {task.createdAt && (
               <text fg={colors.fg.dim}>
-                Created: {new Date(task.createdAt).toLocaleString()}
+                생성: {new Date(task.createdAt).toLocaleString()}
               </text>
             )}
             {task.updatedAt && (
               <text fg={colors.fg.dim}>
-                {' '}| Updated: {new Date(task.updatedAt).toLocaleString()}
+                {' '}| 수정: {new Date(task.updatedAt).toLocaleString()}
               </text>
             )}
           </box>
@@ -503,12 +503,12 @@ function TaskMetadataView({
 }
 
 /**
- * Timing summary component for the output view
- * Shows started time immediately, duration that updates every second while running,
- * and ended time when complete. Also displays model info when available.
+ * 출력 뷰용 타이밍 요약 컴포넌트
+ * 시작 시간을 즉시 표시하고, 실행 중에는 매초 업데이트되는 소요 시간을 표시하며,
+ * 완료 시 종료 시간을 표시합니다. 가능한 경우 모델 정보도 표시합니다.
  */
 function TimingSummary({ timing }: { timing?: IterationTimingInfo }): ReactNode {
-  // Track elapsed time for running iterations
+  // 실행 중인 반복에 대한 경과 시간 추적
   const [elapsedMs, setElapsedMs] = useState<number>(0);
 
   useEffect(() => {
@@ -516,7 +516,7 @@ function TimingSummary({ timing }: { timing?: IterationTimingInfo }): ReactNode 
       return;
     }
 
-    // Calculate initial elapsed time
+    // 초기 경과 시간 계산
     const startTime = new Date(timing.startedAt).getTime();
     const updateElapsed = () => {
       setElapsedMs(Date.now() - startTime);
@@ -535,10 +535,10 @@ function TimingSummary({ timing }: { timing?: IterationTimingInfo }): ReactNode 
     return null;
   }
 
-  // Calculate duration for display
+  // 표시용 소요 시간 계산
   let durationDisplay: string;
   if (timing.isRunning && timing.startedAt) {
-    // Show live elapsed time
+    // 실시간 경과 시간 표시
     const durationSeconds = Math.floor(elapsedMs / 1000);
     durationDisplay = formatElapsedTime(durationSeconds);
   } else if (timing.durationMs !== undefined) {
@@ -566,29 +566,29 @@ function TimingSummary({ timing }: { timing?: IterationTimingInfo }): ReactNode 
         backgroundColor: colors.bg.tertiary,
       }}
     >
-      {/* Model info row - show when model is available */}
+      {/* 모델 정보 행 - 모델이 있을 때 표시 */}
       {modelDisplay && (
         <box style={{ flexDirection: 'row', marginBottom: 1 }}>
-          <text fg={colors.fg.muted}>Model: </text>
+          <text fg={colors.fg.muted}>모델: </text>
           <text fg={colors.accent.primary}>{modelDisplay.display}</text>
         </box>
       )}
-      {/* Timing info row */}
+      {/* 타이밍 정보 행 */}
       <box style={{ flexDirection: 'row', gap: 3 }}>
         <text fg={colors.fg.muted}>
-          Started:{' '}
+          시작:{' '}
           <span fg={colors.fg.secondary}>
             {timing.startedAt ? formatTimestamp(timing.startedAt) : '—'}
           </span>
         </text>
         <text fg={colors.fg.muted}>
-          Ended:{' '}
+          종료:{' '}
           <span fg={colors.fg.secondary}>
             {timing.endedAt ? formatTimestamp(timing.endedAt) : '—'}
           </span>
         </text>
         <text fg={colors.fg.muted}>
-          Duration:{' '}
+          소요:{' '}
           <span fg={timing.isRunning ? colors.status.info : colors.accent.primary}>
             {durationDisplay}
           </span>
@@ -599,11 +599,11 @@ function TimingSummary({ timing }: { timing?: IterationTimingInfo }): ReactNode 
 }
 
 /**
- * Prompt preview view - shows the full rendered prompt that will be sent to the agent.
- * Displays the template source indicator and scrollable prompt content.
+ * 프롬프트 미리보기 뷰 - 에이전트에 전송될 완전히 렌더링된 프롬프트를 표시합니다.
+ * 템플릿 소스 표시기와 스크롤 가능한 프롬프트 내용을 표시합니다.
  *
- * Note: This shows a "point-in-time" preview - dynamic content like progress.md
- * may change before the actual prompt is sent during execution.
+ * 참고: 이것은 "시점" 미리보기입니다 - progress.md와 같은 동적 콘텐츠는
+ * 실행 중 실제 프롬프트가 전송되기 전에 변경될 수 있습니다.
  */
 function PromptPreviewView({
   task,
@@ -619,7 +619,7 @@ function PromptPreviewView({
 
   return (
     <box style={{ flexDirection: 'column', padding: 1, flexGrow: 1 }}>
-      {/* Compact task header with template source */}
+      {/* 템플릿 소스가 포함된 압축된 작업 헤더 */}
       <box style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
         <box>
           <text>
@@ -635,7 +635,7 @@ function PromptPreviewView({
         )}
       </box>
 
-      {/* Dynamic content notice */}
+      {/* 동적 콘텐츠 알림 */}
       <box
         style={{
           marginBottom: 1,
@@ -646,13 +646,13 @@ function PromptPreviewView({
         }}
       >
         <text fg={colors.status.warning}>
-          ⚠ Preview only - dynamic content may change before execution
+          ⚠ 미리보기만 - 실행 전에 동적 콘텐츠가 변경될 수 있습니다
         </text>
       </box>
 
-      {/* Full-height prompt preview */}
+      {/* 전체 높이 프롬프트 미리보기 */}
       <box
-        title="Prompt Preview"
+        title="프롬프트 미리보기"
         style={{
           flexGrow: 1,
           border: true,
@@ -664,7 +664,7 @@ function PromptPreviewView({
           {promptPreview ? (
             <box style={{ flexDirection: 'column' }}>
               {promptPreview.split('\n').map((line, i) => {
-                // Highlight markdown headers
+                // 마크다운 헤더 강조
                 if (line.match(/^#+\s/)) {
                   return (
                     <text key={i} fg={colors.accent.primary}>
@@ -672,7 +672,7 @@ function PromptPreviewView({
                     </text>
                   );
                 }
-                // Highlight bullet points
+                // 글머리 기호 강조
                 if (line.match(/^\s*[-*]\s/)) {
                   return (
                     <text key={i} fg={colors.fg.secondary}>
@@ -680,7 +680,7 @@ function PromptPreviewView({
                     </text>
                   );
                 }
-                // Highlight code fences
+                // 코드 펜스 강조
                 if (line.match(/^```/)) {
                   return (
                     <text key={i} fg={colors.accent.tertiary}>
@@ -688,7 +688,7 @@ function PromptPreviewView({
                     </text>
                   );
                 }
-                // Regular text
+                // 일반 텍스트
                 return (
                   <text key={i} fg={colors.fg.secondary}>
                     {line}
@@ -698,7 +698,7 @@ function PromptPreviewView({
             </box>
           ) : (
             <text fg={colors.fg.muted}>
-              Cycle views with 'o' or press Shift+O for prompt preview
+              'o'로 뷰 전환 또는 Shift+O로 프롬프트 미리보기
             </text>
           )}
         </scrollbox>
@@ -708,8 +708,8 @@ function PromptPreviewView({
 }
 
 /**
- * Task output view - shows full-height scrollable iteration output
- * with optional collapsible subagent sections
+ * 작업 출력 뷰 - 선택적으로 접을 수 있는 서브에이전트 섹션이 포함된
+ * 전체 높이 스크롤 가능한 반복 출력을 표시합니다
  */
 function TaskOutputView({
   task,
@@ -731,26 +731,26 @@ function TaskOutputView({
   const statusColor = getTaskStatusColor(task.status);
   const statusIndicator = getTaskStatusIndicator(task.status);
 
-  // Check if we're live streaming
+  // 실시간 스트리밍 중인지 확인
   const isLiveStreaming = iterationTiming?.isRunning === true;
 
-  // For live streaming, prefer segments for TUI-native colors
-  // For historical/completed output, parse the string to extract readable content
-  // ALWAYS strip ANSI codes - they cause black background artifacts in OpenTUI
+  // 실시간 스트리밍의 경우 TUI 네이티브 색상을 위해 세그먼트 선호
+  // 이전/완료된 출력의 경우 읽기 가능한 콘텐츠를 추출하기 위해 문자열 파싱
+  // 항상 ANSI 코드 제거 - OpenTUI에서 검은 배경 아티팩트 발생
   const displayOutput = useMemo(() => {
     if (!iterationOutput) return undefined;
-    // For live output during execution, strip ANSI but keep raw content
+    // 실행 중 실시간 출력의 경우 ANSI 제거하되 원본 콘텐츠 유지
     if (isLiveStreaming) {
       return stripAnsiCodes(iterationOutput);
     }
-    // For completed output (historical or from current session), parse to extract readable content
-    // parseAgentOutput already strips ANSI codes
+    // 완료된 출력(이전 또는 현재 세션에서)의 경우 읽기 가능한 콘텐츠 추출을 위해 파싱
+    // parseAgentOutput은 이미 ANSI 코드를 제거함
     return parseAgentOutput(iterationOutput, agentName);
   }, [iterationOutput, isLiveStreaming, agentName]);
 
-  // Note: Full segment-based coloring (FormattedText) disabled due to OpenTUI
-  // span rendering issues causing black backgrounds and character loss.
-  // Using simple line-based coloring for tool calls instead.
+  // 참고: 전체 세그먼트 기반 색상(FormattedText)은 OpenTUI의
+  // span 렌더링 문제로 검은 배경과 문자 손실이 발생하여 비활성화됨.
+  // 대신 도구 호출에 간단한 라인 기반 색상 사용.
   void iterationSegments;
 
   // Parse model info for display
@@ -763,7 +763,7 @@ function TaskOutputView({
 
   return (
     <box style={{ flexDirection: 'column', padding: 1, flexGrow: 1 }}>
-      {/* Compact task header with agent/model info */}
+      {/* 에이전트/모델 정보가 포함된 압축된 작업 헤더 */}
       <box style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
         <box>
           <text>
@@ -783,17 +783,17 @@ function TaskOutputView({
         )}
       </box>
 
-      {/* Timing summary - shows start/end/duration */}
+      {/* 타이밍 요약 - 시작/종료/소요 시간 표시 */}
       <TimingSummary timing={iterationTiming} />
 
-      {/* Full-height iteration output */}
+      {/* 전체 높이 반복 출력 */}
       <box
         title={
           currentIteration === -1
-            ? 'Historical Output'
+            ? '이전 출력'
             : currentIteration > 0
-              ? `Iteration ${currentIteration}`
-              : 'Output'
+              ? `반복 ${currentIteration}`
+              : '출력'
         }
         style={{
           flexGrow: 1,
@@ -803,11 +803,11 @@ function TaskOutputView({
         }}
       >
         <scrollbox style={{ flexGrow: 1, padding: 1 }} stickyScroll={true} stickyStart="bottom">
-          {/* Line-based coloring with tool names in green */}
+          {/* 녹색 도구 이름이 포함된 라인 기반 색상 */}
           {displayOutput !== undefined && displayOutput.length > 0 ? (
             <box style={{ flexDirection: 'column' }}>
               {displayOutput.split('\n').map((line, i) => {
-                // Check if line starts with [toolname] pattern
+                // 라인이 [toolname] 패턴으로 시작하는지 확인
                 const toolMatch = line.match(/^(\[[\w-]+\])(.*)/);
                 if (toolMatch) {
                   const [, toolName, rest] = toolMatch;
@@ -826,11 +826,11 @@ function TaskOutputView({
               })}
             </box>
           ) : displayOutput === '' ? (
-            <text fg={colors.fg.muted}>No output captured</text>
+            <text fg={colors.fg.muted}>캡처된 출력 없음</text>
           ) : currentIteration === 0 ? (
-            <text fg={colors.fg.muted}>Task not yet executed</text>
+            <text fg={colors.fg.muted}>작업이 아직 실행되지 않음</text>
           ) : (
-            <text fg={colors.fg.muted}>Waiting for output...</text>
+            <text fg={colors.fg.muted}>출력 대기 중...</text>
           )}
         </scrollbox>
       </box>
@@ -839,7 +839,7 @@ function TaskOutputView({
 }
 
 /**
- * Task details view - switches between metadata, output, and prompt views
+ * 작업 상세 뷰 - 메타데이터, 출력, 프롬프트 뷰 간 전환
  */
 function TaskDetails({
   task,
@@ -892,7 +892,7 @@ function TaskDetails({
 }
 
 /**
- * RightPanel component showing task details, iteration output, or prompt preview
+ * 작업 상세, 반복 출력, 또는 프롬프트 미리보기를 보여주는 RightPanel 컴포넌트
  */
 export function RightPanel({
   selectedTask,
@@ -909,14 +909,14 @@ export function RightPanel({
   remoteConnectionStatus,
   remoteAlias,
 }: RightPanelProps): ReactNode {
-  // Build title with view mode indicator
+  // 뷰 모드 표시기가 포함된 제목 구성
   const modeIndicators: Record<typeof viewMode, string> = {
-    details: '[Details]',
-    output: '[Output]',
-    prompt: '[Prompt]',
+    details: '[상세]',
+    output: '[출력]',
+    prompt: '[프롬프트]',
   };
   const modeIndicator = modeIndicators[viewMode];
-  const title = `Details ${modeIndicator}`;
+  const title = `상세 ${modeIndicator}`;
 
   return (
     <box

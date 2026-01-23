@@ -1,6 +1,6 @@
 /**
- * ABOUTME: LeftPanel component for the Ralph TUI.
- * Displays the task list with status indicators (done/active/pending/blocked).
+ * ABOUTME: Ralph TUI용 LeftPanel 컴포넌트.
+ * 상태 표시기(완료/활성/대기/차단됨)와 함께 작업 목록을 표시합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -9,8 +9,8 @@ import { colors, getTaskStatusColor, getTaskStatusIndicator } from '../theme.js'
 import type { LeftPanelProps, TaskItem } from '../types.js';
 
 /**
- * Truncate text to fit within a maximum width
- * Adds ellipsis if text is truncated
+ * 최대 너비에 맞게 텍스트 자르기
+ * 텍스트가 잘리면 말줄임표 추가
  */
 function truncateText(text: string, maxWidth: number): string {
   if (text.length <= maxWidth) return text;
@@ -19,10 +19,10 @@ function truncateText(text: string, maxWidth: number): string {
 }
 
 /**
- * Single task item row
- * Shows: [indent][status indicator] [task ID] [task title (truncated)]
- * Closed tasks are displayed with greyed-out styling to distinguish historical work
- * Child tasks (those with a parentId) are indented to show hierarchy
+ * 단일 작업 항목 행
+ * 표시: [들여쓰기][상태 표시기] [작업 ID] [작업 제목 (잘림)]
+ * 완료된 작업은 이전 작업과 구분하기 위해 회색으로 표시됩니다
+ * 하위 작업(parentId가 있는 것)은 계층을 보여주기 위해 들여쓰기됩니다
  */
 function TaskRow({
   task,
@@ -32,26 +32,26 @@ function TaskRow({
 }: {
   task: TaskItem;
   isSelected: boolean;
-  /** Maximum width for the entire row content (for truncation) */
+  /** 전체 행 콘텐츠의 최대 너비 (잘림용) */
   maxWidth: number;
-  /** Indentation level (0 = epic/root, 1 = child of epic) */
+  /** 들여쓰기 레벨 (0 = 에픽/루트, 1 = 에픽의 하위) */
   indentLevel?: number;
 }): ReactNode {
   const statusColor = getTaskStatusColor(task.status);
   const statusIndicator = getTaskStatusIndicator(task.status);
   const isClosed = task.status === 'closed';
 
-  // Indentation: 2 spaces per level
+  // 들여쓰기: 레벨당 2칸
   const indent = '  '.repeat(indentLevel);
 
-  // Format: "[indent]✓ task-id title"
-  // Calculate available width: maxWidth - indent - indicator(1) - space(1) - id - space(1)
+  // 형식: "[들여쓰기]✓ task-id 제목"
+  // 사용 가능한 너비 계산: maxWidth - 들여쓰기 - 표시기(1) - 공백(1) - id - 공백(1)
   const idDisplay = task.id;
   const indentWidth = indentLevel * 2;
   const titleWidth = maxWidth - indentWidth - 3 - idDisplay.length;
   const truncatedTitle = truncateText(task.title, Math.max(5, titleWidth));
 
-  // Greyed-out colors for closed tasks
+  // 완료된 작업에 대한 회색 색상
   const idColor = isClosed ? colors.fg.dim : colors.fg.muted;
   const titleColor = isClosed
     ? colors.fg.dim
@@ -80,16 +80,16 @@ function TaskRow({
 }
 
 /**
- * Build a map of parent IDs to determine indentation levels.
- * Tasks with a parentId that exists in the task list are indented.
+ * 들여쓰기 레벨을 결정하기 위한 부모 ID 맵 구축.
+ * 작업 목록에 존재하는 parentId를 가진 작업은 들여쓰기됩니다.
  */
 function buildIndentMap(tasks: TaskItem[]): Map<string, number> {
-  // Create a set of all task IDs for quick lookup
+  // 빠른 조회를 위한 모든 작업 ID 세트 생성
   const taskIds = new Set(tasks.map((t) => t.id));
   const indentMap = new Map<string, number>();
 
   for (const task of tasks) {
-    // If task has a parent that exists in our list, it's indented
+    // 작업이 목록에 존재하는 부모를 가지면 들여쓰기됨
     if (task.parentId && taskIds.has(task.parentId)) {
       indentMap.set(task.id, 1);
     } else {
@@ -101,14 +101,14 @@ function buildIndentMap(tasks: TaskItem[]): Map<string, number> {
 }
 
 /**
- * Connection status for remote instances
+ * 원격 인스턴스의 연결 상태
  */
 type ConnectionStatus = 'connected' | 'connecting' | 'disconnected' | 'reconnecting';
 
 /**
- * LeftPanel component showing the scrollable task list
- * Displays tasks with hierarchical indentation based on parent/child relationships
- * Wrapped in React.memo to prevent re-renders when only sibling state changes (e.g., detailsViewMode)
+ * 스크롤 가능한 작업 목록을 보여주는 LeftPanel 컴포넌트
+ * 부모/자식 관계에 따른 계층적 들여쓰기로 작업을 표시합니다
+ * 형제 상태만 변경될 때 (예: detailsViewMode) 리렌더링 방지를 위해 React.memo로 래핑됨
  */
 export const LeftPanel = memo(function LeftPanel({
   tasks,
@@ -121,22 +121,22 @@ export const LeftPanel = memo(function LeftPanel({
 }: LeftPanelProps & {
   width?: number;
   isFocused?: boolean;
-  /** Whether currently viewing a remote instance */
+  /** 현재 원격 인스턴스를 보고 있는지 여부 */
   isViewingRemote?: boolean;
-  /** Connection status when viewing remote */
+  /** 원격 보기 시 연결 상태 */
   remoteConnectionStatus?: ConnectionStatus;
-  /** Alias of the remote being viewed */
+  /** 보고 있는 원격의 별칭 */
   remoteAlias?: string;
 }): ReactNode {
-  // Calculate max width for task row content (panel width minus padding and border)
+  // 작업 행 콘텐츠의 최대 너비 계산 (패널 너비에서 패딩과 테두리 제외)
   const maxRowWidth = Math.max(20, width - 4);
 
-  // Build indentation map for hierarchical display
+  // 계층적 표시를 위한 들여쓰기 맵 구축
   const indentMap = buildIndentMap(tasks);
 
   return (
     <box
-      title="Tasks"
+      title="작업"
       style={{
         flexGrow: 1,
         flexShrink: 1,
@@ -159,18 +159,18 @@ export const LeftPanel = memo(function LeftPanel({
             {isViewingRemote && remoteConnectionStatus !== 'connected' ? (
               <>
                 <text fg={colors.fg.muted}>
-                  {remoteConnectionStatus === 'connecting' && 'Connecting...'}
-                  {remoteConnectionStatus === 'reconnecting' && 'Reconnecting...'}
-                  {remoteConnectionStatus === 'disconnected' && 'Not connected'}
+                  {remoteConnectionStatus === 'connecting' && '연결 중...'}
+                  {remoteConnectionStatus === 'reconnecting' && '재연결 중...'}
+                  {remoteConnectionStatus === 'disconnected' && '연결되지 않음'}
                 </text>
                 {remoteConnectionStatus === 'disconnected' && remoteAlias && (
                   <text fg={colors.fg.dim}>
-                    {'\n'}Remote "{remoteAlias}" is offline
+                    {'\n'}원격 "{remoteAlias}"이(가) 오프라인입니다
                   </text>
                 )}
               </>
             ) : (
-              <text fg={colors.fg.muted}>No tasks loaded</text>
+              <text fg={colors.fg.muted}>로드된 작업 없음</text>
             )}
           </box>
         ) : (

@@ -1,7 +1,7 @@
 /**
- * ABOUTME: Epic selection view component for the Ralph TUI.
- * Displays a list of available epics for the user to select and start a Ralph run.
- * Used when ralph-tui is launched without an --epic flag.
+ * ABOUTME: Ralph TUI용 에픽 선택 뷰 컴포넌트.
+ * 사용자가 선택하여 Ralph 실행을 시작할 수 있는 에픽 목록을 표시합니다.
+ * --epic 플래그 없이 ralph-tui를 실행할 때 사용됩니다.
  */
 
 import type { ReactNode } from 'react';
@@ -9,25 +9,25 @@ import { colors, statusIndicators } from '../theme.js';
 import type { TrackerTask } from '../../plugins/trackers/types.js';
 
 /**
- * Props for the EpicSelectionView component
+ * EpicSelectionView 컴포넌트 Props
  */
 export interface EpicSelectionViewProps {
-  /** List of available epics */
+  /** 사용 가능한 에픽 목록 */
   epics: TrackerTask[];
-  /** Currently selected epic index */
+  /** 현재 선택된 에픽 인덱스 */
   selectedIndex: number;
-  /** Name of the tracker being used */
+  /** 사용 중인 트래커 이름 */
   trackerName: string;
-  /** Whether we're loading epics */
+  /** 에픽 로딩 중 여부 */
   loading?: boolean;
-  /** Error message if epic loading failed */
+  /** 에픽 로딩 실패 시 오류 메시지 */
   error?: string;
-  /** Configured labels for filtering (used in empty state guidance) */
+  /** 필터링용 구성된 라벨 (빈 상태 안내에 사용) */
   configuredLabels?: string[];
 }
 
 /**
- * Truncate text to fit within a given width
+ * 주어진 너비에 맞게 텍스트 자르기
  */
 function truncateText(text: string, maxWidth: number): string {
   if (text.length <= maxWidth) {
@@ -37,25 +37,25 @@ function truncateText(text: string, maxWidth: number): string {
 }
 
 /**
- * Get a status color for an epic based on its completion status
+ * 완료 상태에 따른 에픽의 상태 색상 가져오기
  */
 function getEpicStatusColor(epic: TrackerTask): string {
-  // Check metadata for completion info if available
+  // 가능한 경우 메타데이터에서 완료 정보 확인
   const meta = epic.metadata as Record<string, unknown> | undefined;
   if (meta) {
     const storyCount = meta.storyCount as number | undefined;
     const completedCount = meta.completedCount as number | undefined;
     if (storyCount !== undefined && completedCount !== undefined) {
       if (completedCount >= storyCount) {
-        return colors.status.success; // All done
+        return colors.status.success; // 모두 완료
       }
       if (completedCount > 0) {
-        return colors.status.warning; // In progress
+        return colors.status.warning; // 진행 중
       }
     }
   }
 
-  // Default based on status
+  // 상태에 따른 기본값
   switch (epic.status) {
     case 'completed':
       return colors.status.success;
@@ -67,8 +67,8 @@ function getEpicStatusColor(epic: TrackerTask): string {
 }
 
 /**
- * EpicSelectionView component
- * Displays a list of available epics with selection highlighting
+ * EpicSelectionView 컴포넌트
+ * 선택 하이라이트가 있는 사용 가능한 에픽 목록을 표시
  */
 export function EpicSelectionView({
   epics,
@@ -78,7 +78,7 @@ export function EpicSelectionView({
   error,
   configuredLabels = [],
 }: EpicSelectionViewProps): ReactNode {
-  // Loading state
+  // 로딩 상태
   if (loading) {
     return (
       <box
@@ -91,12 +91,12 @@ export function EpicSelectionView({
           backgroundColor: colors.bg.primary,
         }}
       >
-        <text fg={colors.fg.secondary}>Loading epics...</text>
+        <text fg={colors.fg.secondary}>에픽 로딩 중...</text>
       </box>
     );
   }
 
-  // Error state
+  // 오류 상태
   if (error) {
     return (
       <box
@@ -109,13 +109,13 @@ export function EpicSelectionView({
           backgroundColor: colors.bg.primary,
         }}
       >
-        <text fg={colors.status.error}>Error: {error}</text>
-        <text fg={colors.fg.muted}>Press 'q' to quit</text>
+        <text fg={colors.status.error}>오류: {error}</text>
+        <text fg={colors.fg.muted}>'q'를 눌러 종료</text>
       </box>
     );
   }
 
-  // No epics found - show helpful guidance
+  // 에픽을 찾을 수 없음 - 유용한 안내 표시
   if (epics.length === 0) {
     const hasLabels = configuredLabels.length > 0;
     const labelsDisplay = configuredLabels.join(', ');
@@ -132,18 +132,18 @@ export function EpicSelectionView({
           gap: 1,
         }}
       >
-        <text fg={colors.status.warning}>No epics found</text>
+        <text fg={colors.status.warning}>에픽을 찾을 수 없음</text>
         <text fg={colors.fg.secondary}> </text>
-        <text fg={colors.fg.secondary}>Please check the following:</text>
-        <text fg={colors.fg.muted}>• You have epic beads defined (bd create --type epic)</text>
+        <text fg={colors.fg.secondary}>다음 사항을 확인하세요:</text>
+        <text fg={colors.fg.muted}>* 에픽 beads가 정의되어 있어야 합니다 (bd create --type epic)</text>
         {hasLabels && (
-          <text fg={colors.fg.muted}>• Those epics have the label(s): {labelsDisplay}</text>
+          <text fg={colors.fg.muted}>* 해당 에픽에 라벨이 있어야 합니다: {labelsDisplay}</text>
         )}
-        <text fg={colors.fg.muted}>• Epics have children defined (child tasks/stories)</text>
-        <text fg={colors.fg.muted}>• Child tasks have dependencies defined (optional, for dependency-aware selection)</text>
+        <text fg={colors.fg.muted}>* 에픽에 하위 항목이 정의되어 있어야 합니다 (하위 작업/스토리)</text>
+        <text fg={colors.fg.muted}>* 하위 작업에 의존성이 정의되어 있어야 합니다 (선택사항, 의존성 인식 선택용)</text>
         <text fg={colors.fg.secondary}> </text>
-        <text fg={colors.fg.muted}>Or use --epic flag to specify an epic directly</text>
-        <text fg={colors.fg.muted}>Press 'q' to quit</text>
+        <text fg={colors.fg.muted}>또는 --epic 플래그로 에픽을 직접 지정하세요</text>
+        <text fg={colors.fg.muted}>'q'를 눌러 종료</text>
       </box>
     );
   }
@@ -157,7 +157,7 @@ export function EpicSelectionView({
         backgroundColor: colors.bg.primary,
       }}
     >
-      {/* Header */}
+      {/* 헤더 */}
       <box
         style={{
           width: '100%',
@@ -173,13 +173,13 @@ export function EpicSelectionView({
         }}
       >
         <box style={{ flexDirection: 'row', gap: 2 }}>
-          <text fg={colors.accent.primary}>Select Epic</text>
-          <text fg={colors.fg.muted}>({epics.length} available)</text>
+          <text fg={colors.accent.primary}>에픽 선택</text>
+          <text fg={colors.fg.muted}>({epics.length}개 사용 가능)</text>
         </box>
         <text fg={colors.fg.muted}>[{trackerName}]</text>
       </box>
 
-      {/* Epic List */}
+      {/* 에픽 목록 */}
       <box
         style={{
           flexGrow: 1,
@@ -198,7 +198,7 @@ export function EpicSelectionView({
             const completedCount = (meta?.completedCount as number | undefined) ?? 0;
             const childCount = (meta?.childCount as number | undefined) ?? storyCount;
 
-            // Build progress text
+            // 진행 상황 텍스트 구성
             let progressText = '';
             if (childCount > 0) {
               progressText = ` (${completedCount}/${childCount})`;
@@ -214,25 +214,25 @@ export function EpicSelectionView({
                   backgroundColor: isSelected ? colors.bg.highlight : 'transparent',
                 }}
               >
-                {/* Selection indicator */}
+                {/* 선택 표시기 */}
                 <text fg={isSelected ? colors.accent.primary : 'transparent'}>
                   {isSelected ? '▸ ' : '  '}
                 </text>
 
-                {/* Status indicator */}
+                {/* 상태 표시기 */}
                 <text fg={statusColor}>
                   {epic.status === 'in_progress' ? statusIndicators.active : statusIndicators.pending}{' '}
                 </text>
 
-                {/* Epic ID */}
+                {/* 에픽 ID */}
                 <text fg={colors.fg.muted}>{epic.id} </text>
 
-                {/* Epic title */}
+                {/* 에픽 제목 */}
                 <text fg={isSelected ? colors.fg.primary : colors.fg.secondary}>
                   {truncateText(epic.title, 50)}
                 </text>
 
-                {/* Progress */}
+                {/* 진행 상황 */}
                 <text fg={colors.fg.muted}>{progressText}</text>
               </box>
             );
@@ -240,7 +240,7 @@ export function EpicSelectionView({
         </scrollbox>
       </box>
 
-      {/* Footer with instructions */}
+      {/* 안내가 있는 푸터 */}
       <box
         style={{
           width: '100%',
@@ -257,13 +257,13 @@ export function EpicSelectionView({
         }}
       >
         <text fg={colors.fg.muted}>
-          <span fg={colors.accent.primary}>Enter/r</span> Start Run
+          <span fg={colors.accent.primary}>Enter/r</span> 실행 시작
         </text>
         <text fg={colors.fg.muted}>
-          <span fg={colors.accent.primary}>↑↓/jk</span> Navigate
+          <span fg={colors.accent.primary}>↑↓/jk</span> 탐색
         </text>
         <text fg={colors.fg.muted}>
-          <span fg={colors.accent.primary}>q</span> Quit
+          <span fg={colors.accent.primary}>q</span> 종료
         </text>
       </box>
     </box>

@@ -1,6 +1,6 @@
 /**
- * ABOUTME: Convert command for ralph-tui.
- * Converts PRD markdown files to prd.json or Beads format.
+ * ABOUTME: ralph-tui의 Convert 명령어.
+ * PRD 마크다운 파일을 prd.json 또는 Beads 형식으로 변환합니다.
  */
 
 import { readFile, writeFile, access, constants, mkdir } from 'node:fs/promises';
@@ -26,38 +26,38 @@ import {
 } from '../plugins/trackers/builtin/json/index.js';
 
 /**
- * Supported conversion target formats.
+ * 지원하는 변환 대상 형식.
  */
 export type ConvertFormat = 'json' | 'beads';
 
 /**
- * Command-line arguments for the convert command.
+ * convert 명령어의 명령줄 인자.
  */
 export interface ConvertArgs {
-  /** Target format */
+  /** 대상 형식 */
   to: ConvertFormat;
 
-  /** Input file path */
+  /** 입력 파일 경로 */
   input: string;
 
-  /** Output file path (optional, only for json format) */
+  /** 출력 파일 경로 (선택, json 형식에서만 사용) */
   output?: string;
 
-  /** Branch name (optional, will prompt if not provided) */
+  /** 브랜치 이름 (선택, 미제공 시 프롬프트 표시) */
   branch?: string;
 
-  /** Labels to apply (optional, for beads format) */
+  /** 적용할 라벨 (선택, beads 형식용) */
   labels?: string[];
 
-  /** Skip confirmation prompts */
+  /** 확인 프롬프트 건너뛰기 */
   force?: boolean;
 
-  /** Show verbose output */
+  /** 상세 출력 표시 */
   verbose?: boolean;
 }
 
 /**
- * Parse convert command arguments.
+ * convert 명령어 인자 파싱.
  */
 export function parseConvertArgs(args: string[]): ConvertArgs | null {
   let to: ConvertFormat | undefined;
@@ -76,8 +76,8 @@ export function parseConvertArgs(args: string[]): ConvertArgs | null {
       if (format === 'json' || format === 'beads') {
         to = format;
       } else {
-        console.error(`Unsupported format: ${format}`);
-        console.log('Supported formats: json, beads');
+        console.error(`지원하지 않는 형식: ${format}`);
+        console.log('지원 형식: json, beads');
         return null;
       }
     } else if (arg === '--output' || arg === '-o') {
@@ -100,16 +100,16 @@ export function parseConvertArgs(args: string[]): ConvertArgs | null {
     }
   }
 
-  // Validate required arguments
+  // 필수 인자 검증
   if (!to) {
-    console.error('Error: --to <format> is required');
-    console.log('Use --help for usage information');
+    console.error('오류: --to <format>은 필수입니다');
+    console.log('사용법은 --help를 참조하세요');
     return null;
   }
 
   if (!input) {
-    console.error('Error: Input file path is required');
-    console.log('Usage: ralph-tui convert --to json ./tasks/prd-feature.md');
+    console.error('오류: 입력 파일 경로는 필수입니다');
+    console.log('사용법: ralph-tui convert --to json ./tasks/prd-feature.md');
     return null;
   }
 
@@ -117,60 +117,60 @@ export function parseConvertArgs(args: string[]): ConvertArgs | null {
 }
 
 /**
- * Print help for the convert command.
+ * convert 명령어 도움말 출력.
  */
 export function printConvertHelp(): void {
   console.log(`
-ralph-tui convert - Convert PRD markdown to JSON or Beads format
+ralph-tui convert - PRD 마크다운을 JSON 또는 Beads 형식으로 변환
 
-Usage: ralph-tui convert --to <format> <input-file> [options]
+사용법: ralph-tui convert --to <format> <input-file> [옵션]
 
-Arguments:
-  <input-file>           Path to the PRD markdown file to convert
+인자:
+  <input-file>           변환할 PRD 마크다운 파일 경로
 
-Options:
-  --to, -t <format>      Target format (required): json, beads
-  --output, -o <path>    Output file path (default: ./prd.json, only for json format)
-  --branch, -b <name>    Git branch name (prompts if not provided)
-  --labels, -l <labels>  Labels to apply (comma-separated, beads format only)
-                         Default: uses labels from config.toml [trackerOptions].labels
-                         Note: "ralph" is always included for beads format
-  --force, -f            Overwrite existing files without prompting
-  --verbose, -v          Show detailed parsing output
-  --help, -h             Show this help message
+옵션:
+  --to, -t <format>      대상 형식 (필수): json, beads
+  --output, -o <path>    출력 파일 경로 (기본값: ./prd.json, json 형식에서만 사용)
+  --branch, -b <name>    Git 브랜치 이름 (미제공 시 프롬프트 표시)
+  --labels, -l <labels>  적용할 라벨 (쉼표 구분, beads 형식에서만 사용)
+                         기본값: config.toml의 [trackerOptions].labels 사용
+                         참고: beads 형식에서 "ralph"는 항상 포함됨
+  --force, -f            프롬프트 없이 기존 파일 덮어쓰기
+  --verbose, -v          상세 파싱 출력 표시
+  --help, -h             이 도움말 메시지 표시
 
-Description:
-  The convert command parses a PRD markdown file and extracts:
+설명:
+  convert 명령어는 PRD 마크다운 파일을 파싱하여 다음을 추출합니다:
 
-  - User stories from ### US-XXX: Title sections
-  - Acceptance criteria from checklist items (- [ ] item)
-  - Priority from **Priority:** P1-P4 lines
-  - Dependencies from **Depends on:** lines
+  - ### US-XXX: Title 섹션에서 사용자 스토리
+  - 체크리스트 항목(- [ ] item)에서 인수 기준
+  - **Priority:** P1-P4 줄에서 우선순위
+  - **Depends on:** 줄에서 의존성
 
-  For JSON format (--to json):
-    Creates a prd.json file for use with \`ralph-tui run --prd ./prd.json\`
+  JSON 형식 (--to json):
+    \`ralph-tui run --prd ./prd.json\`에서 사용할 prd.json 파일 생성
 
-  For Beads format (--to beads):
-    - Creates an epic bead for the feature
-    - Creates child beads for each user story
-    - Sets up dependencies based on story order or explicit deps
-    - Applies the 'ralph' label plus any configured/CLI labels
-    - Runs bd sync after creation
-    - Displays all created bead IDs
+  Beads 형식 (--to beads):
+    - 기능에 대한 에픽 bead 생성
+    - 각 사용자 스토리에 대한 자식 bead 생성
+    - 스토리 순서 또는 명시적 deps 기반으로 의존성 설정
+    - 'ralph' 라벨과 설정/CLI 라벨 적용
+    - 생성 후 bd sync 실행
+    - 생성된 모든 bead ID 표시
 
-Examples:
-  # Convert to JSON format
+예시:
+  # JSON 형식으로 변환
   ralph-tui convert --to json ./tasks/prd-feature.md
   ralph-tui convert --to json ./docs/requirements.md -o ./custom.json
 
-  # Convert to Beads format
+  # Beads 형식으로 변환
   ralph-tui convert --to beads ./tasks/prd-feature.md
   ralph-tui convert --to beads ./prd.md --labels "frontend,sprint-1"
 `);
 }
 
 /**
- * Check if a file exists.
+ * 파일 존재 여부 확인.
  */
 async function fileExists(path: string): Promise<boolean> {
   try {
@@ -182,7 +182,7 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 /**
- * Execute a bd command and return the output.
+ * bd 명령어 실행 및 출력 반환.
  */
 async function execBd(
   args: string[],
@@ -218,7 +218,7 @@ async function execBd(
 }
 
 /**
- * Result of beads conversion.
+ * Beads 변환 결과.
  */
 interface BeadsConversionResult {
   success: boolean;
@@ -228,8 +228,8 @@ interface BeadsConversionResult {
 }
 
 /**
- * Convert PRD to Beads format.
- * Creates an epic bead and child beads for each user story.
+ * PRD를 Beads 형식으로 변환.
+ * 에픽 bead와 각 사용자 스토리에 대한 자식 bead를 생성합니다.
  */
 async function convertToBeads(
   parsed: import('../prd/parser.js').ParsedPrd,
@@ -239,12 +239,12 @@ async function convertToBeads(
 ): Promise<BeadsConversionResult> {
   const storyIds: string[] = [];
 
-  // Ensure 'ralph' label is always included
+  // 'ralph' 라벨이 항상 포함되도록 보장
   const allLabels = ['ralph', ...labels.filter((l) => l !== 'ralph')];
   const labelsStr = allLabels.join(',');
 
-  // Step 1: Create the epic bead
-  printInfo('Creating epic bead...');
+  // 1단계: 에픽 bead 생성
+  printInfo('에픽 bead 생성 중...');
   const epicArgs = [
     'create',
     '--type', 'epic',
@@ -255,7 +255,7 @@ async function convertToBeads(
     '--silent',
   ];
 
-  // Include PRD link if available
+  // PRD 링크 포함 (가능한 경우)
   if (prdPath) {
     epicArgs.splice(-1, 0, '--external-ref', `prd:${prdPath}`);
   }
@@ -270,24 +270,24 @@ async function convertToBeads(
     return {
       success: false,
       storyIds: [],
-      error: `Failed to create epic: ${epicResult.stderr || epicResult.stdout}`,
+      error: `에픽 생성 실패: ${epicResult.stderr || epicResult.stdout}`,
     };
   }
 
   const epicId = epicResult.stdout.trim();
-  printSuccess(`Created epic: ${epicId}`);
+  printSuccess(`에픽 생성됨: ${epicId}`);
 
-  // Step 2: Create child beads for each user story
-  // Build a map of old story IDs to new bead IDs for dependency mapping
+  // 2단계: 각 사용자 스토리에 대한 자식 bead 생성
+  // 의존성 매핑을 위해 이전 스토리 ID를 새 bead ID로 매핑
   const storyIdMap: Map<string, string> = new Map();
 
-  printInfo(`Creating ${parsed.userStories.length} story beads...`);
+  printInfo(`${parsed.userStories.length}개 스토리 bead 생성 중...`);
 
   for (const story of parsed.userStories) {
-    // Build description with acceptance criteria
+    // 인수 기준을 포함한 설명 구성
     let description = story.description || story.title;
     if (story.acceptanceCriteria.length > 0) {
-      description += '\n\n## Acceptance Criteria\n';
+      description += '\n\n## 인수 기준\n';
       for (const criterion of story.acceptanceCriteria) {
         description += `- [ ] ${criterion}\n`;
       }
@@ -304,7 +304,7 @@ async function convertToBeads(
       '--silent',
     ];
 
-    // Include PRD link if available
+    // PRD 링크 포함 (가능한 경우)
     if (prdPath) {
       storyArgs.splice(-1, 0, '--external-ref', `prd:${prdPath}`);
     }
@@ -316,7 +316,7 @@ async function convertToBeads(
     const storyResult = await execBd(storyArgs);
 
     if (storyResult.exitCode !== 0) {
-      printError(`Failed to create story ${story.id}: ${storyResult.stderr || storyResult.stdout}`);
+      printError(`스토리 ${story.id} 생성 실패: ${storyResult.stderr || storyResult.stdout}`);
       continue;
     }
 
@@ -325,25 +325,25 @@ async function convertToBeads(
     storyIdMap.set(story.id, newBeadId);
 
     if (verbose) {
-      printSuccess(`  Created: ${newBeadId} (${story.id}: ${story.title})`);
+      printSuccess(`  생성됨: ${newBeadId} (${story.id}: ${story.title})`);
     }
   }
 
-  // Step 3: Set up dependencies
-  printInfo('Setting up dependencies...');
+  // 3단계: 의존성 설정
+  printInfo('의존성 설정 중...');
   let depsCreated = 0;
 
   for (const story of parsed.userStories) {
     const currentBeadId = storyIdMap.get(story.id);
     if (!currentBeadId) continue;
 
-    // Handle explicit dependencies from the PRD
+    // PRD의 명시적 의존성 처리
     if (story.dependsOn && story.dependsOn.length > 0) {
       for (const depId of story.dependsOn) {
         const depBeadId = storyIdMap.get(depId);
         if (depBeadId) {
           // bd dep add <blocked-id> <blocker-id>
-          // currentBead depends on depBead (depBead blocks currentBead)
+          // currentBead가 depBead에 의존 (depBead가 currentBead를 차단)
           const depArgs = ['dep', 'add', currentBeadId, depBeadId];
 
           if (verbose) {
@@ -354,7 +354,7 @@ async function convertToBeads(
 
           if (depResult.exitCode !== 0) {
             if (verbose) {
-              printError(`  Failed to create dependency: ${depResult.stderr || depResult.stdout}`);
+              printError(`  의존성 생성 실패: ${depResult.stderr || depResult.stdout}`);
             }
           } else {
             depsCreated++;
@@ -365,20 +365,20 @@ async function convertToBeads(
   }
 
   if (depsCreated > 0) {
-    printSuccess(`Created ${depsCreated} dependencies`);
+    printSuccess(`${depsCreated}개 의존성 생성됨`);
   } else if (parsed.userStories.some((s) => s.dependsOn && s.dependsOn.length > 0)) {
-    printInfo('No dependencies created (may have been specified but not found)');
+    printInfo('의존성이 생성되지 않음 (지정되었으나 찾을 수 없음)');
   }
 
-  // Step 4: Run bd sync
-  printInfo('Running bd sync...');
+  // 4단계: bd sync 실행
+  printInfo('bd sync 실행 중...');
   const syncResult = await execBd(['sync']);
 
   if (syncResult.exitCode !== 0) {
-    printError(`bd sync failed: ${syncResult.stderr || syncResult.stdout}`);
-    // Don't fail the whole operation for a sync failure
+    printError(`bd sync 실패: ${syncResult.stderr || syncResult.stdout}`);
+    // sync 실패로 전체 작업을 실패시키지 않음
   } else {
-    printSuccess('Synced beads with git');
+    printSuccess('beads가 git과 동기화됨');
   }
 
   return {
@@ -389,7 +389,7 @@ async function convertToBeads(
 }
 
 /**
- * Execute the convert command.
+ * convert 명령어 실행.
  */
 export async function executeConvertCommand(args: string[]): Promise<void> {
   const parsedArgs = parseConvertArgs(args);
@@ -400,62 +400,62 @@ export async function executeConvertCommand(args: string[]): Promise<void> {
 
   const { to, input, output, branch, labels, force, verbose } = parsedArgs;
 
-  // Resolve input path
+  // 입력 경로 해석
   const inputPath = resolve(input);
 
-  // Check input file exists
+  // 입력 파일 존재 확인
   if (!(await fileExists(inputPath))) {
-    printError(`Input file not found: ${inputPath}`);
+    printError(`입력 파일을 찾을 수 없음: ${inputPath}`);
     process.exit(1);
   }
 
   const formatLabel = to === 'beads' ? 'Beads' : 'JSON';
-  printSection(`PRD to ${formatLabel} Conversion`);
+  printSection(`PRD를 ${formatLabel}로 변환`);
 
-  // Read input file
-  printInfo(`Reading: ${inputPath}`);
+  // 입력 파일 읽기
+  printInfo(`읽는 중: ${inputPath}`);
   let markdown: string;
   try {
     markdown = await readFile(inputPath, 'utf-8');
   } catch (err) {
-    printError(`Failed to read input file: ${err instanceof Error ? err.message : String(err)}`);
+    printError(`입력 파일 읽기 실패: ${err instanceof Error ? err.message : String(err)}`);
     process.exit(1);
   }
 
-  // Parse the markdown
-  printInfo('Parsing user stories from markdown...');
+  // 마크다운 파싱
+  printInfo('마크다운에서 사용자 스토리 파싱 중...');
   const parsed = parsePrdMarkdown(markdown);
 
-  // Show warnings
+  // 경고 표시
   if (parsed.warnings.length > 0 && verbose) {
     console.log();
-    console.log('Parsing warnings:');
+    console.log('파싱 경고:');
     for (const warning of parsed.warnings) {
       console.log(`  - ${warning}`);
     }
   }
 
-  // Show parsed info
+  // 파싱된 정보 표시
   console.log();
-  printSuccess(`Found ${parsed.userStories.length} user stories`);
+  printSuccess(`${parsed.userStories.length}개 사용자 스토리 발견`);
 
   if (verbose) {
     console.log();
-    console.log('User stories:');
+    console.log('사용자 스토리:');
     for (const story of parsed.userStories) {
       console.log(`  ${story.id}: ${story.title} (P${story.priority})`);
       if (story.acceptanceCriteria.length > 0) {
-        console.log(`    - ${story.acceptanceCriteria.length} acceptance criteria`);
+        console.log(`    - ${story.acceptanceCriteria.length}개 인수 기준`);
       }
       if (story.dependsOn && story.dependsOn.length > 0) {
-        console.log(`    - Depends on: ${story.dependsOn.join(', ')}`);
+        console.log(`    - 의존: ${story.dependsOn.join(', ')}`);
       }
     }
   }
 
   if (parsed.userStories.length === 0) {
-    printError('No user stories found in the PRD');
-    printInfo('Make sure your PRD has sections like: ### US-001: Title');
+    printError('PRD에서 사용자 스토리를 찾을 수 없습니다');
+    printInfo('PRD에 ### US-001: Title 형식의 섹션이 있는지 확인하세요');
     process.exit(1);
   }
 
@@ -468,7 +468,7 @@ export async function executeConvertCommand(args: string[]): Promise<void> {
 }
 
 /**
- * Execute JSON format conversion.
+ * JSON 형식 변환 실행.
  */
 async function executeJsonConversion(
   parsed: import('../prd/parser.js').ParsedPrd,
@@ -477,7 +477,7 @@ async function executeJsonConversion(
   force: boolean,
   inputPath: string
 ): Promise<void> {
-  // Prompt for branch name if not provided
+  // 브랜치 이름이 제공되지 않은 경우 프롬프트
   let branchName = branch || parsed.branchName;
 
   if (!branchName) {
@@ -491,26 +491,26 @@ async function executeJsonConversion(
       .replace(/^-|-$/g, '');
     const defaultBranch = `feature/${featureSlug}`;
 
-    branchName = await promptText('Git branch name for this work:', {
+    branchName = await promptText('이 작업의 Git 브랜치 이름:', {
       default: defaultBranch,
       required: true,
-      help: 'The git branch that will be used when running ralph-tui',
+      help: 'ralph-tui 실행 시 사용될 git 브랜치',
     });
   }
 
-  // Determine output path
+  // 출력 경로 결정
   const outputPath = output ? resolve(output) : resolve('./prd.json');
 
-  // Check if output file exists
+  // 출력 파일 존재 확인
   if (await fileExists(outputPath)) {
     if (!force) {
       console.log();
-      const overwrite = await promptBoolean(`Output file exists: ${outputPath}. Overwrite?`, {
+      const overwrite = await promptBoolean(`출력 파일 존재: ${outputPath}. 덮어쓰시겠습니까?`, {
         default: false,
       });
 
       if (!overwrite) {
-        printInfo('Conversion cancelled');
+        printInfo('변환 취소됨');
         process.exit(0);
       }
     }
@@ -518,7 +518,7 @@ async function executeJsonConversion(
 
   const generatedPrd = parsedPrdToGeneratedPrd(parsed, branchName);
 
-  // Compute relative path from output directory to input PRD
+  // 출력 디렉토리에서 입력 PRD까지의 상대 경로 계산
   const outputDir = dirname(outputPath);
   const sourcePrdPath = relative(outputDir, inputPath);
 
@@ -528,8 +528,8 @@ async function executeJsonConversion(
     validatePrdJsonSchema(prdJson, outputPath);
   } catch (err) {
     if (err instanceof PrdJsonSchemaError) {
-      printError('Internal error: Generated prd.json failed schema validation.');
-      printError('This indicates a bug in the PRD parser. Please report this issue.');
+      printError('내부 오류: 생성된 prd.json이 스키마 검증에 실패했습니다.');
+      printError('이는 PRD 파서의 버그를 나타냅니다. 이 문제를 보고해 주세요.');
       for (const detail of err.details) {
         console.error(`  - ${detail}`);
       }
@@ -541,34 +541,34 @@ async function executeJsonConversion(
   try {
     await mkdir(outputDir, { recursive: true });
   } catch {
-    // Directory may already exist
+    // 디렉토리가 이미 존재할 수 있음
   }
 
-  // Write output file
+  // 출력 파일 작성
   console.log();
-  printInfo(`Writing: ${outputPath}`);
+  printInfo(`쓰는 중: ${outputPath}`);
   try {
     await writeFile(outputPath, JSON.stringify(prdJson, null, 2), 'utf-8');
   } catch (err) {
-    printError(`Failed to write output file: ${err instanceof Error ? err.message : String(err)}`);
+    printError(`출력 파일 쓰기 실패: ${err instanceof Error ? err.message : String(err)}`);
     process.exit(1);
   }
 
-  // Summary
+  // 요약
   console.log();
-  printSuccess('Conversion complete!');
+  printSuccess('변환 완료!');
   console.log();
-  console.log('Summary:');
+  console.log('요약:');
   console.log(`  PRD: ${parsed.name}`);
-  console.log(`  Stories: ${parsed.userStories.length}`);
-  console.log(`  Branch: ${branchName}`);
-  console.log(`  Output: ${outputPath}`);
+  console.log(`  스토리: ${parsed.userStories.length}개`);
+  console.log(`  브랜치: ${branchName}`);
+  console.log(`  출력: ${outputPath}`);
   console.log();
-  printInfo(`Run with: ralph-tui run --prd ${outputPath}`);
+  printInfo(`실행: ralph-tui run --prd ${outputPath}`);
 }
 
 /**
- * Execute Beads format conversion.
+ * Beads 형식 변환 실행.
  */
 async function executeBeadsConversion(
   parsed: import('../prd/parser.js').ParsedPrd,
@@ -576,18 +576,18 @@ async function executeBeadsConversion(
   verbose: boolean,
   prdPath?: string
 ): Promise<void> {
-  // Check that beads is available
+  // beads 사용 가능 여부 확인
   const { exitCode, stderr } = await execBd(['--version']);
   if (exitCode !== 0) {
-    printError(`bd command not available: ${stderr}`);
-    printInfo('Make sure beads is installed and the bd command is in your PATH');
+    printError(`bd 명령어를 사용할 수 없음: ${stderr}`);
+    printInfo('beads가 설치되어 있고 bd 명령어가 PATH에 있는지 확인하세요');
     process.exit(1);
   }
 
-  // Determine labels: CLI takes precedence, then config, then no labels
+  // 라벨 결정: CLI가 우선, 그 다음 config, 없으면 라벨 없음
   let labels = cliLabels;
   if (labels.length === 0) {
-    // Load labels from config if not provided via CLI
+    // CLI로 제공되지 않은 경우 config에서 라벨 로드
     const storedConfig = await loadStoredConfig();
     const configLabels = storedConfig.trackerOptions?.labels;
     if (typeof configLabels === 'string') {
@@ -600,29 +600,29 @@ async function executeBeadsConversion(
     }
   }
 
-  // Perform the conversion
+  // 변환 수행
   console.log();
   const result = await convertToBeads(parsed, labels, verbose, prdPath);
 
   if (!result.success) {
-    printError(result.error || 'Conversion failed');
+    printError(result.error || '변환 실패');
     process.exit(1);
   }
 
-  // Summary
+  // 요약
   console.log();
-  printSuccess('Conversion complete!');
+  printSuccess('변환 완료!');
   console.log();
-  console.log('Summary:');
+  console.log('요약:');
   console.log(`  PRD: ${parsed.name}`);
-  console.log(`  Epic: ${result.epicId}`);
-  console.log(`  Stories: ${result.storyIds.length}`);
+  console.log(`  에픽: ${result.epicId}`);
+  console.log(`  스토리: ${result.storyIds.length}개`);
   console.log();
-  console.log('Created bead IDs:');
-  console.log(`  Epic: ${result.epicId}`);
+  console.log('생성된 bead ID:');
+  console.log(`  에픽: ${result.epicId}`);
   for (const storyId of result.storyIds) {
-    console.log(`  Task: ${storyId}`);
+    console.log(`  작업: ${storyId}`);
   }
   console.log();
-  printInfo(`Run with: ralph-tui run --epic ${result.epicId}`);
+  printInfo(`실행: ralph-tui run --epic ${result.epicId}`);
 }

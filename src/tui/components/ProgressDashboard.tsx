@@ -1,7 +1,7 @@
 /**
- * ABOUTME: Progress Dashboard component for the Ralph TUI.
- * Displays execution status, current task info, and agent/tracker configuration.
- * Shows detailed activity information to make engine state clear.
+ * ABOUTME: Ralph TUI용 진행 대시보드 컴포넌트.
+ * 실행 상태, 현재 작업 정보, 에이전트/트래커 설정을 표시합니다.
+ * 엔진 상태를 명확하게 보여주기 위한 상세 활동 정보를 표시합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -9,10 +9,10 @@ import { colors, statusIndicators, layout, type RalphStatus } from '../theme.js'
 import type { SandboxConfig, SandboxMode } from '../../config/types.js';
 
 /**
- * Props for the ProgressDashboard component
+ * ProgressDashboard 컴포넌트 Props
  */
 /**
- * Git repository information for display
+ * 표시용 Git 저장소 정보
  */
 export interface GitInfo {
   repoName?: string;
@@ -22,38 +22,38 @@ export interface GitInfo {
 }
 
 export interface ProgressDashboardProps {
-  /** Current Ralph execution status */
+  /** 현재 Ralph 실행 상태 */
   status: RalphStatus;
-  /** Name of the agent being used */
+  /** 사용 중인 에이전트 이름 */
   agentName: string;
-  /** Model being used (provider/model format) */
+  /** 사용 중인 모델 (provider/model 형식) */
   currentModel?: string;
-  /** Name of the tracker being used */
+  /** 사용 중인 트래커 이름 */
   trackerName: string;
-  /** Epic or project name */
+  /** 에픽 또는 프로젝트 이름 */
   epicName?: string;
-  /** Current task ID being worked on (if any) */
+  /** 작업 중인 현재 작업 ID (있는 경우) */
   currentTaskId?: string;
-  /** Current task title being worked on (if any) */
+  /** 작업 중인 현재 작업 제목 (있는 경우) */
   currentTaskTitle?: string;
-  /** Sandbox configuration (if sandboxing is enabled) */
+  /** 샌드박스 설정 (샌드박싱이 활성화된 경우) */
   sandboxConfig?: SandboxConfig;
-  /** Resolved sandbox mode (when mode is 'auto', this shows what it resolved to) */
+  /** 해석된 샌드박스 모드 (모드가 'auto'일 때 실제로 무엇으로 해석되었는지 표시) */
   resolvedSandboxMode?: Exclude<SandboxMode, 'auto'>;
-  /** Remote instance info (when viewing a remote) */
+  /** 원격 인스턴스 정보 (원격 보기 시) */
   remoteInfo?: {
     name: string;
     host: string;
     port: number;
   };
-  /** Whether auto-commit is enabled */
+  /** 자동 커밋 활성화 여부 */
   autoCommit?: boolean;
-  /** Git repository information */
+  /** Git 저장소 정보 */
   gitInfo?: GitInfo;
 }
 
 /**
- * Truncate text to fit within a given width, adding ellipsis if needed
+ * 주어진 너비에 맞게 텍스트를 자르고 필요시 말줄임표 추가
  */
 function truncateText(text: string, maxWidth: number): string {
   if (text.length <= maxWidth) return text;
@@ -62,8 +62,8 @@ function truncateText(text: string, maxWidth: number): string {
 }
 
 /**
- * Get sandbox display info from config
- * Always returns a display value with icon indicating enabled/disabled state
+ * 설정에서 샌드박스 표시 정보 가져오기
+ * 항상 활성화/비활성화 상태를 나타내는 아이콘과 함께 표시 값 반환
  */
 function getSandboxDisplay(
   sandboxConfig?: SandboxConfig,
@@ -72,20 +72,20 @@ function getSandboxDisplay(
   const isEnabled = sandboxConfig?.enabled && sandboxConfig.mode !== 'off';
 
   if (!isEnabled) {
-    return { enabled: false, icon: '🔓', text: 'off' };
+    return { enabled: false, icon: '🔓', text: '꺼짐' };
   }
 
   const mode = sandboxConfig.mode ?? 'auto';
-  // Show resolved mode when mode is 'auto' (e.g., "auto (bwrap)")
+  // 모드가 'auto'일 때 해석된 모드 표시 (예: "auto (bwrap)")
   const modeDisplay = mode === 'auto' && resolvedSandboxMode
     ? `auto (${resolvedSandboxMode})`
     : mode;
-  const networkSuffix = sandboxConfig.network === false ? ' (no-net)' : '';
+  const networkSuffix = sandboxConfig.network === false ? ' (네트워크 차단)' : '';
   return { enabled: true, icon: '🔒', text: `${modeDisplay}${networkSuffix}` };
 }
 
 /**
- * Get status display configuration with detailed activity info
+ * 상세 활동 정보가 포함된 상태 표시 설정 가져오기
  */
 function getStatusDisplay(
   status: RalphStatus,
@@ -93,33 +93,33 @@ function getStatusDisplay(
 ): { label: string; color: string; indicator: string } {
   switch (status) {
     case 'ready':
-      return { label: 'Ready - Press Enter or s to start', color: colors.status.info, indicator: statusIndicators.ready };
+      return { label: '준비 완료 - Enter 또는 s를 눌러 시작', color: colors.status.info, indicator: statusIndicators.ready };
     case 'running':
-      return { label: 'Running', color: colors.status.success, indicator: statusIndicators.running };
+      return { label: '실행 중', color: colors.status.success, indicator: statusIndicators.running };
     case 'selecting':
-      return { label: 'Selecting next task...', color: colors.status.info, indicator: statusIndicators.selecting };
+      return { label: '다음 작업 선택 중...', color: colors.status.info, indicator: statusIndicators.selecting };
     case 'executing': {
       const taskLabel = currentTaskId ? ` (${currentTaskId})` : '';
-      return { label: `Agent running${taskLabel}`, color: colors.status.success, indicator: statusIndicators.executing };
+      return { label: `에이전트 실행 중${taskLabel}`, color: colors.status.success, indicator: statusIndicators.executing };
     }
     case 'pausing':
-      return { label: 'Pausing after current iteration...', color: colors.status.warning, indicator: statusIndicators.pausing };
+      return { label: '현재 반복 후 일시정지 중...', color: colors.status.warning, indicator: statusIndicators.pausing };
     case 'paused':
-      return { label: 'Paused - Press p to resume', color: colors.status.warning, indicator: statusIndicators.paused };
+      return { label: '일시정지됨 - p를 눌러 재개', color: colors.status.warning, indicator: statusIndicators.paused };
     case 'stopped':
-      return { label: 'Stopped', color: colors.fg.muted, indicator: statusIndicators.stopped };
+      return { label: '중지됨', color: colors.fg.muted, indicator: statusIndicators.stopped };
     case 'complete':
-      return { label: 'All tasks complete!', color: colors.status.success, indicator: statusIndicators.complete };
+      return { label: '모든 작업 완료!', color: colors.status.success, indicator: statusIndicators.complete };
     case 'idle':
-      return { label: 'No more tasks available', color: colors.fg.muted, indicator: statusIndicators.idle };
+      return { label: '더 이상 사용 가능한 작업 없음', color: colors.fg.muted, indicator: statusIndicators.idle };
     case 'error':
-      return { label: 'Failed - Check logs for details', color: colors.status.error, indicator: statusIndicators.blocked };
+      return { label: '실패 - 자세한 내용은 로그 확인', color: colors.status.error, indicator: statusIndicators.blocked };
   }
 }
 
 /**
- * Progress Dashboard component showing comprehensive execution status.
- * Provides clear visibility into what the engine is doing at any moment.
+ * 포괄적인 실행 상태를 보여주는 진행 대시보드 컴포넌트.
+ * 엔진이 현재 무엇을 하고 있는지 명확하게 보여줍니다.
  */
 export function ProgressDashboard({
   status,
@@ -138,17 +138,17 @@ export function ProgressDashboard({
   const statusDisplay = getStatusDisplay(status, currentTaskId);
   const sandboxDisplay = getSandboxDisplay(sandboxConfig, resolvedSandboxMode);
 
-  // Format git info for display
+  // 표시용 git 정보 포맷
   const gitDisplay = gitInfo?.branch
     ? `${gitInfo.repoName ?? 'repo'}:${gitInfo.branch}${gitInfo.isDirty ? '*' : ''}`
     : null;
 
-  // Show current task title when executing
+  // 실행 중일 때 현재 작업 제목 표시
   const taskDisplay = currentTaskTitle && (status === 'executing' || status === 'running')
     ? truncateText(currentTaskTitle, 50)
     : null;
 
-  // Parse model info for display
+  // 표시용 모델 정보 파싱
   const modelDisplay = currentModel
     ? (() => {
         const [provider, model] = currentModel.includes('/') ? currentModel.split('/') : ['', currentModel];
@@ -169,9 +169,9 @@ export function ProgressDashboard({
         overflow: 'hidden',
       }}
     >
-      {/* Left column: Status, remote, and current task */}
+      {/* 왼쪽 열: 상태, 원격, 현재 작업 */}
       <box style={{ flexDirection: 'column', flexGrow: 1, flexShrink: 1, paddingRight: 2 }}>
-        {/* Status line */}
+        {/* 상태 라인 */}
         <box style={{ flexDirection: 'row', gap: 1 }}>
           <text>
             <span fg={statusDisplay.color}>{statusDisplay.indicator}</span>
@@ -179,27 +179,27 @@ export function ProgressDashboard({
           </text>
         </box>
 
-        {/* Remote info (if viewing remote) */}
+        {/* 원격 정보 (원격 보기 시) */}
         {remoteInfo && (
           <box style={{ flexDirection: 'row' }}>
-            <text fg={colors.accent.primary}>🌐 Remote: </text>
+            <text fg={colors.accent.primary}>🌐 원격: </text>
             <text fg={colors.fg.primary}>{remoteInfo.name}</text>
             <text fg={colors.fg.dim}> ({remoteInfo.host}:{remoteInfo.port})</text>
           </box>
         )}
 
-        {/* Epic name (if any) */}
+        {/* 에픽 이름 (있는 경우) */}
         {epicName && (
           <box style={{ flexDirection: 'row' }}>
-            <text fg={colors.fg.muted}>Epic: </text>
+            <text fg={colors.fg.muted}>에픽: </text>
             <text fg={colors.accent.primary}>{epicName}</text>
           </box>
         )}
 
-        {/* Current task info - shown when executing */}
+        {/* 현재 작업 정보 - 실행 중일 때 표시 */}
         {taskDisplay && (
           <box style={{ flexDirection: 'row', gap: 1 }}>
-            <text fg={colors.fg.muted}>Task:</text>
+            <text fg={colors.fg.muted}>작업:</text>
             <text fg={colors.accent.tertiary}>{currentTaskId}</text>
             <text fg={colors.fg.dim}>-</text>
             <text fg={colors.fg.primary}>{taskDisplay}</text>
@@ -207,11 +207,11 @@ export function ProgressDashboard({
         )}
       </box>
 
-      {/* Right column: Configuration items stacked */}
+      {/* 오른쪽 열: 설정 항목 스택 */}
       <box style={{ flexDirection: 'column', width: 45, flexShrink: 0 }}>
-        {/* Row 1: Agent and Model */}
+        {/* 1행: 에이전트와 모델 */}
         <box style={{ flexDirection: 'row' }}>
-          <text fg={colors.fg.secondary}>Agent: </text>
+          <text fg={colors.fg.secondary}>에이전트: </text>
           <text fg={colors.accent.secondary}>{agentName}</text>
           {modelDisplay && (
             <>
@@ -221,21 +221,21 @@ export function ProgressDashboard({
           )}
         </box>
 
-        {/* Row 2: Tracker */}
+        {/* 2행: 트래커 */}
         <box style={{ flexDirection: 'row' }}>
-          <text fg={colors.fg.secondary}>Tracker: </text>
+          <text fg={colors.fg.secondary}>트래커: </text>
           <text fg={colors.accent.tertiary}>{trackerName}</text>
         </box>
 
-        {/* Row 3: Git branch (own line) */}
+        {/* 3행: Git 브랜치 (별도 줄) */}
         <box style={{ flexDirection: 'row' }}>
           <text fg={colors.fg.secondary}>Git: </text>
           <text fg={gitInfo?.isDirty ? colors.status.warning : colors.accent.primary}>
-            {gitDisplay ?? 'not a repo'}
+            {gitDisplay ?? '저장소 아님'}
           </text>
         </box>
 
-        {/* Row 4: Sandbox and Auto-commit */}
+        {/* 4행: 샌드박스와 자동 커밋 */}
         <box style={{ flexDirection: 'row' }}>
           <text fg={sandboxDisplay.enabled ? colors.status.success : colors.status.warning}>
             {sandboxDisplay.icon}
@@ -244,9 +244,9 @@ export function ProgressDashboard({
             {' '}{sandboxDisplay.text}
           </text>
           <text fg={colors.fg.muted}> · </text>
-          <text fg={colors.fg.secondary}>Commit: </text>
+          <text fg={colors.fg.secondary}>커밋: </text>
           <text fg={autoCommit ? colors.status.success : colors.fg.muted}>
-            {autoCommit ? '✓ auto' : '✗ manual'}
+            {autoCommit ? '✓ 자동' : '✗ 수동'}
           </text>
         </box>
       </box>

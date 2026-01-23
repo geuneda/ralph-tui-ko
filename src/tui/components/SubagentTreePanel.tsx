@@ -1,7 +1,7 @@
 /**
- * ABOUTME: SubagentTreePanel component for displaying subagent hierarchy in a dedicated panel.
- * Shows a tree structure of spawned subagents with status icons, descriptions, and durations.
- * Supports highlighting the currently active subagent and auto-scrolling to newest activity.
+ * ABOUTME: 전용 패널에 서브에이전트 계층을 표시하는 SubagentTreePanel 컴포넌트.
+ * 상태 아이콘, 설명, 지속 시간과 함께 생성된 서브에이전트의 트리 구조를 표시합니다.
+ * 현재 활성 서브에이전트 강조 및 최신 활동으로 자동 스크롤을 지원합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -11,26 +11,26 @@ import type { SubagentTreeNode } from '../../engine/types.js';
 import type { EngineSubagentStatus } from '../../engine/types.js';
 
 /**
- * Status icon for subagent based on its completion state.
- * - running: spinner (◐ animated feel)
- * - completed: checkmark (✓)
+ * 완료 상태에 따른 서브에이전트 상태 아이콘
+ * - running: 스피너 (◐ 애니메이션 느낌)
+ * - completed: 체크마크 (✓)
  * - error: X (✗)
  */
 function getStatusIcon(status: EngineSubagentStatus): string {
   switch (status) {
     case 'running':
-      return '◐'; // Spinner/running indicator
+      return '◐'; // 스피너/실행 표시기
     case 'completed':
-      return '✓'; // Checkmark
+      return '✓'; // 체크마크
     case 'error':
-      return '✗'; // X for failure
+      return '✗'; // 실패용 X
     default:
-      return '○'; // Default circle
+      return '○'; // 기본 원
   }
 }
 
 /**
- * Status color for subagent based on its completion state.
+ * 완료 상태에 따른 서브에이전트 상태 색상
  */
 function getStatusColor(status: EngineSubagentStatus): string {
   switch (status) {
@@ -46,8 +46,8 @@ function getStatusColor(status: EngineSubagentStatus): string {
 }
 
 /**
- * Format duration in human-readable format.
- * Shows milliseconds for short durations, seconds for longer ones.
+ * 사람이 읽기 쉬운 형식으로 지속 시간 포맷
+ * 짧은 시간은 밀리초, 긴 시간은 초로 표시
  */
 function formatDuration(durationMs?: number): string {
   if (durationMs === undefined) return '';
@@ -60,8 +60,8 @@ function formatDuration(durationMs?: number): string {
 }
 
 /**
- * Truncate text to fit within a maximum width.
- * Adds ellipsis if text is truncated.
+ * 최대 너비에 맞게 텍스트 자르기
+ * 잘린 경우 생략 부호 추가
  */
 function truncateText(text: string, maxWidth: number): string {
   if (text.length <= maxWidth) return text;
@@ -70,25 +70,25 @@ function truncateText(text: string, maxWidth: number): string {
 }
 
 /**
- * Props for a single SubagentTreeRow component.
+ * 단일 SubagentTreeRow 컴포넌트 Props
  */
 interface SubagentTreeRowProps {
-  /** The subagent tree node to render */
+  /** 렌더링할 서브에이전트 트리 노드 */
   node: SubagentTreeNode;
-  /** ID of the currently active (running) subagent for highlighting */
+  /** 강조용 현재 활성(실행 중) 서브에이전트 ID */
   activeSubagentId?: string;
-  /** Maximum width for the row content (for truncation) */
+  /** 행 콘텐츠의 최대 너비 (잘라내기용) */
   maxWidth: number;
-  /** Currently selected node ID (for keyboard navigation) */
+  /** 현재 선택된 노드 ID (키보드 탐색용) */
   selectedId?: string | 'main';
-  /** Whether the panel has keyboard focus (affects selection styling) */
+  /** 패널이 키보드 포커스를 가지고 있는지 여부 (선택 스타일링에 영향) */
   isFocused?: boolean;
 }
 
 /**
- * Renders a single row in the subagent tree.
- * Format: [indent][status icon] [agent type] description [duration]
- * Highlights based on: selection state with focus-aware styling
+ * 서브에이전트 트리의 단일 행 렌더링
+ * 형식: [들여쓰기][상태 아이콘] [에이전트 타입] 설명 [지속 시간]
+ * 포커스 인식 스타일링으로 선택 상태에 따라 강조
  */
 function SubagentTreeRow({
   node,
@@ -100,30 +100,30 @@ function SubagentTreeRow({
   const { state } = node;
   const isSelected = selectedId === state.id;
   const isActive = state.id === activeSubagentId || state.status === 'running';
-  // Show selection highlight when selected, show active indicator for running nodes
+  // 선택 시 선택 강조 표시, 실행 중 노드에는 활성 표시기 표시
   const showSelectionHighlight = isSelected;
   const showActiveIndicator = !isSelected && isActive;
   const statusIcon = getStatusIcon(state.status);
   const statusColor = getStatusColor(state.status);
 
-  // Indentation: 2 spaces per depth level (depth starts at 1 for top-level)
+  // 들여쓰기: 깊이 레벨당 2칸 (최상위 레벨은 깊이 1에서 시작)
   const indentLevel = Math.max(0, state.depth - 1);
   const indent = '  '.repeat(indentLevel);
 
-  // Calculate available width for description
-  // Format: [indent][icon] [Type] description [duration]
-  // icon=1, space=1, type brackets and content, space=1, duration with brackets
+  // 설명에 사용 가능한 너비 계산
+  // 형식: [들여쓰기][아이콘] [타입] 설명 [지속 시간]
+  // 아이콘=1, 공백=1, 타입 괄호와 내용, 공백=1, 괄호 포함 지속 시간
   const typeDisplay = `[${state.type}]`;
   const durationStr = state.durationMs !== undefined ? ` [${formatDuration(state.durationMs)}]` : '';
   const fixedWidth = indent.length + 2 + typeDisplay.length + 1 + durationStr.length;
   const descriptionWidth = Math.max(5, maxWidth - fixedWidth);
   const truncatedDescription = truncateText(state.description, descriptionWidth);
 
-  // Determine background color based on selection and focus state
-  // - Selected + focused: bright highlight
-  // - Selected + unfocused: muted highlight (still visible but dimmed)
-  // - Active (running): subtle highlight
-  // - Default: transparent
+  // 선택 및 포커스 상태에 따른 배경색 결정
+  // - 선택됨 + 포커스: 밝은 강조
+  // - 선택됨 + 포커스 없음: 흐린 강조 (여전히 보이지만 흐릿함)
+  // - 활성 (실행 중): 미묘한 강조
+  // - 기본: 투명
   let bgColor = 'transparent';
   if (showSelectionHighlight) {
     bgColor = isFocused ? colors.bg.highlight : colors.bg.tertiary;
@@ -131,7 +131,7 @@ function SubagentTreeRow({
     bgColor = colors.bg.secondary;
   }
 
-  // Text color: brighter when selected and focused
+  // 텍스트 색상: 선택되고 포커스될 때 더 밝음
   const textColor = showSelectionHighlight && isFocused
     ? colors.fg.primary
     : showSelectionHighlight
@@ -160,7 +160,7 @@ function SubagentTreeRow({
 }
 
 /**
- * Recursively render a subagent tree node and its children.
+ * 서브에이전트 트리 노드와 자식을 재귀적으로 렌더링
  */
 function SubagentTreeNodeRows({
   node,
@@ -193,32 +193,32 @@ function SubagentTreeNodeRows({
 }
 
 /**
- * Props for the SubagentTreePanel component.
+ * SubagentTreePanel 컴포넌트 Props
  */
 export interface SubagentTreePanelProps {
-  /** Array of root-level subagent tree nodes */
+  /** 루트 레벨 서브에이전트 트리 노드 배열 */
   tree: SubagentTreeNode[];
-  /** ID of the currently active (running) subagent for highlighting */
+  /** 강조용 현재 활성(실행 중) 서브에이전트 ID */
   activeSubagentId?: string;
-  /** Panel width for truncation calculations */
+  /** 잘라내기 계산용 패널 너비 */
   width?: number;
-  /** Current task ID (shown as root node, prep for parallel execution) */
+  /** 현재 작업 ID (루트 노드로 표시, 병렬 실행 준비) */
   currentTaskId?: string;
-  /** Current task title (shown as root node label) */
+  /** 현재 작업 제목 (루트 노드 라벨로 표시) */
   currentTaskTitle?: string;
-  /** Current task status for display icon */
+  /** 표시 아이콘용 현재 작업 상태 */
   currentTaskStatus?: 'running' | 'completed' | 'error' | 'idle';
-  /** Currently selected node ID (for keyboard navigation) - taskId for root, subagent ID for children */
+  /** 현재 선택된 노드 ID (키보드 탐색용) - 루트는 taskId, 자식은 서브에이전트 ID */
   selectedId?: string;
-  /** Callback when a node is selected */
+  /** 노드 선택 시 콜백 */
   onSelect?: (id: string) => void;
-  /** Whether this panel currently has keyboard focus (TAB navigation) */
+  /** 이 패널이 현재 키보드 포커스를 가지고 있는지 여부 (TAB 탐색) */
   isFocused?: boolean;
 }
 
 /**
- * Find the ID of the most recently active (running) subagent in the tree.
- * Traverses depth-first and returns the last running subagent found.
+ * 트리에서 가장 최근 활성(실행 중) 서브에이전트 ID 찾기
+ * 깊이 우선 탐색으로 마지막 실행 중인 서브에이전트를 반환
  */
 function findActiveSubagentId(nodes: SubagentTreeNode[]): string | undefined {
   let activeId: string | undefined;
@@ -240,7 +240,7 @@ function findActiveSubagentId(nodes: SubagentTreeNode[]): string | undefined {
 }
 
 /**
- * Count total number of subagents in the tree (for display).
+ * 트리의 총 서브에이전트 수 계산 (표시용)
  */
 function countSubagents(nodes: SubagentTreeNode[]): number {
   let count = 0;
@@ -260,12 +260,12 @@ function countSubagents(nodes: SubagentTreeNode[]): number {
 }
 
 /**
- * Get status icon for main agent.
+ * 메인 에이전트 상태 아이콘 가져오기
  */
 function getMainAgentIcon(status: 'running' | 'completed' | 'error' | 'idle'): string {
   switch (status) {
     case 'running':
-      return '◉'; // Filled circle for main agent running
+      return '◉'; // 메인 에이전트 실행 중 채워진 원
     case 'completed':
       return '✓';
     case 'error':
@@ -276,7 +276,7 @@ function getMainAgentIcon(status: 'running' | 'completed' | 'error' | 'idle'): s
 }
 
 /**
- * Get status color for main agent.
+ * 메인 에이전트 상태 색상 가져오기
  */
 function getMainAgentColor(status: 'running' | 'completed' | 'error' | 'idle'): string {
   switch (status) {
@@ -292,9 +292,9 @@ function getMainAgentColor(status: 'running' | 'completed' | 'error' | 'idle'): 
 }
 
 /**
- * SubagentTreePanel component showing a dedicated panel with subagent hierarchy.
- * Displays: main agent at root, subagents as children with types, descriptions, status icons, durations.
- * Features: indented nested subagents, highlighted active/selected nodes, auto-scroll.
+ * 서브에이전트 계층을 보여주는 전용 패널 SubagentTreePanel 컴포넌트
+ * 표시: 루트에 메인 에이전트, 타입, 설명, 상태 아이콘, 지속 시간과 함께 자식으로 서브에이전트
+ * 기능: 들여쓰기된 중첩 서브에이전트, 강조된 활성/선택 노드, 자동 스크롤
  */
 export function SubagentTreePanel({
   tree,
@@ -304,16 +304,16 @@ export function SubagentTreePanel({
   currentTaskTitle,
   currentTaskStatus = 'running',
   selectedId,
-  onSelect: _onSelect, // Reserved for future keyboard navigation
+  onSelect: _onSelect, // 향후 키보드 탐색용 예약
   isFocused = false,
 }: SubagentTreePanelProps): ReactNode {
-  // Calculate max width for row content (panel width minus padding and border)
+  // 행 콘텐츠의 최대 너비 계산 (패널 너비에서 패딩과 테두리 제외)
   const maxRowWidth = Math.max(20, width - 4);
 
-  // Auto-detect active subagent if not provided
+  // 제공되지 않은 경우 활성 서브에이전트 자동 감지
   const effectiveActiveId = activeSubagentId ?? findActiveSubagentId(tree);
 
-  // Count subagents for title
+  // 제목용 서브에이전트 수 계산
   const totalSubagents = countSubagents(tree);
   const runningCount = tree.reduce((acc, node) => {
     let count = 0;
@@ -325,31 +325,31 @@ export function SubagentTreePanel({
     return acc + count;
   }, 0);
 
-  // Build title with counts
+  // 카운트가 포함된 제목 구성
   const title = runningCount > 0
-    ? `Agent Tree (${runningCount} active)`
+    ? `에이전트 트리 (${runningCount}개 활성)`
     : totalSubagents > 0
-      ? `Agent Tree (${totalSubagents})`
-      : 'Agent Tree';
+      ? `에이전트 트리 (${totalSubagents})`
+      : '에이전트 트리';
 
-  // Use a ref for auto-scroll behavior
-  // Note: In @opentui/react, scrollbox auto-scrolls when content exceeds height
-  // We track the previous tree length to detect new subagents
+  // 자동 스크롤 동작용 ref 사용
+  // 참고: @opentui/react에서 콘텐츠가 높이를 초과하면 scrollbox가 자동 스크롤
+  // 새 서브에이전트를 감지하기 위해 이전 트리 길이 추적
   const prevTreeLengthRef = useRef(totalSubagents);
 
   useEffect(() => {
-    // When new subagents are added, the scrollbox should auto-scroll
-    // This is handled automatically by the scrollbox component when content grows
+    // 새 서브에이전트가 추가되면 scrollbox가 자동 스크롤해야 함
+    // 콘텐츠가 증가하면 scrollbox 컴포넌트가 자동으로 처리
     prevTreeLengthRef.current = totalSubagents;
   }, [totalSubagents]);
 
-  // Determine if task root is selected (selectedId matches currentTaskId or 'main' for backwards compat)
+  // 작업 루트가 선택되었는지 확인 (selectedId가 currentTaskId와 일치하거나 하위 호환을 위해 'main')
   const isTaskRootSelected = selectedId === currentTaskId || selectedId === 'main';
   const taskIcon = getMainAgentIcon(currentTaskStatus);
   const taskColor = getMainAgentColor(currentTaskStatus);
 
-  // Determine border color based on focus state
-  // Simple: focused = accent, not focused = normal
+  // 포커스 상태에 따른 테두리 색상 결정
+  // 단순: 포커스 = 강조, 포커스 없음 = 일반
   const borderColor = isFocused ? colors.accent.primary : colors.border.normal;
 
   return (
@@ -372,7 +372,7 @@ export function SubagentTreePanel({
           width: '100%',
         }}
       >
-        {/* Task root node - shows task ID and title */}
+        {/* 작업 루트 노드 - 작업 ID와 제목 표시 */}
         <box
           style={{
             width: '100%',
@@ -387,7 +387,7 @@ export function SubagentTreePanel({
           <text>
             <span fg={taskColor}>{taskIcon}</span>
             <span fg={isTaskRootSelected && isFocused ? colors.fg.primary : colors.accent.primary}>
-              {' '}{currentTaskId || 'Task'}
+              {' '}{currentTaskId || '작업'}
             </span>
             {currentTaskTitle && (
               <span fg={colors.fg.secondary}> {truncateText(currentTaskTitle, Math.max(0, maxRowWidth - (currentTaskId?.length || 4) - 10))}</span>
@@ -396,10 +396,10 @@ export function SubagentTreePanel({
           </text>
         </box>
 
-        {/* Subagents as children */}
+        {/* 자식으로 서브에이전트 */}
         {tree.length === 0 ? (
           <box style={{ paddingLeft: 3 }}>
-            <text fg={colors.fg.muted}>└─ No subagents</text>
+            <text fg={colors.fg.muted}>└─ 서브에이전트 없음</text>
           </box>
         ) : (
           tree.map((node) => (
@@ -409,7 +409,7 @@ export function SubagentTreePanel({
                 ...node,
                 state: {
                   ...node.state,
-                  // Increase depth by 1 since main agent is at depth 0
+                  // 메인 에이전트가 깊이 0이므로 깊이를 1 증가
                   depth: node.state.depth + 1,
                 },
               }}

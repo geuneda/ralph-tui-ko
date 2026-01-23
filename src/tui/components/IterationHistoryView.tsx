@@ -1,7 +1,7 @@
 /**
- * ABOUTME: IterationHistoryView component for the Ralph TUI.
- * Displays a list of all iterations with status, task, duration, outcome, and subagent summary.
- * Supports keyboard navigation through iterations with Enter to drill into details.
+ * ABOUTME: Ralph TUI용 IterationHistoryView 컴포넌트.
+ * 상태, 작업, 소요 시간, 결과, 서브에이전트 요약이 포함된 모든 반복 목록을 표시합니다.
+ * Enter 키로 상세 정보로 드릴다운하는 키보드 탐색을 지원합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -10,13 +10,13 @@ import type { IterationResult, IterationStatus } from '../../engine/types.js';
 import type { SubagentTraceStats } from '../../logs/types.js';
 
 /**
- * Extended status type that includes 'pending' for display purposes
- * (pending iterations don't have an IterationResult yet)
+ * 표시 목적으로 'pending'을 포함하는 확장된 상태 타입
+ * (대기 중인 반복은 아직 IterationResult가 없음)
  */
 type DisplayIterationStatus = IterationStatus | 'pending';
 
 /**
- * Status indicator symbols for iterations
+ * 반복에 대한 상태 표시기 심볼
  */
 const iterationStatusIndicators: Record<DisplayIterationStatus, string> = {
   completed: '✓',
@@ -28,7 +28,7 @@ const iterationStatusIndicators: Record<DisplayIterationStatus, string> = {
 };
 
 /**
- * Status colors for iterations
+ * 반복에 대한 상태 색상
  */
 const iterationStatusColors: Record<DisplayIterationStatus, string> = {
   completed: colors.status.success,
@@ -40,39 +40,38 @@ const iterationStatusColors: Record<DisplayIterationStatus, string> = {
 };
 
 /**
- * Get display text for iteration outcome
+ * 반복 결과의 표시 텍스트 가져오기
  */
 function getOutcomeText(result: IterationResult, isRunning: boolean): string {
-  if (isRunning) return 'Running...';
-  if (result.status === 'skipped') return 'Skipped';
-  if (result.status === 'interrupted') return 'Interrupted';
-  if (result.status === 'failed') return result.error || 'Failed';
-  // Completed - show if task was completed or just iteration
-  if (result.promiseComplete) return 'Task completed';
-  if (result.taskCompleted) return 'Success';
-  return 'Completed';
+  if (isRunning) return '실행 중...';
+  if (result.status === 'skipped') return '건너뜀';
+  if (result.status === 'interrupted') return '중단됨';
+  if (result.status === 'failed') return result.error || '실패';
+  // 완료 - 작업 완료인지 반복 완료인지 표시
+  if (result.promiseComplete) return '작업 완료';
+  if (result.taskCompleted) return '성공';
+  return '완료';
 }
 
 /**
- * Format subagent summary for display in iteration row.
- * Shows count and failure indicator if any subagents failed.
- * Examples: "3 subagents", "5 subagents ✗1"
+ * 반복 행에 표시할 서브에이전트 요약 포맷.
+ * 서브에이전트가 실패한 경우 개수와 실패 표시기를 보여줍니다.
+ * 예: "3 서브에이전트", "5 서브에이전트 ✗1"
  */
 function formatSubagentSummary(stats: SubagentTraceStats | undefined): string {
   if (!stats || stats.totalSubagents === 0) return '';
 
   const count = stats.totalSubagents;
-  const label = count === 1 ? 'subagent' : 'subagents';
 
   if (stats.failureCount > 0) {
-    return `${count} ${label} ✗${stats.failureCount}`;
+    return `${count} 서브에이전트 ✗${stats.failureCount}`;
   }
 
-  return `${count} ${label}`;
+  return `${count} 서브에이전트`;
 }
 
 /**
- * Format duration in milliseconds to human-readable format
+ * 밀리초 단위 소요 시간을 사람이 읽기 쉬운 형식으로 포맷
  */
 function formatDuration(durationMs: number): string {
   const seconds = Math.floor(durationMs / 1000);
@@ -80,7 +79,7 @@ function formatDuration(durationMs: number): string {
 }
 
 /**
- * Truncate text to fit within max width
+ * 최대 너비에 맞게 텍스트 자르기
  */
 function truncateText(text: string, maxWidth: number): string {
   if (text.length <= maxWidth) return text;
@@ -89,27 +88,27 @@ function truncateText(text: string, maxWidth: number): string {
 }
 
 /**
- * Props for the IterationHistoryView component
+ * IterationHistoryView 컴포넌트 Props
  */
 export interface IterationHistoryViewProps {
-  /** List of iteration results to display */
+  /** 표시할 반복 결과 목록 */
   iterations: IterationResult[];
-  /** Total number of iterations (for display like "1 of 10") */
+  /** 총 반복 수 ("1/10" 같은 표시용) */
   totalIterations: number;
-  /** Currently selected iteration index */
+  /** 현재 선택된 반복 인덱스 */
   selectedIndex: number;
-  /** Current running iteration number (0 if none running) */
+  /** 현재 실행 중인 반복 번호 (실행 중이 아니면 0) */
   runningIteration: number;
-  /** Callback when Enter is pressed to drill into iteration details */
+  /** Enter를 눌러 반복 상세로 드릴다운할 때 콜백 */
   onIterationDrillDown?: (iteration: IterationResult) => void;
-  /** Width of the component (for truncation calculations) */
+  /** 컴포넌트 너비 (자름 계산용) */
   width?: number;
-  /** Subagent trace stats per iteration (keyed by iteration number) for summary display */
+  /** 요약 표시용 반복당 서브에이전트 추적 통계 (반복 번호로 키 지정) */
   subagentStats?: Map<number, SubagentTraceStats>;
 }
 
 /**
- * Single iteration row component
+ * 단일 반복 행 컴포넌트
  */
 function IterationRow({
   result,
@@ -126,22 +125,22 @@ function IterationRow({
   maxWidth: number;
   subagentStats?: SubagentTraceStats;
 }): ReactNode {
-  // Determine effective display status (override to 'running' if this is the current iteration)
+  // 유효 표시 상태 결정 (현재 반복이면 'running'으로 오버라이드)
   const effectiveStatus: DisplayIterationStatus = isRunning ? 'running' : result.status;
   const statusIndicator = iterationStatusIndicators[effectiveStatus];
   const statusColor = iterationStatusColors[effectiveStatus];
 
-  // Format: "✓ Iteration 1 of 10  task-id  3 subagents  2m 30s  Success"
-  const iterationLabel = `Iteration ${result.iteration} of ${totalIterations}`;
+  // 형식: "✓ 반복 1/10  task-id  3 서브에이전트  2분 30초  성공"
+  const iterationLabel = `반복 ${result.iteration}/${totalIterations}`;
   const taskId = result.task.id;
   const duration = isRunning ? '...' : formatDuration(result.durationMs);
   const outcome = getOutcomeText(result, isRunning);
   const subagentSummary = formatSubagentSummary(subagentStats);
   const hasSubagentFailure = subagentStats && subagentStats.failureCount > 0;
 
-  // Calculate widths for each section
-  // Format: [indicator(1)] [iteration label] [task-id] [subagent summary] [duration] [outcome]
-  // We'll use fixed widths for some columns and let task-id be flexible
+  // 각 섹션의 너비 계산
+  // 형식: [표시기(1)] [반복 라벨] [작업-id] [서브에이전트 요약] [소요 시간] [결과]
+  // 일부 열은 고정 너비를 사용하고 작업 ID는 유연하게 설정
   const durationWidth = 8;
   const outcomeWidth = 14;
   const subagentWidth = subagentSummary ? Math.max(12, subagentSummary.length + 2) : 0;
@@ -177,7 +176,7 @@ function IterationRow({
 }
 
 /**
- * IterationHistoryView component showing all iterations with their status
+ * 모든 반복과 상태를 보여주는 IterationHistoryView 컴포넌트
  */
 export function IterationHistoryView({
   iterations,
@@ -187,18 +186,18 @@ export function IterationHistoryView({
   width = 80,
   subagentStats,
 }: IterationHistoryViewProps): ReactNode {
-  // Calculate max width for row content (width minus padding and border)
+  // 행 콘텐츠의 최대 너비 계산 (너비에서 패딩과 테두리 제외)
   const maxRowWidth = Math.max(40, width - 4);
 
-  // Build display list: completed iterations + pending placeholders
+  // 표시 목록 구성: 완료된 반복 + 대기 중인 플레이스홀더
   const displayItems: Array<{ type: 'result'; result: IterationResult } | { type: 'pending'; iteration: number }> = [];
 
-  // Add completed/running iterations
+  // 완료/실행 중인 반복 추가
   for (const result of iterations) {
     displayItems.push({ type: 'result', result });
   }
 
-  // Add pending placeholders for remaining iterations
+  // 남은 반복에 대한 대기 중 플레이스홀더 추가
   const completedCount = iterations.length;
   for (let i = completedCount + 1; i <= totalIterations; i++) {
     displayItems.push({ type: 'pending', iteration: i });
@@ -206,7 +205,7 @@ export function IterationHistoryView({
 
   return (
     <box
-      title="Iterations"
+      title="반복"
       style={{
         flexGrow: 1,
         flexShrink: 1,
@@ -226,7 +225,7 @@ export function IterationHistoryView({
       >
         {displayItems.length === 0 ? (
           <box style={{ padding: 1 }}>
-            <text fg={colors.fg.muted}>No iterations yet</text>
+            <text fg={colors.fg.muted}>아직 반복 없음</text>
           </box>
         ) : (
           displayItems.map((item, index) => {
@@ -243,9 +242,9 @@ export function IterationHistoryView({
                 />
               );
             } else {
-              // Pending placeholder
+              // 대기 중 플레이스홀더
               const statusIndicator = iterationStatusIndicators.pending;
-              const iterationLabel = `Iteration ${item.iteration} of ${totalIterations}`;
+              const iterationLabel = `반복 ${item.iteration}/${totalIterations}`;
 
               return (
                 <box
@@ -261,7 +260,7 @@ export function IterationHistoryView({
                   <text>
                     <span fg={colors.fg.muted}>{statusIndicator}</span>
                     <span fg={colors.fg.dim}> {iterationLabel}</span>
-                    <span fg={colors.fg.dim}>  (pending)</span>
+                    <span fg={colors.fg.dim}>  (대기 중)</span>
                   </text>
                 </box>
               );

@@ -1,7 +1,7 @@
 /**
- * ABOUTME: Epic loader overlay component for switching epics mid-session.
- * Provides an in-TUI modal for selecting a different epic without restarting.
- * Supports both beads-style epic selection (list) and json-style (file path prompt).
+ * ABOUTME: 세션 중 에픽 전환을 위한 에픽 로더 오버레이 컴포넌트.
+ * 재시작 없이 다른 에픽을 선택할 수 있는 TUI 내 모달을 제공합니다.
+ * beads 스타일 에픽 선택(목록)과 json 스타일(파일 경로 프롬프트) 모두 지원합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -11,47 +11,47 @@ import { colors, statusIndicators } from '../theme.js';
 import type { TrackerTask } from '../../plugins/trackers/types.js';
 
 /**
- * Mode for the epic loader overlay
+ * 에픽 로더 오버레이 모드
  */
 export type EpicLoaderMode = 'list' | 'file-prompt';
 
 /**
- * Props for the EpicLoaderOverlay component
+ * EpicLoaderOverlay 컴포넌트 Props
  */
 export interface EpicLoaderOverlayProps {
-  /** Whether the overlay is visible */
+  /** 오버레이 표시 여부 */
   visible: boolean;
 
-  /** Mode: 'list' for beads-style selection, 'file-prompt' for json-style */
+  /** 모드: beads 스타일 선택은 'list', json 스타일은 'file-prompt' */
   mode: EpicLoaderMode;
 
-  /** Available epics (for list mode) */
+  /** 사용 가능한 에픽 (목록 모드용) */
   epics: TrackerTask[];
 
-  /** Whether epics are loading */
+  /** 에픽 로딩 중 여부 */
   loading: boolean;
 
-  /** Error message if loading failed */
+  /** 로딩 실패 시 오류 메시지 */
   error?: string;
 
-  /** Tracker name for display */
+  /** 표시용 트래커 이름 */
   trackerName: string;
 
-  /** Current epic ID (for highlighting) */
+  /** 현재 에픽 ID (하이라이트용) */
   currentEpicId?: string;
 
-  /** Callback when an epic is selected */
+  /** 에픽 선택 시 콜백 */
   onSelect: (epic: TrackerTask) => void;
 
-  /** Callback when user cancels (Escape) */
+  /** 사용자가 취소할 때 (Escape) 콜백 */
   onCancel: () => void;
 
-  /** Callback when file path is submitted (file-prompt mode) */
+  /** 파일 경로 제출 시 콜백 (file-prompt 모드) */
   onFilePath?: (path: string) => void;
 }
 
 /**
- * Truncate text to fit within a given width
+ * 주어진 너비에 맞게 텍스트 자르기
  */
 function truncateText(text: string, maxWidth: number): string {
   if (text.length <= maxWidth) {
@@ -61,7 +61,7 @@ function truncateText(text: string, maxWidth: number): string {
 }
 
 /**
- * Get a status color for an epic based on its completion status
+ * 완료 상태에 따른 에픽의 상태 색상 가져오기
  */
 function getEpicStatusColor(epic: TrackerTask): string {
   const meta = epic.metadata as Record<string, unknown> | undefined;
@@ -89,10 +89,10 @@ function getEpicStatusColor(epic: TrackerTask): string {
 }
 
 /**
- * Modal overlay for loading/switching epics during a TUI session.
- * Supports two modes:
- * - 'list': Display a list of available epics for selection (beads/beads-bv)
- * - 'file-prompt': Prompt user to enter a file path (json tracker)
+ * TUI 세션 중 에픽 로드/전환을 위한 모달 오버레이.
+ * 두 가지 모드 지원:
+ * - 'list': 선택 가능한 에픽 목록 표시 (beads/beads-bv)
+ * - 'file-prompt': 파일 경로 입력 프롬프트 (json 트래커)
  */
 export function EpicLoaderOverlay({
   visible,
@@ -109,17 +109,17 @@ export function EpicLoaderOverlay({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [filePath, setFilePath] = useState('');
 
-  // Reset state when overlay becomes visible
+  // 오버레이가 표시될 때 상태 초기화
   useEffect(() => {
     if (visible) {
-      // Find the currently selected epic in the list
+      // 목록에서 현재 선택된 에픽 찾기
       const currentIndex = epics.findIndex((e) => e.id === currentEpicId);
       setSelectedIndex(currentIndex >= 0 ? currentIndex : 0);
       setFilePath('');
     }
   }, [visible, epics, currentEpicId]);
 
-  // Handle keyboard input
+  // 키보드 입력 처리
   const handleKeyboard = useCallback(
     (key: { name: string; sequence?: string }) => {
       if (!visible) return;
@@ -165,7 +165,7 @@ export function EpicLoaderOverlay({
             break;
 
           default:
-            // Handle character input (including pasted text which may be multi-character)
+            // 문자 입력 처리 (여러 문자일 수 있는 붙여넣기 텍스트 포함)
             if (key.sequence && key.name !== 'backspace') {
               setFilePath((prev) => prev + key.sequence);
             }
@@ -182,7 +182,7 @@ export function EpicLoaderOverlay({
     return null;
   }
 
-  // Full-screen overlay with centered modal
+  // 중앙 모달이 있는 전체 화면 오버레이
   return (
     <box
       style={{
@@ -193,7 +193,7 @@ export function EpicLoaderOverlay({
         bottom: 0,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#00000080', // 50% opacity black (OpenTUI doesn't support rgba syntax)
+        backgroundColor: '#00000080', // 50% 불투명 검정 (OpenTUI는 rgba 문법을 지원하지 않음)
       }}
     >
       <box
@@ -206,7 +206,7 @@ export function EpicLoaderOverlay({
           flexDirection: 'column',
         }}
       >
-        {/* Header */}
+        {/* 헤더 */}
         <box
           style={{
             width: '100%',
@@ -220,12 +220,12 @@ export function EpicLoaderOverlay({
           }}
         >
           <text fg={colors.accent.primary}>
-            {mode === 'list' ? 'Load Epic' : 'Enter PRD File Path'}
+            {mode === 'list' ? '에픽 로드' : 'PRD 파일 경로 입력'}
           </text>
           <text fg={colors.fg.muted}>[{trackerName}]</text>
         </box>
 
-        {/* Content */}
+        {/* 콘텐츠 */}
         {mode === 'file-prompt' ? (
           <box
             style={{
@@ -236,7 +236,7 @@ export function EpicLoaderOverlay({
             }}
           >
             <text fg={colors.fg.secondary}>
-              Enter the path to a prd.json file:
+              prd.json 파일 경로를 입력하세요:
             </text>
             <box style={{ height: 1 }} />
             <box
@@ -252,7 +252,7 @@ export function EpicLoaderOverlay({
             </box>
             <box style={{ height: 1 }} />
             <text fg={colors.fg.muted}>
-              Press Enter to load, Escape to cancel
+              Enter로 로드, Escape로 취소
             </text>
           </box>
         ) : loading ? (
@@ -263,7 +263,7 @@ export function EpicLoaderOverlay({
               alignItems: 'center',
             }}
           >
-            <text fg={colors.fg.secondary}>Loading epics...</text>
+            <text fg={colors.fg.secondary}>에픽 로딩 중...</text>
           </box>
         ) : error ? (
           <box
@@ -274,9 +274,9 @@ export function EpicLoaderOverlay({
               alignItems: 'center',
             }}
           >
-            <text fg={colors.status.error}>Error: {error}</text>
+            <text fg={colors.status.error}>오류: {error}</text>
             <box style={{ height: 1 }} />
-            <text fg={colors.fg.muted}>Press Escape to close</text>
+            <text fg={colors.fg.muted}>Escape를 눌러 닫기</text>
           </box>
         ) : epics.length === 0 ? (
           <box
@@ -287,9 +287,9 @@ export function EpicLoaderOverlay({
               alignItems: 'center',
             }}
           >
-            <text fg={colors.fg.secondary}>No epics found</text>
+            <text fg={colors.fg.secondary}>에픽을 찾을 수 없음</text>
             <box style={{ height: 1 }} />
-            <text fg={colors.fg.muted}>Press Escape to close</text>
+            <text fg={colors.fg.muted}>Escape를 눌러 닫기</text>
           </box>
         ) : (
           <box
@@ -326,32 +326,32 @@ export function EpicLoaderOverlay({
                       backgroundColor: isSelected ? colors.bg.highlight : 'transparent',
                     }}
                   >
-                    {/* Selection indicator */}
+                    {/* 선택 표시기 */}
                     <text fg={isSelected ? colors.accent.primary : 'transparent'}>
                       {isSelected ? '▸ ' : '  '}
                     </text>
 
-                    {/* Current epic marker */}
+                    {/* 현재 에픽 마커 */}
                     <text fg={isCurrent ? colors.status.success : 'transparent'}>
                       {isCurrent ? '● ' : '  '}
                     </text>
 
-                    {/* Status indicator */}
+                    {/* 상태 표시기 */}
                     <text fg={statusColor}>
                       {epic.status === 'in_progress'
                         ? statusIndicators.active
                         : statusIndicators.pending}{' '}
                     </text>
 
-                    {/* Epic ID */}
+                    {/* 에픽 ID */}
                     <text fg={colors.fg.muted}>{truncateText(epic.id, 20)} </text>
 
-                    {/* Epic title */}
+                    {/* 에픽 제목 */}
                     <text fg={isSelected ? colors.fg.primary : colors.fg.secondary}>
                       {truncateText(epic.title, 30)}
                     </text>
 
-                    {/* Progress */}
+                    {/* 진행 상황 */}
                     <text fg={colors.fg.muted}>{progressText}</text>
                   </box>
                 );
@@ -360,7 +360,7 @@ export function EpicLoaderOverlay({
           </box>
         )}
 
-        {/* Footer */}
+        {/* 푸터 */}
         <box
           style={{
             width: '100%',
@@ -375,15 +375,15 @@ export function EpicLoaderOverlay({
           {mode === 'list' && (
             <>
               <text fg={colors.fg.muted}>
-                <span fg={colors.accent.primary}>Enter</span> Select
+                <span fg={colors.accent.primary}>Enter</span> 선택
               </text>
               <text fg={colors.fg.muted}>
-                <span fg={colors.accent.primary}>↑↓/jk</span> Navigate
+                <span fg={colors.accent.primary}>↑↓/jk</span> 탐색
               </text>
             </>
           )}
           <text fg={colors.fg.muted}>
-            <span fg={colors.accent.primary}>Esc</span> Cancel
+            <span fg={colors.accent.primary}>Esc</span> 취소
           </text>
         </box>
       </box>

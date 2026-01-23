@@ -1,6 +1,6 @@
 /**
- * ABOUTME: Template commands for viewing and initializing prompt templates.
- * Provides ralph-tui template show and ralph-tui template init commands.
+ * ABOUTME: 프롬프트 템플릿 조회 및 초기화 명령어.
+ * ralph-tui template show와 ralph-tui template init 명령어를 제공합니다.
  */
 
 import * as fs from 'node:fs';
@@ -15,7 +15,7 @@ import {
   type BuiltinTemplateType,
 } from '../templates/index.js';
 
-// ANSI color codes
+// ANSI 색상 코드
 const RESET = '\x1b[0m';
 const BOLD = '\x1b[1m';
 const DIM = '\x1b[2m';
@@ -24,20 +24,20 @@ const CYAN = '\x1b[36m';
 const RED = '\x1b[31m';
 
 /**
- * Execute the template command.
- * @param args Command arguments: ['show'] or ['init', options...]
+ * template 명령어 실행
+ * @param args 명령어 인자: ['show'] 또는 ['init', 옵션...]
  */
 export async function executeTemplateCommand(args: string[]): Promise<void> {
   const subcommand = args[0];
 
-  // Check for help flag
+  // 도움말 플래그 확인
   if (subcommand === '--help' || subcommand === '-h') {
     printTemplateHelp();
     return;
   }
 
   if (subcommand === 'show') {
-    // Check for help in subcommand args
+    // 하위 명령어 인자에서 도움말 확인
     if (args.includes('--help') || args.includes('-h')) {
       printTemplateHelp();
       return;
@@ -47,7 +47,7 @@ export async function executeTemplateCommand(args: string[]): Promise<void> {
   }
 
   if (subcommand === 'init' || subcommand === 'install') {
-    // Check for help in subcommand args
+    // 하위 명령어 인자에서 도움말 확인
     if (args.includes('--help') || args.includes('-h')) {
       printTemplateHelp();
       return;
@@ -56,75 +56,75 @@ export async function executeTemplateCommand(args: string[]): Promise<void> {
     return;
   }
 
-  // Help or unknown subcommand
+  // 도움말 또는 알 수 없는 하위 명령어
   printTemplateHelp();
 }
 
 /**
- * Print help for the template command.
- * Exported for use in index.ts
+ * template 명령어 도움말 출력
+ * index.ts에서 사용하기 위해 내보냄
  */
 export function printTemplateHelp(): void {
   showTemplateHelp();
 }
 
 /**
- * Show help for template commands.
+ * template 명령어 도움말 표시
  */
 function showTemplateHelp(): void {
   console.log(`
-${BOLD}ralph-tui template${RESET} - Manage prompt templates
+${BOLD}ralph-tui template${RESET} - 프롬프트 템플릿 관리
 
-${BOLD}Commands:${RESET}
-  ${CYAN}show${RESET}              Display the current template being used
-  ${CYAN}init${RESET}              Copy default template for customization
-  ${CYAN}install${RESET}           Alias for init
+${BOLD}명령어:${RESET}
+  ${CYAN}show${RESET}              현재 사용 중인 템플릿 표시
+  ${CYAN}init${RESET}              커스터마이징을 위해 기본 템플릿 복사
+  ${CYAN}install${RESET}           init의 별칭
 
-${BOLD}Show Options:${RESET}
-  ${DIM}--tracker <name>${RESET}   Show template for specific tracker (default, beads, beads-bv, json)
-  ${DIM}--custom <path>${RESET}    Show template from a custom file path
+${BOLD}Show 옵션:${RESET}
+  ${DIM}--tracker <name>${RESET}   특정 트래커의 템플릿 표시 (default, beads, beads-bv, json)
+  ${DIM}--custom <path>${RESET}    커스텀 파일 경로에서 템플릿 표시
 
-${BOLD}Init Options:${RESET}
-  ${DIM}--tracker <name>${RESET}   Use template for specific tracker (default, beads, beads-bv, json)
-  ${DIM}--output <path>${RESET}    Custom output path (default: ./ralph-prompt.hbs)
-  ${DIM}--global${RESET}           Install all templates to ~/.config/ralph-tui/templates/
-  ${DIM}--force${RESET}            Overwrite existing file
+${BOLD}Init 옵션:${RESET}
+  ${DIM}--tracker <name>${RESET}   특정 트래커의 템플릿 사용 (default, beads, beads-bv, json)
+  ${DIM}--output <path>${RESET}    커스텀 출력 경로 (기본값: ./ralph-prompt.hbs)
+  ${DIM}--global${RESET}           모든 템플릿을 ~/.config/ralph-tui/templates/에 설치
+  ${DIM}--force${RESET}            기존 파일 덮어쓰기
 
-${BOLD}Examples:${RESET}
-  ralph-tui template show                    # Show current template
-  ralph-tui template show --tracker beads    # Show built-in beads template
-  ralph-tui template init                    # Copy default template for customization
-  ralph-tui template init --tracker beads    # Copy beads template
-  ralph-tui template init --global           # Install all templates to global config
+${BOLD}예시:${RESET}
+  ralph-tui template show                    # 현재 템플릿 표시
+  ralph-tui template show --tracker beads    # 내장 beads 템플릿 표시
+  ralph-tui template init                    # 커스터마이징을 위해 기본 템플릿 복사
+  ralph-tui template init --tracker beads    # beads 템플릿 복사
+  ralph-tui template init --global           # 모든 템플릿을 전역 설정에 설치
 
-${BOLD}Template Resolution Order:${RESET}
-  Ralph searches for templates in this order (first match wins):
-  1. Explicit --prompt <path> or prompt_template in config
-  2. Project templates: .ralph-tui/templates/{tracker}.hbs
-  3. Global templates: ~/.config/ralph-tui/templates/{tracker}.hbs
-  4. Tracker plugin bundled template
-  5. Built-in fallback
+${BOLD}템플릿 해석 순서:${RESET}
+  Ralph는 다음 순서로 템플릿을 검색합니다 (첫 번째 일치 사용):
+  1. 명시적 --prompt <path> 또는 설정의 prompt_template
+  2. 프로젝트 템플릿: .ralph-tui/templates/{tracker}.hbs
+  3. 전역 템플릿: ~/.config/ralph-tui/templates/{tracker}.hbs
+  4. 트래커 플러그인 번들 템플릿
+  5. 내장 폴백
 
-${BOLD}Template Variables:${RESET}
-  ${DIM}Task:${RESET}     {{taskId}}, {{taskTitle}}, {{taskDescription}}, {{acceptanceCriteria}}
+${BOLD}템플릿 변수:${RESET}
+  ${DIM}작업:${RESET}     {{taskId}}, {{taskTitle}}, {{taskDescription}}, {{acceptanceCriteria}}
             {{type}}, {{status}}, {{priority}}, {{notes}}
-  ${DIM}Relations:${RESET} {{dependsOn}}, {{blocks}}, {{labels}}, {{epicId}}, {{epicTitle}}
-  ${DIM}Context:${RESET}  {{trackerName}}, {{agentName}}, {{model}}, {{cwd}}, {{beadsDbPath}}
+  ${DIM}관계:${RESET}     {{dependsOn}}, {{blocks}}, {{labels}}, {{epicId}}, {{epicTitle}}
+  ${DIM}컨텍스트:${RESET} {{trackerName}}, {{agentName}}, {{model}}, {{cwd}}, {{beadsDbPath}}
             {{currentDate}}, {{currentTimestamp}}
   ${DIM}PRD:${RESET}      {{prdName}}, {{prdDescription}}, {{prdContent}}
             {{prdCompletedCount}}, {{prdTotalCount}}
-  ${DIM}Progress:${RESET} {{recentProgress}}, {{codebasePatterns}}, {{selectionReason}}
+  ${DIM}진행:${RESET}     {{recentProgress}}, {{codebasePatterns}}, {{selectionReason}}
 `);
 }
 
 /**
- * Handle the 'template show' command.
- * Displays the current template or a specific built-in template.
+ * 'template show' 명령어 처리.
+ * 현재 템플릿 또는 특정 내장 템플릿을 표시합니다.
  */
 async function handleShowTemplate(args: string[]): Promise<void> {
   const cwd = process.cwd();
 
-  // Parse options
+  // 옵션 파싱
   let trackerType: BuiltinTemplateType = 'default';
   let customPath: string | undefined;
 
@@ -137,46 +137,46 @@ async function handleShowTemplate(args: string[]): Promise<void> {
     }
   }
 
-  // If no explicit options, check config for custom template
+  // 명시적 옵션이 없으면 설정에서 커스텀 템플릿 확인
   if (!customPath) {
     const storedConfig = await loadStoredConfig(cwd);
     if (storedConfig.prompt_template) {
       customPath = storedConfig.prompt_template;
     }
 
-    // Also get tracker type from config if not specified
+    // 지정되지 않은 경우 설정에서 트래커 타입도 가져오기
     if (trackerType === 'default' && storedConfig.tracker) {
       trackerType = getTemplateTypeFromPlugin(storedConfig.tracker);
     }
   }
 
-  // Load the template
+  // 템플릿 로드
   const result = loadTemplate(customPath, trackerType, cwd);
 
   if (!result.success) {
-    console.error(`${RED}Error:${RESET} ${result.error}`);
+    console.error(`${RED}오류:${RESET} ${result.error}`);
     process.exit(1);
   }
 
-  // Display template info
-  console.log(`${BOLD}Template Source:${RESET} ${CYAN}${result.source}${RESET}`);
+  // 템플릿 정보 표시
+  console.log(`${BOLD}템플릿 소스:${RESET} ${CYAN}${result.source}${RESET}`);
   console.log(`${DIM}${'─'.repeat(60)}${RESET}`);
   console.log(result.content);
   console.log(`${DIM}${'─'.repeat(60)}${RESET}`);
 
-  // Show available variables reminder
-  console.log(`\n${DIM}Tip: Use {{variableName}} for template variables${RESET}`);
+  // 사용 가능한 변수 알림 표시
+  console.log(`\n${DIM}팁: 템플릿 변수에는 {{variableName}} 사용${RESET}`);
 }
 
 /**
- * Handle the 'template init' command.
- * Copies a built-in template to a custom location for customization.
- * With --global flag, installs all templates to ~/.config/ralph-tui/templates/
+ * 'template init' 명령어 처리.
+ * 커스터마이징을 위해 내장 템플릿을 커스텀 위치로 복사합니다.
+ * --global 플래그 사용 시 모든 템플릿을 ~/.config/ralph-tui/templates/에 설치합니다.
  */
 async function handleInitTemplate(args: string[]): Promise<void> {
   const cwd = process.cwd();
 
-  // Parse options
+  // 옵션 파싱
   let trackerType: BuiltinTemplateType = 'default';
   let outputPath = getCustomTemplatePath(cwd);
   let force = false;
@@ -197,66 +197,66 @@ async function handleInitTemplate(args: string[]): Promise<void> {
     }
   }
 
-  // Handle --global flag: install all templates to global config
+  // --global 플래그 처리: 모든 템플릿을 전역 설정에 설치
   if (global) {
-    console.log(`${BOLD}Installing templates to global config...${RESET}`);
+    console.log(`${BOLD}전역 설정에 템플릿 설치 중...${RESET}`);
     const result = installBuiltinTemplates(force);
 
-    console.log(`${DIM}Templates directory: ${result.templatesDir}${RESET}\n`);
+    console.log(`${DIM}템플릿 디렉토리: ${result.templatesDir}${RESET}\n`);
 
     for (const r of result.results) {
       if (r.created) {
-        console.log(`${GREEN}✓${RESET} Created: ${CYAN}${r.file}${RESET}`);
+        console.log(`${GREEN}✓${RESET} 생성됨: ${CYAN}${r.file}${RESET}`);
       } else if (r.skipped) {
-        console.log(`${DIM}⊘${RESET} Skipped: ${r.file} ${DIM}(already exists, use --force to overwrite)${RESET}`);
+        console.log(`${DIM}⊘${RESET} 건너뜀: ${r.file} ${DIM}(이미 존재함, 덮어쓰려면 --force 사용)${RESET}`);
       } else if (r.error) {
-        console.log(`${RED}✗${RESET} Failed: ${r.file} - ${r.error}`);
+        console.log(`${RED}✗${RESET} 실패: ${r.file} - ${r.error}`);
       }
     }
 
     if (result.success) {
-      console.log(`\n${GREEN}Done!${RESET}`);
-      console.log(`\n${BOLD}Templates will be used as fallback for all projects.${RESET}`);
-      console.log(`${DIM}Override per-project in .ralph-tui/templates/${RESET}`);
+      console.log(`\n${GREEN}완료!${RESET}`);
+      console.log(`\n${BOLD}템플릿은 모든 프로젝트의 폴백으로 사용됩니다.${RESET}`);
+      console.log(`${DIM}프로젝트별 재정의는 .ralph-tui/templates/에서${RESET}`);
     } else {
-      console.log(`\n${RED}Some templates could not be created.${RESET}`);
+      console.log(`\n${RED}일부 템플릿을 생성할 수 없습니다.${RESET}`);
       process.exit(1);
     }
     return;
   }
 
-  // Auto-detect tracker type from config if not specified
+  // 지정되지 않은 경우 설정에서 트래커 타입 자동 감지
   if (trackerType === 'default') {
     const storedConfig = await loadStoredConfig(cwd);
     if (storedConfig.tracker) {
       trackerType = getTemplateTypeFromPlugin(storedConfig.tracker);
-      console.log(`${DIM}Detected tracker: ${trackerType}${RESET}`);
+      console.log(`${DIM}감지된 트래커: ${trackerType}${RESET}`);
     }
   }
 
-  // Check if file exists
+  // 파일 존재 여부 확인
   if (fs.existsSync(outputPath) && !force) {
     console.error(
-      `${RED}Error:${RESET} File already exists: ${outputPath}`
+      `${RED}오류:${RESET} 파일이 이미 존재함: ${outputPath}`
     );
-    console.log(`${DIM}Use --force to overwrite${RESET}`);
+    console.log(`${DIM}덮어쓰려면 --force 사용${RESET}`);
     process.exit(1);
   }
 
-  // Copy the template
+  // 템플릿 복사
   const result = copyBuiltinTemplate(trackerType, outputPath);
 
   if (!result.success) {
-    console.error(`${RED}Error:${RESET} ${result.error}`);
+    console.error(`${RED}오류:${RESET} ${result.error}`);
     process.exit(1);
   }
 
-  console.log(`${GREEN}✓${RESET} Template created: ${CYAN}${outputPath}${RESET}`);
-  console.log(`${DIM}Template type: ${trackerType}${RESET}`);
-  console.log(`\n${BOLD}Next steps:${RESET}`);
-  console.log(`  1. Edit ${path.basename(outputPath)} to customize the prompt`);
-  console.log(`  2. Add to your ${CYAN}.ralph-tui/config.toml${RESET}:`);
+  console.log(`${GREEN}✓${RESET} 템플릿 생성됨: ${CYAN}${outputPath}${RESET}`);
+  console.log(`${DIM}템플릿 타입: ${trackerType}${RESET}`);
+  console.log(`\n${BOLD}다음 단계:${RESET}`);
+  console.log(`  1. ${path.basename(outputPath)}를 편집하여 프롬프트 커스터마이징`);
+  console.log(`  2. ${CYAN}.ralph-tui/config.toml${RESET}에 추가:`);
   console.log(`     ${DIM}prompt_template: ${path.relative(cwd, outputPath)}${RESET}`);
-  console.log(`\n${DIM}See 'ralph-tui template show' for available variables${RESET}`);
+  console.log(`\n${DIM}사용 가능한 변수는 'ralph-tui template show' 참조${RESET}`);
 }
 

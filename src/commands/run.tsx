@@ -1,8 +1,8 @@
 /**
- * ABOUTME: Run command implementation for ralph-tui.
- * Handles CLI argument parsing, configuration loading, session management,
- * and starting the execution engine with TUI.
- * Implements graceful interruption with Ctrl+C confirmation dialog.
+ * ABOUTME: ralph-tui의 실행 명령어 구현.
+ * CLI 인자 파싱, 설정 로딩, 세션 관리,
+ * TUI와 함께 실행 엔진 시작을 처리합니다.
+ * Ctrl+C 확인 다이얼로그를 통한 우아한 중단을 구현합니다.
  */
 
 import { useState, useEffect, useMemo } from 'react';
@@ -328,66 +328,66 @@ export function parseRunArgs(args: string[]): ExtendedRuntimeOptions {
 }
 
 /**
- * Print run command help
+ * 실행 명령어 도움말 출력
  */
 export function printRunHelp(): void {
   console.log(`
-ralph-tui run - Start Ralph execution
+ralph-tui run - Ralph 실행 시작
 
-Usage: ralph-tui run [options]
+사용법: ralph-tui run [옵션]
 
-Options:
-  --epic <id>         Epic ID for beads tracker (if omitted, shows epic selection)
-  --prd <path>        PRD file path (auto-switches to json tracker)
-  --agent <name>      Override agent plugin (e.g., claude, opencode)
-  --model <name>      Override model (e.g., opus, sonnet)
-  --variant <level>   Model variant/reasoning effort (minimal, high, max)
-  --tracker <name>    Override tracker plugin (e.g., beads, beads-bv, json)
-  --prompt <path>     Custom prompt file (default: based on tracker mode)
-  --output-dir <path> Directory for iteration logs (default: .ralph-tui/iterations)
-  --progress-file <path> Progress file for cross-iteration context (default: .ralph-tui/progress.md)
-  --iterations <n>    Maximum iterations (0 = unlimited)
-  --delay <ms>        Delay between iterations in milliseconds
-  --cwd <path>        Working directory
-  --resume            Resume existing session
-  --force             Force start even if locked
-  --headless          Run without TUI (alias: --no-tui)
-  --no-tui            Run without TUI, output structured logs to stdout
-  --no-setup          Skip interactive setup even if no config exists
-  --verify            Run agent preflight check before starting
-  --notify            Force enable desktop notifications
-  --no-notify         Force disable desktop notifications
-  --sandbox           Enable sandboxing (auto mode)
-  --sandbox=bwrap     Force Bubblewrap sandboxing (Linux)
-  --sandbox=sandbox-exec  Force sandbox-exec (macOS)
-  --no-sandbox        Disable sandboxing
-  --no-network        Disable network access in sandbox
-  --listen            Enable remote listener (implies --headless)
-  --listen-port <n>   Port for remote listener (default: 7890)
-  --rotate-token      Rotate server token before starting listener
+옵션:
+  --epic <id>         beads 트래커용 에픽 ID (생략 시 에픽 선택 화면 표시)
+  --prd <path>        PRD 파일 경로 (자동으로 json 트래커로 전환)
+  --agent <name>      에이전트 플러그인 재정의 (예: claude, opencode)
+  --model <name>      모델 재정의 (예: opus, sonnet)
+  --variant <level>   모델 변형/추론 수준 (minimal, high, max)
+  --tracker <name>    트래커 플러그인 재정의 (예: beads, beads-bv, json)
+  --prompt <path>     커스텀 프롬프트 파일 (기본값: 트래커 모드 기반)
+  --output-dir <path> 반복 로그 디렉토리 (기본값: .ralph-tui/iterations)
+  --progress-file <path> 반복 간 컨텍스트용 진행 파일 (기본값: .ralph-tui/progress.md)
+  --iterations <n>    최대 반복 횟수 (0 = 무제한)
+  --delay <ms>        반복 간 지연 시간 (밀리초)
+  --cwd <path>        작업 디렉토리
+  --resume            기존 세션 재개
+  --force             잠금 상태여도 강제 시작
+  --headless          TUI 없이 실행 (별칭: --no-tui)
+  --no-tui            TUI 없이 실행, 구조화된 로그를 stdout으로 출력
+  --no-setup          설정이 없어도 대화형 설정 건너뛰기
+  --verify            시작 전 에이전트 사전 점검 실행
+  --notify            데스크톱 알림 강제 활성화
+  --no-notify         데스크톱 알림 강제 비활성화
+  --sandbox           샌드박싱 활성화 (자동 모드)
+  --sandbox=bwrap     Bubblewrap 샌드박싱 강제 (Linux)
+  --sandbox=sandbox-exec  sandbox-exec 강제 (macOS)
+  --no-sandbox        샌드박싱 비활성화
+  --no-network        샌드박스에서 네트워크 접근 비활성화
+  --listen            원격 리스너 활성화 (--headless 암시)
+  --listen-port <n>   원격 리스너 포트 (기본값: 7890)
+  --rotate-token      리스너 시작 전 서버 토큰 교체
 
-Log Output Format (--no-tui mode):
+로그 출력 형식 (--no-tui 모드):
   [timestamp] [level] [component] message
 
-  Levels: INFO, WARN, ERROR, DEBUG
-  Components: progress, agent, engine, tracker, session, system
+  레벨: INFO, WARN, ERROR, DEBUG
+  컴포넌트: progress, agent, engine, tracker, session, system
 
-  Example output:
-    [10:42:15] [INFO] [engine] Ralph started. Total tasks: 5
-    [10:42:15] [INFO] [progress] Iteration 1/10: Working on US-001 - Add login
-    [10:42:15] [INFO] [agent] Building prompt for task...
-    [10:42:30] [INFO] [progress] Iteration 1 finished. Task US-001: COMPLETED. Duration: 15s
+  출력 예시:
+    [10:42:15] [INFO] [engine] Ralph 시작됨. 총 작업: 5
+    [10:42:15] [INFO] [progress] 반복 1/10: US-001 - 로그인 추가 작업 중
+    [10:42:15] [INFO] [agent] 작업용 프롬프트 빌드 중...
+    [10:42:30] [INFO] [progress] 반복 1 완료. 작업 US-001: 완료됨. 소요 시간: 15s
 
-Examples:
-  ralph-tui run                              # Start with defaults
-  ralph-tui run --epic ralph-tui-45r         # Run with specific epic
-  ralph-tui run --prd ./prd.json             # Run with PRD file
-  ralph-tui run --agent claude --model opus  # Override agent settings
-  ralph-tui run --tracker beads-bv           # Use beads-bv tracker
-  ralph-tui run --iterations 20              # Limit to 20 iterations
-  ralph-tui run --resume                     # Resume previous session
-  ralph-tui run --no-tui                     # Run headless for CI/scripts
-  ralph-tui run --listen --prd ./prd.json    # Run with remote listener enabled
+예시:
+  ralph-tui run                              # 기본값으로 시작
+  ralph-tui run --epic ralph-tui-45r         # 특정 에픽으로 실행
+  ralph-tui run --prd ./prd.json             # PRD 파일로 실행
+  ralph-tui run --agent claude --model opus  # 에이전트 설정 재정의
+  ralph-tui run --tracker beads-bv           # beads-bv 트래커 사용
+  ralph-tui run --iterations 20              # 20회 반복으로 제한
+  ralph-tui run --resume                     # 이전 세션 재개
+  ralph-tui run --no-tui                     # CI/스크립트용 헤드리스 실행
+  ralph-tui run --listen --prd ./prd.json    # 원격 리스너 활성화하여 실행
 `);
 }
 
@@ -487,74 +487,74 @@ async function detectAndHandleStaleTasks(
     }
   }
 
-  // Display warning
+  // 경고 표시
   console.log('');
-  console.log('⚠️  Stale in_progress tasks detected');
+  console.log('⚠️  지연된 in_progress 작업 감지됨');
   console.log('');
-  console.log('A previous Ralph session did not exit cleanly.');
-  console.log(`Found ${activeTaskIds.length} task(s) stuck in "in_progress" status:`);
+  console.log('이전 Ralph 세션이 정상적으로 종료되지 않았습니다.');
+  console.log(`"in_progress" 상태로 멈춘 ${activeTaskIds.length}개 작업을 발견했습니다:`);
   console.log('');
   for (const task of taskDetails) {
     console.log(`  • ${task.id}: ${task.title}`);
   }
   console.log('');
 
-  // In headless mode, auto-reset with warning
+  // 헤드리스 모드에서 경고와 함께 자동 리셋
   if (headless) {
-    console.log('Headless mode: automatically resetting tasks to open...');
+    console.log('헤드리스 모드: 작업을 자동으로 open으로 리셋 중...');
     for (const taskId of activeTaskIds) {
       try {
         await tracker.updateTaskStatus(taskId, 'open');
         result.resetCount++;
       } catch {
-        // Continue on individual failures
+        // 개별 실패 시 계속 진행
       }
     }
     result.tasksReset = result.resetCount > 0;
 
-    // Update the persisted state to clear active tasks
+    // 활성 작업을 지우기 위해 지속 상태 업데이트
     if (result.tasksReset) {
       const updatedState = clearActiveTasks(persistedState);
       await savePersistedSession(updatedState);
     }
 
-    console.log(`Reset ${result.resetCount} task(s) to open.`);
+    console.log(`${result.resetCount}개 작업을 open으로 리셋했습니다.`);
     console.log('');
     return result;
   }
 
-  // Interactive mode: prompt user
+  // 대화형 모드: 사용자에게 묻기
   const { promptBoolean } = await import('../setup/prompts.js');
   const shouldReset = await promptBoolean(
-    'Reset these tasks back to "open" status?',
+    '이 작업들을 "open" 상태로 되돌리시겠습니까?',
     { default: true }
   );
 
   if (!shouldReset) {
-    console.log('Tasks left as-is. They may need manual cleanup.');
+    console.log('작업을 그대로 두었습니다. 수동 정리가 필요할 수 있습니다.');
     console.log('');
     return result;
   }
 
-  // Reset tasks
-  console.log('Resetting tasks...');
+  // 작업 리셋
+  console.log('작업 리셋 중...');
   for (const taskId of activeTaskIds) {
     try {
       await tracker.updateTaskStatus(taskId, 'open');
       result.resetCount++;
     } catch {
-      console.log(`  Warning: Failed to reset ${taskId}`);
+      console.log(`  경고: ${taskId} 리셋 실패`);
     }
   }
   result.tasksReset = result.resetCount > 0;
 
-  // Update the persisted state to clear active tasks
+  // 활성 작업을 지우기 위해 지속 상태 업데이트
   if (result.tasksReset) {
     const updatedState = clearActiveTasks(persistedState);
     await savePersistedSession(updatedState);
   }
 
-  console.log(`Reset ${result.resetCount} task(s) to open.`);
+  console.log(`${result.resetCount}개 작업을 open으로 리셋했습니다.`);
   console.log('');
 
   return result;
@@ -582,42 +582,42 @@ async function promptResumeOrNew(cwd: string): Promise<'resume' | 'new' | 'abort
 
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');
-  console.log('                  Existing Session Found                        ');
+  console.log('                    기존 세션 발견                               ');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
-  console.log(`  Status:      ${summary.status.toUpperCase()}`);
-  console.log(`  Started:     ${new Date(summary.startedAt).toLocaleString()}`);
-  console.log(`  Progress:    ${summary.tasksCompleted}/${summary.totalTasks} tasks complete`);
-  console.log(`  Iteration:   ${summary.currentIteration}${summary.maxIterations > 0 ? `/${summary.maxIterations}` : ''}`);
-  console.log(`  Agent:       ${summary.agentPlugin}`);
-  console.log(`  Tracker:     ${summary.trackerPlugin}`);
+  console.log(`  상태:        ${summary.status.toUpperCase()}`);
+  console.log(`  시작 시간:   ${new Date(summary.startedAt).toLocaleString()}`);
+  console.log(`  진행률:      ${summary.tasksCompleted}/${summary.totalTasks} 작업 완료`);
+  console.log(`  반복:        ${summary.currentIteration}${summary.maxIterations > 0 ? `/${summary.maxIterations}` : ''}`);
+  console.log(`  에이전트:    ${summary.agentPlugin}`);
+  console.log(`  트래커:      ${summary.trackerPlugin}`);
   if (summary.epicId) {
-    console.log(`  Epic:        ${summary.epicId}`);
+    console.log(`  에픽:        ${summary.epicId}`);
   }
   console.log('');
 
-  // Check for lock conflict
+  // 잠금 충돌 확인
   const sessionCheck = await checkSession(cwd);
   if (sessionCheck.isLocked && !sessionCheck.isStale) {
-    console.log('  WARNING: Session is currently locked by another process.');
-    console.log(`           PID: ${sessionCheck.lock?.pid}`);
+    console.log('  경고: 세션이 현재 다른 프로세스에 의해 잠겨 있습니다.');
+    console.log(`        PID: ${sessionCheck.lock?.pid}`);
     console.log('');
-    console.log('Cannot start while another instance is running.');
+    console.log('다른 인스턴스가 실행 중일 때는 시작할 수 없습니다.');
     return 'abort';
   }
 
   if (resumable) {
-    console.log('This session can be resumed.');
+    console.log('이 세션은 재개할 수 있습니다.');
     console.log('');
-    console.log('  To resume:  ralph-tui resume');
-    console.log('  To start fresh: ralph-tui run --force');
+    console.log('  재개하려면:     ralph-tui resume');
+    console.log('  새로 시작하려면: ralph-tui run --force');
     console.log('');
-    console.log('Starting fresh session...');
-    console.log('(Use --resume flag or "ralph-tui resume" command to continue)');
+    console.log('새 세션을 시작합니다...');
+    console.log('(계속하려면 --resume 플래그 또는 "ralph-tui resume" 명령어 사용)');
     return 'new';
   } else {
-    console.log('This session has completed and cannot be resumed.');
-    console.log('Starting fresh session...');
+    console.log('이 세션은 완료되어 재개할 수 없습니다.');
+    console.log('새 세션을 시작합니다...');
     return 'new';
   }
 }
@@ -1363,15 +1363,15 @@ async function runHeadless(
     }
   });
 
-  // Graceful shutdown handler
+  // 정상 종료 핸들러
   const gracefulShutdown = async (): Promise<void> => {
-    logger.info('system', 'Interrupted, stopping gracefully...');
-    logger.info('system', '(Press Ctrl+C again within 1s to force quit)');
+    logger.info('system', '중단됨, 정상 종료 중...');
+    logger.info('system', '(1초 이내에 Ctrl+C를 다시 누르면 강제 종료)');
 
-    // Reset any active (in_progress) tasks back to open
+    // 활성 (in_progress) 작업들을 open으로 되돌림
     const activeTasks = getActiveTasks(currentState);
     if (activeTasks.length > 0) {
-      logger.info('system', `Resetting ${activeTasks.length} in_progress task(s) to open...`);
+      logger.info('system', `${activeTasks.length}개 in_progress 작업을 open으로 리셋 중...`);
       const resetCount = await engine.resetTasksToOpen(activeTasks);
       if (resetCount > 0) {
         currentState = clearActiveTasks(currentState);
@@ -1397,9 +1397,9 @@ async function runHeadless(
     const timeSinceLastSigint = now - lastSigintTime;
     lastSigintTime = now;
 
-    // Check for double-press - force quit immediately
+    // 더블 클릭 감지 - 즉시 강제 종료
     if (timeSinceLastSigint < DOUBLE_PRESS_WINDOW_MS) {
-      logger.warn('system', 'Force quit!');
+      logger.warn('system', '강제 종료!');
       process.exit(1);
     }
 
@@ -1407,14 +1407,14 @@ async function runHeadless(
     await gracefulShutdown();
   };
 
-  // Handle SIGTERM (always graceful, no double-press)
+  // SIGTERM 처리 (항상 정상 종료, 더블 클릭 없음)
   const handleSigterm = async (): Promise<void> => {
-    logger.info('system', 'Received SIGTERM, stopping gracefully...');
+    logger.info('system', 'SIGTERM 수신, 정상 종료 중...');
 
-    // Reset any active (in_progress) tasks back to open
+    // 활성 (in_progress) 작업들을 open으로 되돌림
     const activeTasks = getActiveTasks(currentState);
     if (activeTasks.length > 0) {
-      logger.info('system', `Resetting ${activeTasks.length} in_progress task(s) to open...`);
+      logger.info('system', `${activeTasks.length}개 in_progress 작업을 open으로 리셋 중...`);
       const resetCount = await engine.resetTasksToOpen(activeTasks);
       if (resetCount > 0) {
         currentState = clearActiveTasks(currentState);
@@ -1446,9 +1446,9 @@ async function runHeadless(
   // Start the engine
   await engine.start();
 
-  // In listen mode, keep process alive for remote connections
+  // 리슨 모드에서 원격 연결을 위해 프로세스 유지
   if (listenMode) {
-    logger.info('system', 'Engine idle. Waiting for remote commands (Ctrl+C to stop)...');
+    logger.info('system', '엔진 대기 중. 원격 명령 대기 중 (Ctrl+C로 중지)...');
 
     // Keep process alive until signal received
     await new Promise<void>((_resolve) => {
@@ -1463,58 +1463,58 @@ async function runHeadless(
 }
 
 /**
- * Execute the run command
+ * 실행 명령어 실행
  */
 export async function executeRunCommand(args: string[]): Promise<void> {
-  // Check for help
+  // 도움말 확인
   if (args.includes('--help') || args.includes('-h')) {
     printRunHelp();
     return;
   }
 
-  // Parse arguments
+  // 인자 파싱
   const options = parseRunArgs(args);
   const cwd = options.cwd ?? process.cwd();
 
-  // Check if project config exists
+  // 프로젝트 설정 존재 확인
   const configExists = await projectConfigExists(cwd);
 
   if (!configExists && !options.noSetup) {
-    // No config found - offer to run setup
+    // 설정 없음 - 설정 실행 제안
     console.log('');
-    console.log('No .ralph-tui/config.toml configuration found in this project.');
+    console.log('이 프로젝트에서 .ralph-tui/config.toml 설정을 찾을 수 없습니다.');
     console.log('');
 
-    // Run the setup wizard
+    // 설정 마법사 실행
     const result = await runSetupWizard({ cwd });
 
     if (!result.success) {
       if (result.cancelled) {
-        console.log('Run "ralph-tui setup" to configure later,');
-        console.log('or use "ralph-tui run --no-setup" to skip setup.');
+        console.log('나중에 설정하려면 "ralph-tui setup"을 실행하거나,');
+        console.log('"ralph-tui run --no-setup"으로 설정을 건너뛰세요.');
         return;
       }
-      console.error('Setup failed:', result.error);
+      console.error('설정 실패:', result.error);
       process.exit(1);
     }
 
-    // Setup completed, continue with run
+    // 설정 완료, 실행 계속
     console.log('');
-    console.log('Setup complete! Starting Ralph...');
+    console.log('설정 완료! Ralph를 시작합니다...');
     console.log('');
   } else if (!configExists && options.noSetup) {
-    console.log('No .ralph-tui/config.toml found. Using default configuration.');
+    console.log('.ralph-tui/config.toml을 찾을 수 없습니다. 기본 설정을 사용합니다.');
   }
 
-  // Check for config migrations (auto-upgrade on version changes)
+  // 설정 마이그레이션 확인 (버전 변경 시 자동 업그레이드)
   if (configExists) {
     const migrationResult = await checkAndMigrate(cwd, { quiet: false });
     if (migrationResult?.error) {
-      console.warn(`Warning: Config migration failed: ${migrationResult.error}`);
+      console.warn(`경고: 설정 마이그레이션 실패: ${migrationResult.error}`);
     }
   }
 
-  console.log('Initializing Ralph TUI...');
+  console.log('Ralph TUI 초기화 중...');
 
   // Initialize plugins
   await initializePlugins();
@@ -1528,25 +1528,25 @@ export async function executeRunCommand(args: string[]): Promise<void> {
   // Load stored config for settings view (used when TUI is running)
   const storedConfig = await loadStoredConfig(cwd);
 
-  // Validate configuration
+  // 설정 유효성 검사
   const validation = await validateConfig(config);
   if (!validation.valid) {
-    console.error('\nConfiguration errors:');
+    console.error('\n설정 오류:');
     for (const error of validation.errors) {
       console.error(`  - ${error}`);
     }
     process.exit(1);
   }
 
-  // Show warnings
+  // 경고 표시
   for (const warning of validation.warnings) {
-    console.warn(`Warning: ${warning}`);
+    console.warn(`경고: ${warning}`);
   }
 
-  // Run preflight check if --verify flag is specified
+  // --verify 플래그가 지정된 경우 사전 점검 실행
   if (options.verify) {
     console.log('');
-    console.log('Running agent preflight check...');
+    console.log('에이전트 사전 점검 실행 중...');
 
     const agentRegistry = getAgentRegistry();
     const agentInstance = await agentRegistry.getInstance(config.agent);
@@ -1554,70 +1554,70 @@ export async function executeRunCommand(args: string[]): Promise<void> {
     const preflightResult = await agentInstance.preflight({ timeout: 30000 });
 
     if (preflightResult.success) {
-      console.log('✓ Agent is ready');
+      console.log('✓ 에이전트 준비 완료');
       if (preflightResult.durationMs) {
-        console.log(`  Response time: ${preflightResult.durationMs}ms`);
+        console.log(`  응답 시간: ${preflightResult.durationMs}ms`);
       }
       console.log('');
     } else {
       console.error('');
-      console.error('❌ Agent preflight check failed');
+      console.error('❌ 에이전트 사전 점검 실패');
       if (preflightResult.error) {
         console.error(`   ${preflightResult.error}`);
       }
       if (preflightResult.suggestion) {
         console.error('');
-        console.error('Suggestions:');
+        console.error('제안:');
         for (const line of preflightResult.suggestion.split('\n')) {
           console.error(`  ${line}`);
         }
       }
       console.error('');
-      console.error('Run "ralph-tui doctor" for detailed diagnostics.');
+      console.error('자세한 진단은 "ralph-tui doctor"를 실행하세요.');
       process.exit(1);
     }
   }
 
-  // If using beads tracker without epic, show epic selection TUI
+  // beads 트래커 사용 시 에픽이 지정되지 않으면 에픽 선택 TUI 표시
   const isBeadsTracker = config.tracker.plugin === 'beads' || config.tracker.plugin === 'beads-bv';
   if (isBeadsTracker && !config.epicId && config.showTui) {
-    console.log('No epic specified. Loading epic selection...');
+    console.log('에픽이 지정되지 않았습니다. 에픽 선택 화면 로딩 중...');
 
-    // Get tracker instance for epic selection
+    // 에픽 선택을 위한 트래커 인스턴스 가져오기
     const trackerRegistry = getTrackerRegistry();
     const tracker = await trackerRegistry.getInstance(config.tracker);
 
-    // Show epic selection TUI
+    // 에픽 선택 TUI 표시
     const selectedEpic = await showEpicSelectionTui(tracker);
 
     if (!selectedEpic) {
-      console.log('Epic selection cancelled.');
+      console.log('에픽 선택이 취소되었습니다.');
       process.exit(0);
     }
 
-    // Update config with selected epic
+    // 선택한 에픽으로 설정 업데이트
     config.epicId = selectedEpic.id;
     config.tracker.options.epicId = selectedEpic.id;
 
-    // If the tracker has a setEpicId method, call it
+    // 트래커에 setEpicId 메서드가 있으면 호출
     if (tracker instanceof BeadsTrackerPlugin) {
       tracker.setEpicId(selectedEpic.id);
     }
 
-    console.log(`Selected epic: ${selectedEpic.id} - ${selectedEpic.title}`);
+    console.log(`선택된 에픽: ${selectedEpic.id} - ${selectedEpic.title}`);
     console.log('');
   }
 
-  // Detect and recover stale sessions EARLY (before any prompts)
-  // This fixes the issue where killing the TUI mid-task leaves activeTaskIds populated
+  // 지연된 세션을 프롬프트 전에 조기 감지 및 복구
+  // TUI가 작업 중간에 종료되어 activeTaskIds가 남아있는 문제를 수정
   const staleRecovery = await detectAndRecoverStaleSession(config.cwd, checkLock);
   if (staleRecovery.wasStale) {
     console.log('');
-    console.log('⚠️  Recovered stale session');
+    console.log('⚠️  지연된 세션 복구됨');
     if (staleRecovery.clearedTaskCount > 0) {
-      console.log(`   Cleared ${staleRecovery.clearedTaskCount} stuck in-progress task(s)`);
+      console.log(`   ${staleRecovery.clearedTaskCount}개의 중단된 in_progress 작업 정리됨`);
     }
-    console.log('   Session status set to "interrupted" (resumable)');
+    console.log('   세션 상태가 "interrupted" (재개 가능)로 설정됨');
     console.log('');
   }
 
@@ -1648,9 +1648,9 @@ export async function executeRunCommand(args: string[]): Promise<void> {
   });
 
   if (!lockResult.acquired) {
-    console.error(`\nError: ${lockResult.error}`);
+    console.error(`\n오류: ${lockResult.error}`);
     if (lockResult.existingPid) {
-      console.error('  Use --force to override.');
+      console.error('  --force를 사용하여 강제로 시작할 수 있습니다.');
     }
     process.exit(1);
   }
@@ -1658,13 +1658,13 @@ export async function executeRunCommand(args: string[]): Promise<void> {
   // Register cleanup handlers to release lock on exit/crash
   const cleanupLockHandlers = registerLockCleanupHandlers(config.cwd);
 
-  // Handle resume or new session
+  // 재개 또는 새 세션 처리
   let session;
   if (options.resume && sessionCheck.hasSession) {
-    console.log('Resuming previous session...');
+    console.log('이전 세션 재개 중...');
     session = await resumeSession(config.cwd);
     if (!session) {
-      console.error('Failed to resume session');
+      console.error('세션 재개 실패');
       await releaseLockNew(config.cwd);
       cleanupLockHandlers();
       process.exit(1);
@@ -1720,7 +1720,7 @@ export async function executeRunCommand(args: string[]): Promise<void> {
     tasks = await tracker.getTasks({ status: ['open', 'in_progress', 'completed'] });
   } catch (error) {
     console.error(
-      'Failed to initialize engine:',
+      '엔진 초기화 실패:',
       error instanceof Error ? error.message : error
     );
     await endSession(config.cwd, 'failed');
@@ -1729,9 +1729,9 @@ export async function executeRunCommand(args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  // Warn if --rotate-token is used without --listen
+  // --listen 없이 --rotate-token 사용 시 경고
   if (options.rotateToken && !options.listen) {
-    console.warn('Warning: --rotate-token has no effect without --listen');
+    console.warn('경고: --rotate-token은 --listen 없이는 효과가 없습니다');
   }
 
   // Start remote listener if --listen flag is set
@@ -1740,14 +1740,14 @@ export async function executeRunCommand(args: string[]): Promise<void> {
     try {
       const listenPort = options.listenPort ?? DEFAULT_LISTEN_OPTIONS.port;
 
-      // Handle token rotation if requested
+      // 요청 시 토큰 갱신 처리
       let token;
       let isNew = false;
       if (options.rotateToken) {
         token = await rotateServerToken();
-        isNew = true; // Treat rotated token as new (show it once)
+        isNew = true; // 갱신된 토큰을 새 토큰으로 취급 (한 번만 표시)
         console.log('');
-        console.log('Token rotated successfully.');
+        console.log('토큰이 성공적으로 갱신되었습니다.');
       } else {
         const result = await getOrCreateServerToken();
         token = result.token;
@@ -1783,44 +1783,44 @@ export async function executeRunCommand(args: string[]): Promise<void> {
       const serverState = await remoteServer.start();
       const actualPort = serverState.port;
 
-      // Display connection info
+      // 연결 정보 표시
       console.log('');
       console.log('═══════════════════════════════════════════════════════════════');
-      console.log('                    Remote Listener Enabled                     ');
+      console.log('                    원격 리스너 활성화됨                         ');
       console.log('═══════════════════════════════════════════════════════════════');
       console.log('');
       if (actualPort !== listenPort) {
-        console.log(`  Port: ${actualPort} (requested ${listenPort} was in use)`);
+        console.log(`  포트: ${actualPort} (요청한 ${listenPort}는 사용 중)`);
       } else {
-        console.log(`  Port: ${actualPort}`);
+        console.log(`  포트: ${actualPort}`);
       }
       if (isNew) {
-        // First time or rotated - show full token
+        // 처음 또는 갱신됨 - 전체 토큰 표시
         console.log('');
-        console.log('  New server token generated:');
+        console.log('  새 서버 토큰이 생성되었습니다:');
         console.log(`  ${token.value}`);
         console.log('');
-        console.log('  ⚠️  Save this token securely - it won\'t be shown again!');
+        console.log('  ⚠️  이 토큰을 안전하게 저장하세요 - 다시 표시되지 않습니다!');
       } else {
-        // Subsequent runs - show preview only (security: avoid showing in logs/screen shares)
+        // 이후 실행 - 보안상 미리보기만 표시 (로그/화면 공유에 노출 방지)
         const tokenPreview = token.value.substring(0, 8) + '...';
-        console.log(`  Token: ${tokenPreview}`);
+        console.log(`  토큰: ${tokenPreview}`);
         const tokenInfo = await getServerTokenInfo();
         if (tokenInfo.daysRemaining !== undefined && tokenInfo.daysRemaining <= 7) {
-          console.log(`  ⚠️  Token expires in ${tokenInfo.daysRemaining} day${tokenInfo.daysRemaining !== 1 ? 's' : ''}!`);
+          console.log(`  ⚠️  토큰이 ${tokenInfo.daysRemaining}일 후 만료됩니다!`);
         }
         console.log('');
-        console.log('  Hint: Use --rotate-token to generate a new token and see the full value.');
+        console.log('  힌트: --rotate-token을 사용하여 새 토큰을 생성하고 전체 값을 확인하세요.');
       }
       console.log('');
-      console.log('  Connect from another machine:');
-      console.log(`    ralph-tui remote add <alias> <this-host>:${actualPort} --token <token>`);
+      console.log('  다른 머신에서 연결:');
+      console.log(`    ralph-tui remote add <별칭> <이-호스트>:${actualPort} --token <토큰>`);
       console.log('');
       console.log('═══════════════════════════════════════════════════════════════');
       console.log('');
     } catch (error) {
       console.error(
-        'Failed to start remote listener:',
+        '원격 리스너 시작 실패:',
         error instanceof Error ? error.message : error
       );
       await endSession(config.cwd, 'failed');
@@ -1887,7 +1887,7 @@ export async function executeRunCommand(args: string[]): Promise<void> {
     }
   } catch (error) {
     console.error(
-      'Execution error:',
+      '실행 오류:',
       error instanceof Error ? error.message : error
     );
     // Save failed state
@@ -1907,20 +1907,20 @@ export async function executeRunCommand(args: string[]): Promise<void> {
     finalState.status === 'idle';
 
   if (allComplete) {
-    // Mark as completed and clean up session file
+    // 완료로 표시하고 세션 파일 정리
     persistedState = completeSession(persistedState);
     await savePersistedSession(persistedState);
-    // Delete session file on successful completion
+    // 성공적인 완료 시 세션 파일 삭제
     await deletePersistedSession(config.cwd);
-    // Remove from registry on completion
+    // 완료 시 레지스트리에서 제거
     await unregisterSession(session.id);
-    console.log('\nSession completed successfully. Session file cleaned up.');
+    console.log('\n세션이 성공적으로 완료되었습니다. 세션 파일이 정리되었습니다.');
   } else {
-    // Save current state (session remains resumable)
+    // 현재 상태 저장 (세션은 재개 가능)
     await savePersistedSession(persistedState);
-    // Update registry with current status
+    // 현재 상태로 레지스트리 업데이트
     await updateRegistryStatus(session.id, persistedState.status);
-    console.log('\nSession state saved. Use "ralph-tui resume" to continue.');
+    console.log('\n세션 상태가 저장되었습니다. "ralph-tui resume"로 계속할 수 있습니다.');
   }
 
   // Stop remote server if running
@@ -1928,11 +1928,11 @@ export async function executeRunCommand(args: string[]): Promise<void> {
     await remoteServer.stop();
   }
 
-  // End session and clean up lock
+  // 세션 종료 및 잠금 정리
   await endSession(config.cwd, allComplete ? 'completed' : 'interrupted');
   await releaseLockNew(config.cwd);
   cleanupLockHandlers();
-  console.log('\nRalph TUI finished.');
+  console.log('\nRalph TUI가 종료되었습니다.');
 
   // Explicitly exit - event listeners may keep process alive otherwise
   process.exit(0);

@@ -1,7 +1,7 @@
 /**
- * ABOUTME: System info command for ralph-tui.
- * Outputs diagnostic information useful for bug reports.
- * Collects version info, config paths, environment details, and skills.
+ * ABOUTME: ralph-tui의 시스템 정보 명령어.
+ * 버그 리포트에 유용한 진단 정보를 출력합니다.
+ * 버전 정보, 설정 경로, 환경 세부사항, 스킬을 수집합니다.
  */
 
 import { platform, release, arch } from 'node:os';
@@ -17,17 +17,17 @@ import { getUserConfigDir } from '../templates/engine.js';
 import { listBundledSkills, resolveSkillsPath } from '../setup/skill-installer.js';
 
 /**
- * Compute the path to package.json based on the current module location.
- * Works in both development (src/) and bundled (dist/) environments.
+ * 현재 모듈 위치를 기반으로 package.json 경로 계산.
+ * 개발 환경(src/)과 번들 환경(dist/) 모두에서 작동합니다.
  *
- * @param currentDir - The directory where the code is running from
- * @returns The computed path to package.json
+ * @param currentDir - 코드가 실행되는 디렉토리
+ * @returns 계산된 package.json 경로
  */
 export function computePackageJsonPath(currentDir: string): string {
-  // When bundled by bun, all code is in dist/cli.js (single file bundle).
-  // package.json is at the package root (one level up from dist/).
-  // In development, this file is at src/commands/info.ts,
-  // and package.json is at the project root (up 2 levels).
+  // bun으로 번들링 시 모든 코드는 dist/cli.js에 있음 (단일 파일 번들).
+  // package.json은 패키지 루트에 있음 (dist/에서 한 레벨 위).
+  // 개발 환경에서 이 파일은 src/commands/info.ts에 있고,
+  // package.json은 프로젝트 루트에 있음 (2레벨 위).
   if (currentDir.endsWith('dist') || currentDir.includes('/dist/') || currentDir.includes('\\dist\\')) {
     return join(currentDir, '..', 'package.json');
   }
@@ -35,8 +35,8 @@ export function computePackageJsonPath(currentDir: string): string {
 }
 
 /**
- * Get the package version from package.json.
- * Uses import.meta.url for correct path resolution in ESM bundles.
+ * package.json에서 패키지 버전 가져오기.
+ * ESM 번들에서 올바른 경로 해석을 위해 import.meta.url 사용.
  */
 async function getPackageVersion(): Promise<string> {
   try {
@@ -48,110 +48,110 @@ async function getPackageVersion(): Promise<string> {
       return parsed.version;
     }
   } catch {
-    // Fall through to unknown
+    // unknown으로 폴스루
   }
   return 'unknown';
 }
 
 /**
- * Information about an agent's skills installation status.
+ * 에이전트 스킬 설치 상태 정보
  */
 export interface AgentSkillsInfo {
-  /** Agent plugin ID */
+  /** 에이전트 플러그인 ID */
   id: string;
-  /** Agent display name */
+  /** 에이전트 표시 이름 */
   name: string;
-  /** Whether the agent is available/detected */
+  /** 에이전트 사용 가능/감지 여부 */
   available: boolean;
-  /** Personal skills directory path */
+  /** 개인 스킬 디렉토리 경로 */
   personalDir: string;
-  /** Repo skills directory pattern */
+  /** 저장소 스킬 디렉토리 패턴 */
   repoDir: string;
-  /** Skills installed in personal directory */
+  /** 개인 디렉토리에 설치된 스킬 */
   personalSkills: string[];
 }
 
 /**
- * Skills information for the system info output.
+ * 시스템 정보 출력용 스킬 정보
  */
 export interface SkillsInfo {
-  /** Bundled skills available for installation */
+  /** 설치 가능한 번들 스킬 */
   bundled: string[];
-  /** Custom skills directory (from config) */
+  /** 커스텀 스킬 디렉토리 (설정에서) */
   customDir: string | null;
-  /** Skills found in custom directory */
+  /** 커스텀 디렉토리에서 발견된 스킬 */
   customSkills: string[];
-  /** Per-agent skills information */
+  /** 에이전트별 스킬 정보 */
   agents: AgentSkillsInfo[];
 }
 
 /**
- * System info result
+ * 시스템 정보 결과
  */
 export interface SystemInfo {
-  /** ralph-tui version */
+  /** ralph-tui 버전 */
   version: string;
 
-  /** Runtime info */
+  /** 런타임 정보 */
   runtime: {
-    /** Bun or Node version */
+    /** Bun 또는 Node 버전 */
     version: string;
-    /** Runtime name */
+    /** 런타임 이름 */
     name: 'bun' | 'node';
   };
 
-  /** Operating system info */
+  /** 운영체제 정보 */
   os: {
     platform: string;
     release: string;
     arch: string;
   };
 
-  /** Configuration info */
+  /** 설정 정보 */
   config: {
-    /** Global config path */
+    /** 전역 설정 경로 */
     globalPath: string;
-    /** Global config exists */
+    /** 전역 설정 존재 여부 */
     globalExists: boolean;
-    /** Project config path (if found) */
+    /** 프로젝트 설정 경로 (발견된 경우) */
     projectPath: string | null;
-    /** Project config exists */
+    /** 프로젝트 설정 존재 여부 */
     projectExists: boolean;
   };
 
-  /** Templates info */
+  /** 템플릿 정보 */
   templates: {
-    /** Global templates directory */
+    /** 전역 템플릿 디렉토리 */
     globalDir: string;
-    /** Templates found */
+    /** 발견된 템플릿 */
     installed: string[];
   };
 
-  /** Agent info */
+  /** 에이전트 정보 */
   agent: {
-    /** Configured agent name */
+    /** 설정된 에이전트 이름 */
     name: string;
-    /** Agent detected/available */
+    /** 에이전트 감지/사용 가능 여부 */
     available: boolean;
-    /** Agent version (if available) */
+    /** 에이전트 버전 (사용 가능한 경우) */
     version?: string;
-    /** Detection error (if any) */
+    /** 감지 오류 (있는 경우) */
     error?: string;
   };
 
-  /** Tracker info */
+  /** 트래커 정보 */
   tracker: {
-    /** Configured tracker name */
+    /** 설정된 트래커 이름 */
     name: string;
   };
 
-  /** Skills info */
+  /** 스킬 정보 */
   skills: SkillsInfo;
 }
 
 /**
- * List skill directories found in a given path.
- * Skills are identified by having a SKILL.md file.
+ * 주어진 경로에서 발견된 스킬 디렉토리 나열.
+ * 스킬은 SKILL.md 파일이 있으면 식별됩니다.
  */
 async function listSkillsInDir(skillsDir: string): Promise<string[]> {
   const skills: string[] = [];
@@ -164,29 +164,29 @@ async function listSkillsInDir(skillsDir: string): Promise<string[]> {
           await access(skillMdPath, constants.F_OK);
           skills.push(entry.name);
         } catch {
-          // Not a skill directory
+          // 스킬 디렉토리가 아님
         }
       }
     }
   } catch {
-    // Directory doesn't exist or can't read
+    // 디렉토리가 존재하지 않거나 읽을 수 없음
   }
   return skills;
 }
 
 /**
- * Collect skills information from all sources.
+ * 모든 소스에서 스킬 정보 수집
  */
 async function collectSkillsInfo(
   agentRegistry: ReturnType<typeof getAgentRegistry>,
   customSkillsDir: string | null,
   cwd: string
 ): Promise<SkillsInfo> {
-  // Get bundled skills
+  // 번들 스킬 가져오기
   const bundledSkills = await listBundledSkills();
   const bundledNames = bundledSkills.map((s) => s.name);
 
-  // Check custom skills directory
+  // 커스텀 스킬 디렉토리 확인
   let customSkills: string[] = [];
   let resolvedCustomDir: string | null = null;
   if (customSkillsDir) {
@@ -194,17 +194,17 @@ async function collectSkillsInfo(
     customSkills = await listSkillsInDir(resolvedCustomDir);
   }
 
-  // Get per-agent skills info
+  // 에이전트별 스킬 정보 가져오기
   const agents: AgentSkillsInfo[] = [];
   const plugins = agentRegistry.getRegisteredPlugins();
 
   for (const meta of plugins) {
-    // Skip agents without skillsPaths defined
+    // skillsPaths가 정의되지 않은 에이전트 건너뛰기
     if (!meta.skillsPaths) {
       continue;
     }
 
-    // Check if agent is available
+    // 에이전트 사용 가능 여부 확인
     const instance = agentRegistry.createInstance(meta.id);
     let available = false;
     if (instance) {
@@ -218,7 +218,7 @@ async function collectSkillsInfo(
       }
     }
 
-    // Get installed skills in personal directory
+    // 개인 디렉토리에 설치된 스킬 가져오기
     const personalDir = resolveSkillsPath(meta.skillsPaths.personal);
     const personalSkills = await listSkillsInDir(personalDir);
 
@@ -241,35 +241,35 @@ async function collectSkillsInfo(
 }
 
 /**
- * Collect system information for bug reports
+ * 버그 리포트용 시스템 정보 수집
  */
 export async function collectSystemInfo(cwd: string = process.cwd()): Promise<SystemInfo> {
-  // Get version first (async)
+  // 먼저 버전 가져오기 (비동기)
   const version = await getPackageVersion();
 
-  // Load config with source info
+  // 소스 정보와 함께 설정 로드
   const { config, source } = await loadStoredConfigWithSource(cwd);
 
-  // Check global config exists
+  // 전역 설정 존재 여부 확인
   let globalExists = false;
   try {
     await access(CONFIG_PATHS.global, constants.R_OK);
     globalExists = true;
   } catch {
-    // Doesn't exist
+    // 존재하지 않음
   }
 
-  // Check templates directory
+  // 템플릿 디렉토리 확인
   const templatesDir = join(getUserConfigDir(), 'templates');
   const installedTemplates: string[] = [];
   try {
     const files = await readdir(templatesDir);
     installedTemplates.push(...files.filter((f) => f.endsWith('.hbs')));
   } catch {
-    // Directory doesn't exist or can't read
+    // 디렉토리가 존재하지 않거나 읽을 수 없음
   }
 
-  // Get agent info
+  // 에이전트 정보 가져오기
   registerBuiltinAgents();
   const agentRegistry = getAgentRegistry();
   const agentName = config.agent ?? 'claude';
@@ -289,20 +289,20 @@ export async function collectSystemInfo(cwd: string = process.cwd()): Promise<Sy
       agentVersion = detection.version;
       agentError = detection.error;
     } else {
-      agentError = `Unknown agent plugin: ${agentName}`;
+      agentError = `알 수 없는 에이전트 플러그인: ${agentName}`;
     }
   } catch (error) {
     agentError = error instanceof Error ? error.message : String(error);
   }
 
-  // Get tracker info
+  // 트래커 정보 가져오기
   registerBuiltinTrackers();
   const trackerName = config.tracker ?? 'beads';
 
-  // Collect skills info
+  // 스킬 정보 수집
   const skills = await collectSkillsInfo(agentRegistry, config.skills_dir ?? null, cwd);
 
-  // Determine runtime
+  // 런타임 결정
   const isBun = typeof Bun !== 'undefined';
   const runtimeVersion = isBun ? Bun.version : process.version;
 
@@ -341,81 +341,81 @@ export async function collectSystemInfo(cwd: string = process.cwd()): Promise<Sy
 }
 
 /**
- * Format system info for display
+ * 표시용 시스템 정보 포맷
  */
 export function formatSystemInfo(info: SystemInfo): string {
   const lines: string[] = [];
 
-  lines.push('ralph-tui System Information');
-  lines.push('============================');
+  lines.push('ralph-tui 시스템 정보');
+  lines.push('====================');
   lines.push('');
 
-  // Version info
-  lines.push(`ralph-tui version: ${info.version}`);
-  lines.push(`Runtime: ${info.runtime.name} ${info.runtime.version}`);
+  // 버전 정보
+  lines.push(`ralph-tui 버전: ${info.version}`);
+  lines.push(`런타임: ${info.runtime.name} ${info.runtime.version}`);
   lines.push(`OS: ${info.os.platform} ${info.os.release} (${info.os.arch})`);
   lines.push('');
 
-  // Config info
-  lines.push('Configuration:');
-  lines.push(`  Global config: ${info.config.globalPath}`);
-  lines.push(`    Exists: ${info.config.globalExists ? 'yes' : 'no'}`);
+  // 설정 정보
+  lines.push('설정:');
+  lines.push(`  전역 설정: ${info.config.globalPath}`);
+  lines.push(`    존재: ${info.config.globalExists ? '예' : '아니오'}`);
   if (info.config.projectPath) {
-    lines.push(`  Project config: ${info.config.projectPath}`);
-    lines.push(`    Exists: ${info.config.projectExists ? 'yes' : 'no'}`);
+    lines.push(`  프로젝트 설정: ${info.config.projectPath}`);
+    lines.push(`    존재: ${info.config.projectExists ? '예' : '아니오'}`);
   } else {
-    lines.push('  Project config: (none found)');
+    lines.push('  프로젝트 설정: (찾을 수 없음)');
   }
   lines.push('');
 
-  // Templates info
-  lines.push('Templates:');
-  lines.push(`  Directory: ${info.templates.globalDir}`);
+  // 템플릿 정보
+  lines.push('템플릿:');
+  lines.push(`  디렉토리: ${info.templates.globalDir}`);
   if (info.templates.installed.length > 0) {
-    lines.push(`  Installed: ${info.templates.installed.join(', ')}`);
+    lines.push(`  설치됨: ${info.templates.installed.join(', ')}`);
   } else {
-    lines.push('  Installed: (none)');
+    lines.push('  설치됨: (없음)');
   }
   lines.push('');
 
-  // Agent info
-  lines.push('Agent:');
-  lines.push(`  Configured: ${info.agent.name}`);
-  lines.push(`  Available: ${info.agent.available ? 'yes' : 'no'}`);
+  // 에이전트 정보
+  lines.push('에이전트:');
+  lines.push(`  설정됨: ${info.agent.name}`);
+  lines.push(`  사용 가능: ${info.agent.available ? '예' : '아니오'}`);
   if (info.agent.version) {
-    lines.push(`  Version: ${info.agent.version}`);
+    lines.push(`  버전: ${info.agent.version}`);
   }
   if (info.agent.error) {
-    lines.push(`  Error: ${info.agent.error}`);
+    lines.push(`  오류: ${info.agent.error}`);
   }
   lines.push('');
 
-  // Tracker info
-  lines.push('Tracker:');
-  lines.push(`  Configured: ${info.tracker.name}`);
+  // 트래커 정보
+  lines.push('트래커:');
+  lines.push(`  설정됨: ${info.tracker.name}`);
   lines.push('');
 
-  // Skills info
-  lines.push('Skills:');
-  lines.push(`  Bundled: ${info.skills.bundled.length > 0 ? info.skills.bundled.join(', ') : '(none)'}`);
+  // 스킬 정보
+  lines.push('스킬:');
+  lines.push(`  번들: ${info.skills.bundled.length > 0 ? info.skills.bundled.join(', ') : '(없음)'}`);
 
   if (info.skills.customDir) {
-    lines.push(`  Custom directory: ${info.skills.customDir}`);
-    lines.push(`    Installed: ${info.skills.customSkills.length > 0 ? info.skills.customSkills.join(', ') : '(none)'}`);
+    lines.push(`  커스텀 디렉토리: ${info.skills.customDir}`);
+    lines.push(`    설치됨: ${info.skills.customSkills.length > 0 ? info.skills.customSkills.join(', ') : '(없음)'}`);
   }
 
   for (const agent of info.skills.agents) {
-    const status = agent.available ? '' : ' (not detected)';
+    const status = agent.available ? '' : ' (감지되지 않음)';
     lines.push(`  ${agent.name}${status}:`);
-    lines.push(`    Path: ${agent.personalDir}`);
-    lines.push(`    Installed: ${agent.personalSkills.length > 0 ? agent.personalSkills.join(', ') : '(none)'}`);
+    lines.push(`    경로: ${agent.personalDir}`);
+    lines.push(`    설치됨: ${agent.personalSkills.length > 0 ? agent.personalSkills.join(', ') : '(없음)'}`);
   }
 
   return lines.join('\n');
 }
 
 /**
- * Format system info as copyable bug report snippet
+ * 시스템 정보를 복사 가능한 버그 리포트 스니펫으로 포맷
  */
 export function formatForBugReport(info: SystemInfo): string {
   const lines: string[] = [];
@@ -442,7 +442,7 @@ export function formatForBugReport(info: SystemInfo): string {
   return lines.join('\n');
 }
 
-// ANSI colors
+// ANSI 색상
 const RESET = '\x1b[0m';
 const BOLD = '\x1b[1m';
 const DIM = '\x1b[2m';
@@ -450,9 +450,9 @@ const YELLOW = '\x1b[33m';
 const CYAN = '\x1b[36m';
 
 /**
- * Parse --cwd argument from args array.
- * Handles both '--cwd path' and '--cwd=path' forms.
- * Uses indexOf to avoid truncating paths containing '=' characters.
+ * args 배열에서 --cwd 인자 파싱.
+ * '--cwd path'와 '--cwd=path' 형식 모두 처리.
+ * '=' 문자가 포함된 경로 잘림을 방지하기 위해 indexOf 사용.
  */
 export function parseCwdArg(args: string[]): string {
   for (let i = 0; i < args.length; i++) {
@@ -473,7 +473,7 @@ export function parseCwdArg(args: string[]): string {
 }
 
 /**
- * Execute the info command
+ * info 명령어 실행
  */
 export async function executeInfoCommand(args: string[]): Promise<void> {
   const jsonOutput = args.includes('--json');
@@ -482,34 +482,34 @@ export async function executeInfoCommand(args: string[]): Promise<void> {
 
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`
-${BOLD}ralph-tui info${RESET} - Display system information for bug reports
+${BOLD}ralph-tui info${RESET} - 버그 리포트용 시스템 정보 표시
 
-${BOLD}Usage:${RESET} ralph-tui info [options]
+${BOLD}사용법:${RESET} ralph-tui info [옵션]
 
-${BOLD}Options:${RESET}
-  ${DIM}--json${RESET}            Output in JSON format
-  ${DIM}--copyable, -c${RESET}    Output in copyable format for bug reports
-  ${DIM}--cwd <path>${RESET}      Working directory (default: current directory)
-  ${DIM}-h, --help${RESET}        Show this help message
+${BOLD}옵션:${RESET}
+  ${DIM}--json${RESET}            JSON 형식으로 출력
+  ${DIM}--copyable, -c${RESET}    버그 리포트용 복사 가능한 형식으로 출력
+  ${DIM}--cwd <path>${RESET}      작업 디렉토리 (기본값: 현재 디렉토리)
+  ${DIM}-h, --help${RESET}        이 도움말 표시
 
-${BOLD}Description:${RESET}
-  Collects and displays diagnostic information about your ralph-tui
-  installation. This is useful for including in bug reports.
+${BOLD}설명:${RESET}
+  ralph-tui 설치에 대한 진단 정보를 수집하고 표시합니다.
+  버그 리포트에 포함하기 유용합니다.
 
-  Information collected:
-  - ralph-tui version
-  - Runtime (Bun/Node) version
-  - Operating system details
-  - Configuration file locations and status
-  - Installed templates
-  - Agent detection status
-  - Tracker configuration
-  - Installed skills (per agent and custom directory)
+  수집되는 정보:
+  - ralph-tui 버전
+  - 런타임 (Bun/Node) 버전
+  - 운영체제 세부사항
+  - 설정 파일 위치 및 상태
+  - 설치된 템플릿
+  - 에이전트 감지 상태
+  - 트래커 설정
+  - 설치된 스킬 (에이전트별 및 커스텀 디렉토리)
 
-${BOLD}Examples:${RESET}
-  ${CYAN}ralph-tui info${RESET}              # Display system info
-  ${CYAN}ralph-tui info --json${RESET}       # JSON output for scripts
-  ${CYAN}ralph-tui info -c${RESET}           # Copyable format for bug reports
+${BOLD}예시:${RESET}
+  ${CYAN}ralph-tui info${RESET}              # 시스템 정보 표시
+  ${CYAN}ralph-tui info --json${RESET}       # 스크립트용 JSON 출력
+  ${CYAN}ralph-tui info -c${RESET}           # 버그 리포트용 복사 가능한 형식
 `);
     return;
   }
@@ -525,11 +525,11 @@ ${BOLD}Examples:${RESET}
       console.log();
       console.log(formatSystemInfo(info));
       console.log();
-      console.log(`${DIM}Tip: Use ${CYAN}ralph-tui info -c${RESET}${DIM} for a copyable bug report format${RESET}`);
+      console.log(`${DIM}팁: 복사 가능한 버그 리포트 형식은 ${CYAN}ralph-tui info -c${RESET}${DIM} 사용${RESET}`);
       console.log();
     }
   } catch (error) {
-    console.error(`${YELLOW}Error collecting system info:${RESET}`, error instanceof Error ? error.message : error);
+    console.error(`${YELLOW}시스템 정보 수집 오류:${RESET}`, error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }

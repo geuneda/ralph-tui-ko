@@ -1,6 +1,6 @@
 /**
- * ABOUTME: Main App component for the Ralph TUI.
- * Composes Header, LeftPanel, RightPanel, and Footer into a responsive layout.
+ * ABOUTME: Ralph TUI용 메인 App 컴포넌트.
+ * Header, LeftPanel, RightPanel, Footer를 반응형 레이아웃으로 구성합니다.
  */
 
 import { useKeyboard, useTerminalDimensions } from '@opentui/react';
@@ -14,18 +14,18 @@ import { LeftPanel } from './LeftPanel.js';
 import { RightPanel } from './RightPanel.js';
 
 /**
- * Props for the App component
+ * App 컴포넌트 Props
  */
 export interface AppProps {
-  /** Initial application state */
+  /** 초기 애플리케이션 상태 */
   initialState?: Partial<AppState>;
-  /** Callback when quit is requested */
+  /** 종료 요청 시 콜백 */
   onQuit?: () => void;
 }
 
 /**
- * Create default application state with empty tasks.
- * Real tasks come from the tracker when using 'ralph-tui run'.
+ * 빈 작업으로 기본 애플리케이션 상태 생성.
+ * 실제 작업은 'ralph-tui run' 사용 시 트래커에서 가져옵니다.
  */
 function createDefaultState(tasks: TaskItem[] = []): AppState {
   const completedTasksCount = tasks.filter((t) => t.status === 'done').length;
@@ -44,14 +44,14 @@ function createDefaultState(tasks: TaskItem[] = []): AppState {
     rightPanel: {
       selectedTask: tasks[0] ?? null,
       currentIteration: 1,
-      iterationOutput: 'Starting iteration...',
+      iterationOutput: '반복 시작 중...',
     },
   };
 }
 
 /**
- * Main App component with responsive layout
- * Note: Task details are shown inline in the RightPanel, no separate drill-down view
+ * 반응형 레이아웃을 가진 메인 App 컴포넌트
+ * 참고: 작업 상세는 RightPanel에 인라인으로 표시되며, 별도의 드릴다운 뷰 없음
  */
 export function App({ initialState, onQuit }: AppProps): ReactNode {
   const { width, height } = useTerminalDimensions();
@@ -61,7 +61,7 @@ export function App({ initialState, onQuit }: AppProps): ReactNode {
   }));
   const [elapsedTime, setElapsedTime] = useState(state.header.elapsedTime);
 
-  // Update elapsed time every second
+  // 매초 경과 시간 업데이트
   useEffect(() => {
     const interval = setInterval(() => {
       setElapsedTime((prev) => prev + 1);
@@ -69,7 +69,7 @@ export function App({ initialState, onQuit }: AppProps): ReactNode {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle keyboard navigation
+  // 키보드 탐색 처리
   const handleKeyboard = useCallback(
     (key: { name: string }) => {
       const { tasks, selectedIndex } = state.leftPanel;
@@ -77,7 +77,7 @@ export function App({ initialState, onQuit }: AppProps): ReactNode {
       switch (key.name) {
         case 'q':
         case 'escape':
-          // Quit the application
+          // 애플리케이션 종료
           onQuit?.();
           process.exit(0);
           break;
@@ -107,7 +107,7 @@ export function App({ initialState, onQuit }: AppProps): ReactNode {
           break;
 
         case 'p':
-          // Toggle pause/resume
+          // 일시정지/재개 전환
           setState((prev) => ({
             ...prev,
             header: {
@@ -123,10 +123,10 @@ export function App({ initialState, onQuit }: AppProps): ReactNode {
 
   useKeyboard(handleKeyboard);
 
-  // Calculate content area height (total height minus header and footer)
+  // 콘텐츠 영역 높이 계산 (전체 높이에서 헤더와 푸터 제외)
   const contentHeight = Math.max(1, height - layout.header.height - layout.footer.height);
 
-  // Determine if we should use a compact layout for narrow terminals
+  // 좁은 터미널에서 컴팩트 레이아웃 사용 여부 결정
   const isCompact = width < 80;
 
   return (
@@ -138,7 +138,7 @@ export function App({ initialState, onQuit }: AppProps): ReactNode {
         backgroundColor: colors.bg.primary,
       }}
     >
-      {/* Header - compact design */}
+      {/* 헤더 - 컴팩트 디자인 */}
       <Header
         status={state.header.status}
         elapsedTime={elapsedTime}
@@ -146,7 +146,7 @@ export function App({ initialState, onQuit }: AppProps): ReactNode {
         totalTasks={state.header.totalTasks}
       />
 
-      {/* Main content area */}
+      {/* 메인 콘텐츠 영역 */}
       <box
         style={{
           flexGrow: 1,
@@ -165,7 +165,7 @@ export function App({ initialState, onQuit }: AppProps): ReactNode {
         />
       </box>
 
-      {/* Footer */}
+      {/* 푸터 */}
       <Footer />
     </box>
   );

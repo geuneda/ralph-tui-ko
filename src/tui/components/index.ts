@@ -1,6 +1,6 @@
 /**
- * ABOUTME: Component barrel exports for the Ralph TUI.
- * Re-exports all TUI components from a single entry point.
+ * ABOUTME: Ralph TUI용 컴포넌트 배럴 내보내기.
+ * 단일 진입점에서 모든 TUI 컴포넌트를 재내보내기합니다.
  */
 
 export { App } from './App.js';

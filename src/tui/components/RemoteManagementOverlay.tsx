@@ -1,7 +1,7 @@
 /**
- * ABOUTME: Overlay component for managing remote instances (add, edit, delete).
- * Provides a unified form for adding new remotes or editing existing ones,
- * and a confirmation dialog for deletions.
+ * ABOUTME: 원격 인스턴스 관리를 위한 오버레이 컴포넌트 (추가, 수정, 삭제).
+ * 새 원격을 추가하거나 기존 원격을 수정하기 위한 통합 폼과
+ * 삭제를 위한 확인 다이얼로그를 제공합니다.
  */
 
 import type { ReactNode } from 'react';
@@ -10,12 +10,12 @@ import { useKeyboard } from '@opentui/react';
 import { colors } from '../theme.js';
 
 /**
- * Mode determines which UI to show
+ * 표시할 UI를 결정하는 모드
  */
 export type RemoteManagementMode = 'add' | 'edit' | 'delete';
 
 /**
- * Data for an existing remote (for edit/delete modes)
+ * 기존 원격 데이터 (수정/삭제 모드용)
  */
 export interface ExistingRemoteData {
   alias: string;
@@ -25,25 +25,25 @@ export interface ExistingRemoteData {
 }
 
 /**
- * Props for the RemoteManagementOverlay component
+ * RemoteManagementOverlay 컴포넌트 Props
  */
 export interface RemoteManagementOverlayProps {
-  /** Whether the overlay is visible */
+  /** 오버레이 표시 여부 */
   visible: boolean;
-  /** Current mode: add, edit, or delete */
+  /** 현재 모드: 추가, 수정, 또는 삭제 */
   mode: RemoteManagementMode;
-  /** Existing remote data for edit/delete modes */
+  /** 수정/삭제 모드용 기존 원격 데이터 */
   existingRemote?: ExistingRemoteData;
-  /** Callback when saving (add or edit) */
+  /** 저장 시 콜백 (추가 또는 수정) */
   onSave: (data: { alias: string; host: string; port: number; token: string }) => Promise<void>;
-  /** Callback when deleting */
+  /** 삭제 시 콜백 */
   onDelete: (alias: string) => Promise<void>;
-  /** Callback when closing the overlay */
+  /** 오버레이 닫기 시 콜백 */
   onClose: () => void;
 }
 
 /**
- * Form field indices for keyboard navigation
+ * 키보드 탐색용 폼 필드 인덱스
  */
 const FIELD_ALIAS = 0;
 const FIELD_HOST = 1;
@@ -52,54 +52,54 @@ const FIELD_TOKEN = 3;
 const FIELD_COUNT = 4;
 
 /**
- * Validate alias format
+ * 별칭 형식 검증
  */
 function validateAlias(alias: string): string | null {
   if (!alias.trim()) {
-    return 'Alias is required';
+    return '별칭은 필수입니다';
   }
   if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(alias)) {
-    return 'Alias must start with a letter and contain only letters, numbers, dashes, and underscores';
+    return '별칭은 문자로 시작해야 하며 문자, 숫자, 대시, 밑줄만 포함할 수 있습니다';
   }
   return null;
 }
 
 /**
- * Validate host
+ * 호스트 검증
  */
 function validateHost(host: string): string | null {
   if (!host.trim()) {
-    return 'Host is required';
+    return '호스트는 필수입니다';
   }
   return null;
 }
 
 /**
- * Validate port
+ * 포트 검증
  */
 function validatePort(portStr: string): string | null {
   if (!portStr.trim()) {
-    return 'Port is required';
+    return '포트는 필수입니다';
   }
   const port = parseInt(portStr, 10);
   if (isNaN(port) || port < 1 || port > 65535) {
-    return 'Port must be a number between 1 and 65535';
+    return '포트는 1에서 65535 사이의 숫자여야 합니다';
   }
   return null;
 }
 
 /**
- * Validate token
+ * 토큰 검증
  */
 function validateToken(token: string): string | null {
   if (!token.trim()) {
-    return 'Token is required';
+    return '토큰은 필수입니다';
   }
   return null;
 }
 
 /**
- * RemoteManagementOverlay - handles add, edit, delete operations for remotes
+ * RemoteManagementOverlay - 원격 추가, 수정, 삭제 작업 처리
  */
 export function RemoteManagementOverlay({
   visible,
@@ -109,19 +109,19 @@ export function RemoteManagementOverlay({
   onDelete,
   onClose,
 }: RemoteManagementOverlayProps): ReactNode {
-  // Form state
+  // 폼 상태
   const [alias, setAlias] = useState('');
   const [host, setHost] = useState('');
   const [port, setPort] = useState('7890');
   const [token, setToken] = useState('');
 
-  // UI state
+  // UI 상태
   const [focusedField, setFocusedField] = useState(FIELD_ALIAS);
   const [showToken, setShowToken] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Reset form state when opening
+  // 열 때 폼 상태 초기화
   useEffect(() => {
     if (visible) {
       if (mode === 'add') {
@@ -143,9 +143,9 @@ export function RemoteManagementOverlay({
     }
   }, [visible, mode, existingRemote]);
 
-  // Handle form submission
+  // 폼 제출 처리
   const handleSubmit = useCallback(async () => {
-    // Validate all fields
+    // 모든 필드 검증
     const aliasError = validateAlias(alias);
     if (aliasError) {
       setError(aliasError);
@@ -184,28 +184,28 @@ export function RemoteManagementOverlay({
         port: parseInt(port, 10),
         token: token.trim(),
       });
-      // onClose will be called by parent after successful save
+      // 저장 성공 후 부모에서 onClose 호출
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save remote');
+      setError(err instanceof Error ? err.message : '원격 저장 실패');
       setSaving(false);
     }
   }, [alias, host, port, token, onSave]);
 
-  // Handle delete confirmation
+  // 삭제 확인 처리
   const handleDelete = useCallback(async () => {
     if (!existingRemote) return;
 
     setSaving(true);
     try {
       await onDelete(existingRemote.alias);
-      // onClose will be called by parent after successful delete
+      // 삭제 성공 후 부모에서 onClose 호출
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete remote');
+      setError(err instanceof Error ? err.message : '원격 삭제 실패');
       setSaving(false);
     }
   }, [existingRemote, onDelete]);
 
-  // Update the currently focused field's value
+  // 현재 포커스된 필드의 값 업데이트
   const updateCurrentField = useCallback((updater: (prev: string) => string) => {
     switch (focusedField) {
       case FIELD_ALIAS:
@@ -223,16 +223,16 @@ export function RemoteManagementOverlay({
     }
   }, [focusedField]);
 
-  // Handle keyboard input
+  // 키보드 입력 처리
   useKeyboard(
     useCallback(
       (key) => {
         if (!visible) return;
 
-        // Clear error on any key press
+        // 아무 키나 누르면 오류 지우기
         setError(null);
 
-        // Delete confirmation mode has different keyboard handling
+        // 삭제 확인 모드는 다른 키보드 처리 사용
         if (mode === 'delete') {
           switch (key.name) {
             case 'y':
@@ -246,10 +246,10 @@ export function RemoteManagementOverlay({
           return;
         }
 
-        // Form mode (add/edit)
+        // 폼 모드 (추가/수정)
         switch (key.name) {
           case 'tab':
-            // Navigate between fields
+            // 필드 간 이동
             if (key.shift) {
               setFocusedField((prev) => (prev - 1 + FIELD_COUNT) % FIELD_COUNT);
             } else {
@@ -271,15 +271,15 @@ export function RemoteManagementOverlay({
             break;
 
           default:
-            // Toggle token visibility with '*'
+            // '*'로 토큰 표시 토글
             if (key.sequence === '*') {
               setShowToken((prev) => !prev);
               break;
             }
 
-            // Append printable characters to current field
+            // 현재 필드에 출력 가능 문자 추가
             if (key.sequence && key.sequence.length === 1) {
-              // Only allow digits for port field
+              // 포트 필드는 숫자만 허용
               if (focusedField === FIELD_PORT) {
                 if (/^\d$/.test(key.sequence)) {
                   updateCurrentField((prev) => prev + key.sequence);
@@ -297,7 +297,7 @@ export function RemoteManagementOverlay({
 
   if (!visible) return null;
 
-  // Delete confirmation UI
+  // 삭제 확인 UI
   if (mode === 'delete' && existingRemote) {
     return (
       <box
@@ -323,15 +323,15 @@ export function RemoteManagementOverlay({
           }}
           border
         >
-          {/* Header */}
+          {/* 헤더 */}
           <box style={{ marginBottom: 1, justifyContent: 'center' }}>
-            <text fg={colors.status.error}>Delete Remote</text>
+            <text fg={colors.status.error}>원격 삭제</text>
           </box>
 
-          {/* Confirmation message */}
+          {/* 확인 메시지 */}
           <box style={{ marginBottom: 1 }}>
             <text fg={colors.fg.primary}>
-              Are you sure you want to delete
+              정말 삭제하시겠습니까
             </text>
           </box>
           <box style={{ marginBottom: 1, justifyContent: 'center' }}>
@@ -339,24 +339,24 @@ export function RemoteManagementOverlay({
             <text fg={colors.fg.primary}>?</text>
           </box>
 
-          {/* Remote details */}
+          {/* 원격 상세 */}
           <box style={{ marginBottom: 1 }}>
             <text fg={colors.fg.muted}>
-              Host: {existingRemote.host}:{existingRemote.port}
+              호스트: {existingRemote.host}:{existingRemote.port}
             </text>
           </box>
 
-          {/* Error message */}
+          {/* 오류 메시지 */}
           {error && (
             <box style={{ marginBottom: 1 }}>
               <text fg={colors.status.error}>{error}</text>
             </box>
           )}
 
-          {/* Footer */}
+          {/* 푸터 */}
           <box style={{ marginTop: 1, justifyContent: 'center' }}>
             <text fg={colors.fg.muted}>
-              {saving ? 'Deleting...' : '[y] Yes, delete    [n/Esc] Cancel'}
+              {saving ? '삭제 중...' : '[y] 예, 삭제    [n/Esc] 취소'}
             </text>
           </box>
         </box>
@@ -364,8 +364,8 @@ export function RemoteManagementOverlay({
     );
   }
 
-  // Add/Edit form UI
-  const title = mode === 'add' ? 'Add Remote' : 'Edit Remote';
+  // 추가/수정 폼 UI
+  const title = mode === 'add' ? '원격 추가' : '원격 수정';
 
   return (
     <box
@@ -391,53 +391,53 @@ export function RemoteManagementOverlay({
         }}
         border
       >
-        {/* Header */}
+        {/* 헤더 */}
         <box style={{ marginBottom: 1, justifyContent: 'center' }}>
           <text fg={colors.accent.primary}>{title}</text>
         </box>
 
-        {/* Form fields */}
+        {/* 폼 필드 */}
         <FormField
-          label="Alias"
+          label="별칭"
           value={alias}
           focused={focusedField === FIELD_ALIAS}
         />
         <FormField
-          label="Host"
+          label="호스트"
           value={host}
           focused={focusedField === FIELD_HOST}
         />
         <FormField
-          label="Port"
+          label="포트"
           value={port}
           focused={focusedField === FIELD_PORT}
         />
         <FormField
-          label="Token"
+          label="토큰"
           value={showToken ? token : '*'.repeat(token.length || 8)}
           focused={focusedField === FIELD_TOKEN}
         />
 
-        {/* Token visibility hint */}
+        {/* 토큰 표시 힌트 */}
         <box style={{ paddingLeft: 10, marginBottom: 1 }}>
           <text fg={colors.fg.muted}>
-            Press * to {showToken ? 'hide' : 'show'} token
+            * 키로 토큰 {showToken ? '숨기기' : '표시'}
           </text>
         </box>
 
-        {/* Error message */}
+        {/* 오류 메시지 */}
         {error && (
           <box style={{ marginTop: 1, justifyContent: 'center' }}>
             <text fg={colors.status.error}>{error}</text>
           </box>
         )}
 
-        {/* Footer with hints */}
+        {/* 힌트가 있는 푸터 */}
         <box style={{ marginTop: 1, justifyContent: 'center' }}>
           <text fg={colors.fg.muted}>
             {saving
-              ? 'Saving...'
-              : '[Tab] Next field  [Enter] Save  [Esc] Cancel'}
+              ? '저장 중...'
+              : '[Tab] 다음 필드  [Enter] 저장  [Esc] 취소'}
           </text>
         </box>
       </box>
@@ -446,7 +446,7 @@ export function RemoteManagementOverlay({
 }
 
 /**
- * Form field component for consistent field rendering
+ * 일관된 필드 렌더링을 위한 폼 필드 컴포넌트
  */
 interface FormFieldProps {
   label: string;
@@ -482,12 +482,12 @@ function FormField({ label, value, focused, disabled }: FormFieldProps): ReactNo
         border={focused}
       >
         <text fg={fieldFg}>
-          {value || (focused ? '' : '(empty)')}
+          {value || (focused ? '' : '(비어 있음)')}
           {focused && !disabled ? '▏' : ''}
         </text>
       </box>
       {disabled && (
-        <text fg={colors.fg.muted}> (readonly)</text>
+        <text fg={colors.fg.muted}> (읽기 전용)</text>
       )}
     </box>
   );

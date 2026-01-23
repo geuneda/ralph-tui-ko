@@ -1,16 +1,16 @@
 /**
- * ABOUTME: Footer component for the Ralph TUI.
- * Displays keyboard shortcuts for user reference.
+ * ABOUTME: Ralph TUI용 푸터 컴포넌트.
+ * 사용자 참조용 키보드 단축키를 표시합니다.
  */
 
 import type { ReactNode } from 'react';
 import { colors, keyboardShortcuts, layout } from '../theme.js';
 
 /**
- * Footer component showing keyboard shortcuts
+ * 키보드 단축키를 보여주는 푸터 컴포넌트
  */
 export function Footer(): ReactNode {
-  // Format keyboard shortcuts as a single string
+  // 키보드 단축키를 단일 문자열로 포맷
   const shortcutText = keyboardShortcuts
     .map(({ key, description }) => `${key}:${description}`)
     .join('  ');
@@ -30,7 +30,7 @@ export function Footer(): ReactNode {
         borderColor: colors.border.normal,
       }}
     >
-      {/* Keyboard shortcuts */}
+      {/* 키보드 단축키 */}
       <box style={{ flexShrink: 1, overflow: 'hidden' }}>
         <text fg={colors.fg.muted}>{shortcutText}</text>
       </box>

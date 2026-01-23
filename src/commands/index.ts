@@ -1,6 +1,6 @@
 /**
- * ABOUTME: Commands module for ralph-tui CLI commands.
- * Exports all CLI command handlers for the ralph-tui application.
+ * ABOUTME: ralph-tui CLI 명령어 모듈.
+ * ralph-tui 애플리케이션의 모든 CLI 명령어 핸들러를 내보냅니다.
  */
 
 export {

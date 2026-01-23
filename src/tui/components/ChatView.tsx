@@ -1,7 +1,7 @@
 /**
- * ABOUTME: Reusable chat interface component for the Ralph TUI.
- * Displays a conversation with an AI agent, supporting streaming output,
- * user input, and message history. Used primarily for PRD generation.
+ * ABOUTME: Ralph TUI용 재사용 가능한 채팅 인터페이스 컴포넌트.
+ * 스트리밍 출력, 사용자 입력, 메시지 이력을 지원하는 AI 에이전트와의
+ * 대화를 표시합니다. 주로 PRD 생성에 사용됩니다.
  */
 
 import type { ReactNode } from 'react';
@@ -14,12 +14,12 @@ import { FormattedText } from './FormattedText.js';
 import type { FormattedSegment } from '../../plugins/agents/output-formatting.js';
 
 /**
- * Spinner frames for animation
+ * 애니메이션용 스피너 프레임
  */
 const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 /**
- * Animated spinner component for loading states
+ * 로딩 상태용 애니메이션 스피너 컴포넌트
  */
 function AnimatedSpinner(): ReactNode {
   const [frameIndex, setFrameIndex] = useState(0);
@@ -36,57 +36,57 @@ function AnimatedSpinner(): ReactNode {
 }
 
 /**
- * Props for the ChatView component
+ * ChatView 컴포넌트 Props
  */
 export interface ChatViewProps {
-  /** Title to display in the header */
+  /** 헤더에 표시할 제목 */
   title: string;
 
-  /** Subtitle shown next to title */
+  /** 제목 옆에 표시되는 부제목 */
   subtitle?: string;
 
-  /** Conversation messages to display */
+  /** 표시할 대화 메시지 */
   messages: ChatMessage[];
 
-  /** Current user input value */
+  /** 현재 사용자 입력 값 */
   inputValue: string;
 
-  /** Whether the assistant is currently generating a response */
+  /** 어시스턴트가 현재 응답을 생성 중인지 여부 */
   isLoading: boolean;
 
-  /** Status text to show during loading */
+  /** 로딩 중 표시할 상태 텍스트 */
   loadingStatus?: string;
 
-  /** Streaming output chunk (displayed during generation) - legacy string format */
+  /** 스트리밍 출력 청크 (생성 중 표시됨) - 레거시 문자열 형식 */
   streamingChunk?: string;
 
-  /** Streaming output segments for TUI-native color rendering */
+  /** TUI 네이티브 색상 렌더링용 스트리밍 출력 세그먼트 */
   streamingSegments?: FormattedSegment[];
 
-  /** Placeholder text for the input field */
+  /** 입력 필드의 플레이스홀더 텍스트 */
   inputPlaceholder?: string;
 
-  /** Error message to display */
+  /** 표시할 오류 메시지 */
   error?: string;
 
-  /** Whether input is enabled */
+  /** 입력 활성화 여부 */
   inputEnabled?: boolean;
 
-  /** Cursor position in the input (0 = start, inputValue.length = end) */
+  /** 입력의 커서 위치 (0 = 시작, inputValue.length = 끝) */
   cursorPosition?: number;
 
-  /** Hint text for the footer */
+  /** 푸터의 힌트 텍스트 */
   hint?: string;
 
-  /** Name of the agent (for loading messages) */
+  /** 에이전트 이름 (로딩 메시지용) */
   agentName?: string;
 
-  /** Callback when user submits (presses Ctrl+Enter) with the current input value */
+  /** 사용자가 제출할 때 (Enter 누를 때) 현재 입력 값과 함께 호출되는 콜백 */
   onSubmit?: (value: string) => void;
 }
 
 /**
- * Format a timestamp for display
+ * 표시용 타임스탬프 포맷
  */
 function formatTime(date: Date): string {
   return date.toLocaleTimeString('en-US', {
@@ -98,11 +98,11 @@ function formatTime(date: Date): string {
 
 
 /**
- * MessageBubble component for displaying a single chat message
+ * 단일 채팅 메시지를 표시하는 MessageBubble 컴포넌트
  */
 function MessageBubble({ message }: { message: ChatMessage }): ReactNode {
   const isUser = message.role === 'user';
-  const roleLabel = isUser ? 'You' : 'Assistant';
+  const roleLabel = isUser ? '사용자' : '어시스턴트';
   const roleColor = isUser ? colors.accent.primary : colors.accent.secondary;
 
   return (
@@ -113,13 +113,13 @@ function MessageBubble({ message }: { message: ChatMessage }): ReactNode {
         marginBottom: 1,
       }}
     >
-      {/* Role and timestamp header */}
+      {/* 역할과 타임스탬프 헤더 */}
       <box style={{ flexDirection: 'row', gap: 1 }}>
         <text fg={roleColor}>{roleLabel}</text>
         <text fg={colors.fg.dim}>{formatTime(message.timestamp)}</text>
       </box>
 
-      {/* Message content */}
+      {/* 메시지 내용 */}
       <box style={{ paddingLeft: 2, paddingTop: 0 }}>
         <text fg={colors.fg.primary}>
           {message.content}
@@ -130,7 +130,7 @@ function MessageBubble({ message }: { message: ChatMessage }): ReactNode {
 }
 
 /**
- * ChatView component - displays a chat conversation with input
+ * ChatView 컴포넌트 - 입력이 있는 채팅 대화를 표시
  */
 export function ChatView({
   title,
@@ -138,68 +138,68 @@ export function ChatView({
   messages,
   inputValue,
   isLoading,
-  loadingStatus = 'Thinking...',
+  loadingStatus = '생각 중...',
   streamingChunk,
   streamingSegments,
-  inputPlaceholder = 'Type a message...',
+  inputPlaceholder = '메시지를 입력하세요...',
   error,
   inputEnabled = true,
-  cursorPosition: _cursorPosition, // Not used with native input
-  hint = '[Ctrl+Enter] Send  [Esc] Cancel',
+  cursorPosition: _cursorPosition, // 네이티브 입력에서는 사용되지 않음
+  hint = '[Enter] 전송  [Shift+Enter] 줄바꿈  [Esc] 취소',
   agentName,
   onSubmit,
 }: ChatViewProps): ReactNode {
-  // Generate dynamic loading text
+  // 동적 로딩 텍스트 생성
   const loadingText = agentName
-    ? `Waiting for ${agentName}...`
+    ? `${agentName} 응답 대기 중...`
     : loadingStatus;
 
-  // Textarea ref for submit handling and value access
+  // 제출 처리 및 값 접근을 위한 Textarea ref
   const textareaRef = useRef<TextareaRenderable>(null);
 
-  // Sync textarea content when inputValue changes from outside (e.g., after clearing)
+  // 외부에서 inputValue가 변경될 때 (예: 클리어 후) textarea 내용 동기화
   useEffect(() => {
     if (textareaRef.current && inputValue !== textareaRef.current.plainText) {
       textareaRef.current.editBuffer.setText(inputValue);
     }
   }, [inputValue]);
 
-  // Handle submit - get value from textarea ref and pass it directly, then clear
+  // 제출 처리 - textarea ref에서 값을 가져와 직접 전달한 후 클리어
   const handleSubmit = useCallback(() => {
     const currentValue = textareaRef.current?.plainText ?? '';
-    // Clear the textarea immediately before calling onSubmit
-    // This ensures the input is cleared even if there's a delay
+    // onSubmit 호출 전 textarea를 즉시 클리어
+    // 지연이 있어도 입력이 클리어되도록 보장
     if (textareaRef.current) {
       textareaRef.current.editBuffer.setText('');
     }
     onSubmit?.(currentValue);
   }, [onSubmit]);
 
-  // Handle keyboard for text editing shortcuts (macOS-style)
+  // 텍스트 편집 단축키용 키보드 처리 (macOS 스타일)
   const handleKeyboard = useCallback(
     (key: KeyEvent) => {
-      // Only handle if textarea is focused and input is enabled
+      // textarea가 포커스되고 입력이 활성화된 경우에만 처리
       if (!textareaRef.current || !inputEnabled || isLoading) {
         return;
       }
 
       const textarea = textareaRef.current;
 
-      // Enter = submit (without modifiers)
+      // Enter = 제출 (수정자 없이)
       if (key.name === 'return' && !key.meta && !key.ctrl && !key.shift) {
         key.preventDefault?.();
         handleSubmit();
         return;
       }
 
-      // Shift+Enter or Ctrl+J = insert newline
+      // Shift+Enter 또는 Ctrl+J = 줄바꿈 삽입
       if ((key.shift && key.name === 'return') || (key.ctrl && key.name === 'j')) {
         key.preventDefault?.();
         textarea.newLine();
         return;
       }
 
-      // === Option + Arrow Keys (word navigation) ===
+      // === Option + 화살표 키 (단어 탐색) ===
       if (key.option && !key.shift && !key.meta && !key.ctrl) {
         if (key.name === 'left') {
           key.preventDefault?.();
@@ -223,20 +223,20 @@ export function ChatView({
         }
       }
 
-      // === Option + Delete (delete word) ===
+      // === Option + Delete (단어 삭제) ===
       if (key.option && key.name === 'backspace') {
         key.preventDefault?.();
         textarea.deleteWordBackward();
         return;
       }
-      // Option + Fn + Delete (Forward Delete on some keyboards)
+      // Option + Fn + Delete (일부 키보드에서 전방 삭제)
       if (key.option && key.name === 'delete') {
         key.preventDefault?.();
         textarea.deleteWordForward();
         return;
       }
 
-      // === Shift + Option + Arrow Keys (select by word/paragraph) ===
+      // === Shift + Option + 화살표 키 (단어/문단 단위 선택) ===
       if (key.shift && key.option && !key.meta && !key.ctrl) {
         if (key.name === 'left') {
           key.preventDefault?.();
@@ -260,7 +260,7 @@ export function ChatView({
         }
       }
 
-      // === Shift + Arrow Keys (select by character/line) ===
+      // === Shift + 화살표 키 (문자/줄 단위 선택) ===
       if (key.shift && !key.meta && !key.option && !key.ctrl) {
         if (key.name === 'left') {
           key.preventDefault?.();
@@ -284,7 +284,7 @@ export function ChatView({
         }
       }
 
-      // === Shift + Cmd + Arrow Keys (select to line start/end) ===
+      // === Shift + Cmd + 화살표 키 (줄 시작/끝까지 선택) ===
       if (key.shift && key.meta && !key.option && !key.ctrl) {
         if (key.name === 'left') {
           key.preventDefault?.();
@@ -322,7 +322,7 @@ export function ChatView({
         backgroundColor: colors.bg.primary,
       }}
     >
-      {/* Header */}
+      {/* 헤더 */}
       <box
         style={{
           width: '100%',
@@ -342,11 +342,11 @@ export function ChatView({
           {subtitle && <text fg={colors.fg.muted}>{subtitle}</text>}
         </box>
         <text fg={colors.fg.muted}>
-          {messages.length} message{messages.length !== 1 ? 's' : ''}
+          {messages.length}개 메시지
         </text>
       </box>
 
-      {/* Message area */}
+      {/* 메시지 영역 */}
       <box
         style={{
           flexGrow: 1,
@@ -357,25 +357,25 @@ export function ChatView({
         }}
       >
         <scrollbox style={{ flexGrow: 1 }} stickyScroll={true} stickyStart="bottom">
-          {/* Welcome message if no messages */}
+          {/* 메시지가 없을 때 환영 메시지 */}
           {messages.length === 0 && !isLoading && (
             <box style={{ marginBottom: 1 }}>
               <text fg={colors.fg.secondary}>
-                Start the conversation by typing a message below.
+                아래에 메시지를 입력하여 대화를 시작하세요.
               </text>
             </box>
           )}
 
-          {/* Message history */}
+          {/* 메시지 이력 */}
           {messages.map((msg, index) => (
             <MessageBubble key={index} message={msg} />
           ))}
 
-          {/* Streaming output during generation - prefer segments for TUI-native colors */}
+          {/* 생성 중 스트리밍 출력 - TUI 네이티브 색상을 위해 세그먼트 선호 */}
           {isLoading && (streamingSegments?.length || streamingChunk) && (
             <box style={{ flexDirection: 'column', marginBottom: 1 }}>
               <box style={{ flexDirection: 'row', gap: 1 }}>
-                <text fg={colors.accent.secondary}>Assistant</text>
+                <text fg={colors.accent.secondary}>어시스턴트</text>
                 <AnimatedSpinner />
               </box>
               <box style={{ paddingLeft: 2, flexDirection: 'row', flexWrap: 'wrap' }}>
@@ -390,16 +390,16 @@ export function ChatView({
             </box>
           )}
 
-          {/* Loading indicator */}
+          {/* 로딩 표시기 */}
           {isLoading && !streamingChunk && !streamingSegments?.length && (
             <box style={{ flexDirection: 'row', gap: 1, marginBottom: 1 }}>
-              <text fg={colors.accent.secondary}>Assistant</text>
+              <text fg={colors.accent.secondary}>어시스턴트</text>
               <AnimatedSpinner />
               <text fg={colors.fg.muted}>{loadingText}</text>
             </box>
           )}
 
-          {/* Error message */}
+          {/* 오류 메시지 */}
           {error && (
             <box
               style={{
@@ -410,13 +410,13 @@ export function ChatView({
                 borderColor: colors.status.error,
               }}
             >
-              <text fg={colors.status.error}>Error: {error}</text>
+              <text fg={colors.status.error}>오류: {error}</text>
             </box>
           )}
         </scrollbox>
       </box>
 
-      {/* Input area */}
+      {/* 입력 영역 */}
       <box
         style={{
           width: '100%',
@@ -429,7 +429,7 @@ export function ChatView({
           paddingRight: 1,
         }}
       >
-        {/* Textarea for multi-line input with word wrap */}
+        {/* 단어 줄바꿈이 있는 여러 줄 입력용 Textarea */}
         <box
           style={{
             flexGrow: 1,
@@ -456,7 +456,7 @@ export function ChatView({
           />
         </box>
 
-        {/* Hint bar - positioned on bottom border */}
+        {/* 힌트 바 - 하단 테두리에 위치 */}
         <box
           style={{
             position: 'absolute',

@@ -1,8 +1,8 @@
 /**
- * ABOUTME: RunApp component for the Ralph TUI execution view.
- * Integrates with the execution engine to display real-time progress.
- * US-5: Extended with connection resilience toast notifications.
- * Handles graceful interruption with confirmation dialog.
+ * ABOUTME: Ralph TUI 실행 뷰를 위한 RunApp 컴포넌트.
+ * 실행 엔진과 통합하여 실시간 진행 상황을 표시합니다.
+ * US-5: 연결 복원력 토스트 알림으로 확장됨.
+ * 확인 다이얼로그를 통한 우아한 중단 처리.
  */
 
 import { useKeyboard, useTerminalDimensions, useRenderer } from '@opentui/react';
@@ -54,86 +54,86 @@ import { StreamingOutputParser } from '../output-parser.js';
 import type { FormattedSegment } from '../../plugins/agents/output-formatting.js';
 
 /**
- * View modes for the RunApp component
- * - 'tasks': Show the task list (default)
- * - 'iterations': Show the iteration history
- * - 'iteration-detail': Show detailed view of a single iteration
- * Note: Task details are now shown inline in the RightPanel, not as a separate view
+ * RunApp 컴포넌트의 뷰 모드
+ * - 'tasks': 작업 목록 표시 (기본값)
+ * - 'iterations': 반복 히스토리 표시
+ * - 'iteration-detail': 단일 반복의 상세 뷰 표시
+ * 참고: 작업 상세는 이제 별도 뷰가 아닌 RightPanel에 인라인으로 표시됨
  */
 type ViewMode = 'tasks' | 'iterations' | 'iteration-detail';
 
 /**
- * Focused pane for TAB-based navigation between panels.
- * - 'output': RightPanel output view has keyboard focus (j/k scroll output)
- * - 'subagentTree': SubagentTreePanel has keyboard focus (j/k select nodes)
+ * TAB 기반 패널 간 탐색을 위한 포커스된 패널.
+ * - 'output': RightPanel 출력 뷰가 키보드 포커스 (j/k로 출력 스크롤)
+ * - 'subagentTree': SubagentTreePanel이 키보드 포커스 (j/k로 노드 선택)
  */
 type FocusedPane = 'output' | 'subagentTree';
 
 /**
- * Props for the RunApp component
+ * RunApp 컴포넌트 Props
  */
 export interface RunAppProps {
-  /** The execution engine instance */
+  /** 실행 엔진 인스턴스 */
   engine: ExecutionEngine;
-  /** Current working directory for loading historical logs */
+  /** 히스토리 로그 로딩을 위한 현재 작업 디렉토리 */
   cwd: string;
-  /** Callback when quit is requested */
+  /** 종료 요청 시 콜백 */
   onQuit?: () => Promise<void>;
-  /** Callback when Enter is pressed on an iteration to drill into details */
+  /** 반복에서 Enter 키를 눌러 상세 보기로 이동할 때 콜백 */
   onIterationDrillDown?: (iteration: IterationResult) => void;
-  /** Whether the interrupt confirmation dialog is showing */
+  /** 중단 확인 다이얼로그 표시 여부 */
   showInterruptDialog?: boolean;
-  /** Callback when user confirms interrupt */
+  /** 사용자가 중단을 확인할 때 콜백 */
   onInterruptConfirm?: () => void;
-  /** Callback when user cancels interrupt */
+  /** 사용자가 중단을 취소할 때 콜백 */
   onInterruptCancel?: () => void;
-  /** Initial tasks to display before engine starts */
+  /** 엔진 시작 전 표시할 초기 작업 목록 */
   initialTasks?: TrackerTask[];
-  /** Callback when user wants to start the engine (s key in ready state) */
+  /** 사용자가 엔진을 시작하려 할 때 콜백 (ready 상태에서 s 키) */
   onStart?: () => Promise<void>;
-  /** Current stored configuration (for settings view) */
+  /** 현재 저장된 설정 (설정 뷰용) */
   storedConfig?: StoredConfig;
-  /** Available agent plugins (for settings view) */
+  /** 사용 가능한 에이전트 플러그인 목록 (설정 뷰용) */
   availableAgents?: AgentPluginMeta[];
-  /** Available tracker plugins (for settings view) */
+  /** 사용 가능한 트래커 플러그인 목록 (설정 뷰용) */
   availableTrackers?: TrackerPluginMeta[];
-  /** Callback when settings should be saved */
+  /** 설정 저장 시 콜백 */
   onSaveSettings?: (config: StoredConfig) => Promise<void>;
-  /** Callback to load available epics for the epic loader */
+  /** 에픽 로더용 에픽 목록 로드 콜백 */
   onLoadEpics?: () => Promise<TrackerTask[]>;
-  /** Callback when user selects a new epic */
+  /** 사용자가 새 에픽을 선택할 때 콜백 */
   onEpicSwitch?: (epic: TrackerTask) => Promise<void>;
-  /** Callback when user enters a file path (json tracker) */
+  /** 사용자가 파일 경로를 입력할 때 콜백 (json 트래커) */
   onFilePathSwitch?: (path: string) => Promise<boolean>;
-  /** Current tracker type to determine epic loader mode */
+  /** 에픽 로더 모드 결정을 위한 현재 트래커 타입 */
   trackerType?: string;
-  /** Current agent plugin name (from resolved config, includes CLI override) */
+  /** 현재 에이전트 플러그인 이름 (CLI 오버라이드 포함 해결된 설정에서) */
   agentPlugin?: string;
-  /** Current epic ID for highlighting in the loader */
+  /** 로더에서 강조 표시할 현재 에픽 ID */
   currentEpicId?: string;
-  /** Initial subagent panel visibility state (from persisted session) */
+  /** 초기 서브에이전트 패널 표시 상태 (지속된 세션에서) */
   initialSubagentPanelVisible?: boolean;
-  /** Callback when subagent panel visibility changes (to persist state) */
+  /** 서브에이전트 패널 표시 상태 변경 시 콜백 (상태 지속용) */
   onSubagentPanelVisibilityChange?: (visible: boolean) => void;
-  /** Current model being used (provider/model format, e.g., "anthropic/claude-3-5-sonnet") */
+  /** 현재 사용 중인 모델 (provider/model 형식, 예: "anthropic/claude-3-5-sonnet") */
   currentModel?: string;
-  /** Sandbox configuration for display in header */
+  /** 헤더 표시용 샌드박스 설정 */
   sandboxConfig?: SandboxConfig;
-  /** Resolved sandbox mode (when mode is 'auto', this shows what it resolved to) */
+  /** 해결된 샌드박스 모드 (mode가 'auto'일 때 실제 해결된 값) */
   resolvedSandboxMode?: Exclude<SandboxMode, 'auto'>;
-  /** Instance tabs for remote navigation (local first, then remotes) */
+  /** 원격 탐색용 인스턴스 탭 (로컬 먼저, 그 다음 원격) */
   instanceTabs?: InstanceTab[];
-  /** Currently selected instance tab index */
+  /** 현재 선택된 인스턴스 탭 인덱스 */
   selectedTabIndex?: number;
-  /** Callback when a tab is selected */
+  /** 탭 선택 시 콜백 */
   onSelectTab?: (index: number) => void;
-  /** Connection toast to display (from InstanceManager) */
+  /** 표시할 연결 토스트 (InstanceManager에서) */
   connectionToast?: ConnectionToastMessage | null;
-  /** Instance manager for remote data fetching */
+  /** 원격 데이터 가져오기용 인스턴스 매니저 */
   instanceManager?: import('../../remote/instance-manager.js').InstanceManager;
-  /** Whether to show the epic loader immediately on startup (for json tracker without PRD path) */
+  /** 시작 시 에픽 로더 즉시 표시 여부 (PRD 경로 없는 json 트래커용) */
   initialShowEpicLoader?: boolean;
-  /** Local git repository info (from server's working directory) */
+  /** 로컬 git 저장소 정보 (서버의 작업 디렉토리에서) */
   localGitInfo?: {
     repoName?: string;
     branch?: string;
@@ -817,15 +817,15 @@ export function RunApp({
 
     // If no task is selected, clear the preview
     if (!effectiveTaskId) {
-      setPromptPreview('No task selected');
+      setPromptPreview('선택된 작업 없음');
       setTemplateSource(undefined);
       return;
     }
 
-    // Track if this effect has been superseded by a newer one
+    // 이 effect가 새로운 것으로 대체되었는지 추적
     let cancelled = false;
 
-    setPromptPreview('Generating prompt preview...');
+    setPromptPreview('프롬프트 미리보기 생성 중...');
     setTemplateSource(undefined);
 
     void (async () => {
@@ -835,7 +835,7 @@ export function RunApp({
         if (cancelled) return;
 
         if (result === null) {
-          setPromptPreview('Unable to fetch prompt preview from remote.\n\nConnection may not be ready.');
+          setPromptPreview('원격에서 프롬프트 미리보기를 가져올 수 없습니다.\n\n연결이 준비되지 않았을 수 있습니다.');
           setTemplateSource(undefined);
         } else if (result.success) {
           setPromptPreview(result.prompt);
@@ -1224,7 +1224,7 @@ export function RunApp({
         if (selectedText && selectedText.length > 0) {
           writeToClipboard(selectedText).then((result) => {
             if (result.success) {
-              setCopyFeedback(`Copied ${result.charCount} chars`);
+              setCopyFeedback(`${result.charCount}자 복사됨`);
             }
           });
         }
@@ -1516,12 +1516,12 @@ export function RunApp({
                   if (data) {
                     setRemoteConfigData(data);
                   } else {
-                    setRemoteConfigError('Failed to fetch remote config');
+                    setRemoteConfigError('원격 설정을 가져오지 못했습니다');
                   }
                   setRemoteConfigLoading(false);
                 })
                 .catch((err) => {
-                  setRemoteConfigError(err instanceof Error ? err.message : 'Failed to fetch remote config');
+                  setRemoteConfigError(err instanceof Error ? err.message : '원격 설정을 가져오지 못했습니다');
                   setRemoteConfigLoading(false);
                 });
             } else {
@@ -1563,7 +1563,7 @@ export function RunApp({
                   });
                   setRemoteConfigLoading(false);
                 } catch (err) {
-                  setRemoteConfigError(err instanceof Error ? err.message : 'Failed to load config');
+                  setRemoteConfigError(err instanceof Error ? err.message : '설정을 로드하지 못했습니다');
                   setRemoteConfigLoading(false);
                 }
               });
@@ -1573,9 +1573,9 @@ export function RunApp({
 
         case 'l':
           // Open epic loader to switch epics (only when not executing)
-          // Disabled for remote instances - epic loading is local-only
+          // 원격 인스턴스에서는 비활성화 - 에픽 로딩은 로컬 전용
           if (isViewingRemote) {
-            setInfoFeedback('Epic/PRD loading not available for remote instances');
+            setInfoFeedback('원격 인스턴스에서는 에픽/PRD 로딩을 사용할 수 없습니다');
             break;
           }
           if (onLoadEpics && (status === 'ready' || status === 'paused' || status === 'stopped' || status === 'idle' || status === 'complete' || status === 'error')) {
@@ -1724,7 +1724,7 @@ export function RunApp({
                 }
               }).catch((err) => {
                 console.error('Failed to load remote config for editing:', err);
-                setInfoFeedback('Failed to load remote configuration');
+                setInfoFeedback('원격 설정을 로드하지 못했습니다');
               });
             }
           }
@@ -1749,7 +1749,7 @@ export function RunApp({
                 }
               }).catch((err) => {
                 console.error('Failed to load remote config for deletion:', err);
-                setInfoFeedback('Failed to load remote configuration');
+                setInfoFeedback('원격 설정을 로드하지 못했습니다');
               });
             }
           }
@@ -1968,22 +1968,22 @@ export function RunApp({
 
         lines.push('');
 
-        // Status message
+        // 상태 메시지
         if (state.status === 'running') {
-          lines.push('─── Status ───');
-          lines.push('Subagent is currently running...');
+          lines.push('─── 상태 ───');
+          lines.push('서브에이전트가 현재 실행 중입니다...');
         } else if (state.status === 'completed') {
-          lines.push('─── Info ───');
-          lines.push('Detailed subagent output not available for remote instances.');
-          lines.push('View the main task output for full iteration results.');
+          lines.push('─── 정보 ───');
+          lines.push('원격 인스턴스에서는 상세 서브에이전트 출력을 사용할 수 없습니다.');
+          lines.push('전체 반복 결과는 메인 작업 출력에서 확인하세요.');
         } else if (state.status === 'error') {
-          lines.push('─── Error ───');
-          lines.push('Subagent encountered an error');
+          lines.push('─── 오류 ───');
+          lines.push('서브에이전트에서 오류가 발생했습니다');
         }
 
         return lines.join('\n');
       }
-      return `[Subagent ${selectedSubagentId}]\nNo output available for remote instance`;
+      return `[서브에이전트 ${selectedSubagentId}]\n원격 인스턴스에서는 출력을 사용할 수 없습니다`;
     }
 
     // Local instance: get subagent-specific output from engine
@@ -2000,58 +2000,58 @@ export function RunApp({
       lines.push(`═══ [${state.type}] ${state.description} ═══`);
       lines.push('');
 
-      // Status and timing
-      const statusLine = `Status: ${state.status}`;
+      // 상태 및 타이밍
+      const statusLine = `상태: ${state.status}`;
       const durationLine = state.durationMs
-        ? `  |  Duration: ${state.durationMs < 1000 ? `${state.durationMs}ms` : `${Math.round(state.durationMs / 1000)}s`}`
+        ? `  |  소요 시간: ${state.durationMs < 1000 ? `${state.durationMs}ms` : `${Math.round(state.durationMs / 1000)}초`}`
         : '';
       lines.push(statusLine + durationLine);
 
-      // Timestamps
+      // 타임스탬프
       if (details) {
         const startTime = new Date(details.spawnedAt).toLocaleTimeString();
-        const endTime = details.endedAt ? new Date(details.endedAt).toLocaleTimeString() : 'running';
-        lines.push(`Started: ${startTime}  |  Ended: ${endTime}`);
+        const endTime = details.endedAt ? new Date(details.endedAt).toLocaleTimeString() : '실행 중';
+        lines.push(`시작: ${startTime}  |  종료: ${endTime}`);
       }
 
-      // Child subagents
+      // 하위 서브에이전트
       if (state.children.length > 0) {
-        lines.push(`Child subagents: ${state.children.length}`);
+        lines.push(`하위 서브에이전트: ${state.children.length}개`);
       }
 
       lines.push('');
 
-      // Show the prompt/task given to the subagent
+      // 서브에이전트에 주어진 프롬프트/작업 표시
       if (details?.prompt) {
-        lines.push('─── Task Given ───');
+        lines.push('─── 주어진 작업 ───');
         lines.push(details.prompt);
         lines.push('');
       }
 
-      // Show the result if available
+      // 결과 표시 (가능한 경우)
       if (subagentOutput && subagentOutput.trim().length > 0) {
-        lines.push('─── Result ───');
+        lines.push('─── 결과 ───');
         lines.push(subagentOutput);
       } else if (state.status === 'running') {
-        lines.push('─── Status ───');
-        lines.push('Subagent is currently running...');
+        lines.push('─── 상태 ───');
+        lines.push('서브에이전트가 현재 실행 중입니다...');
       } else if (state.status === 'completed') {
-        lines.push('─── Result ───');
-        lines.push('(Subagent completed without returning detailed output)');
+        lines.push('─── 결과 ───');
+        lines.push('(서브에이전트가 상세 출력 없이 완료됨)');
       } else if (state.status === 'error') {
-        lines.push('─── Error ───');
-        lines.push('Subagent encountered an error');
+        lines.push('─── 오류 ───');
+        lines.push('서브에이전트에서 오류가 발생했습니다');
       }
 
       return lines.join('\n');
     }
 
-    // Subagent not found in tree
+    // 트리에서 서브에이전트를 찾을 수 없음
     if (subagentOutput && subagentOutput.trim().length > 0) {
-      return `[Subagent]\n\n${subagentOutput}`;
+      return `[서브에이전트]\n\n${subagentOutput}`;
     }
 
-    return `[Subagent ${selectedSubagentId}]\nNo output available`;
+    return `[서브에이전트 ${selectedSubagentId}]\n출력 없음`;
   }, [selectedSubagentId, currentTaskId, remoteCurrentTaskId, selectedTask?.id, selectedIteration?.task?.id, viewMode, selectedTaskIteration.output, engine, subagentTree, remoteSubagentTree, isViewingRemote]);
 
   // Compute historic agent/model for display when viewing completed iterations
@@ -2436,7 +2436,7 @@ export function RunApp({
           }}
         >
           <text fg={colors.status.info}>
-            ▸ {runningSubagentCount} subagent{runningSubagentCount > 1 ? 's' : ''} running (T to show)
+            ▸ {runningSubagentCount}개 서브에이전트 실행 중 (T로 표시)
           </text>
         </box>
       )}
@@ -2492,20 +2492,20 @@ export function RunApp({
         );
       })()}
 
-      {/* Interrupt Confirmation Dialog */}
+      {/* 중단 확인 다이얼로그 */}
       <ConfirmationDialog
         visible={showInterruptDialog}
-        title="⚠ Interrupt Ralph?"
-        message="Current iteration will be terminated."
-        hint="[y] Yes  [n/Esc] No  [Ctrl+C] Force quit"
+        title="⚠ Ralph를 중단하시겠습니까?"
+        message="현재 반복이 종료됩니다."
+        hint="[y] 예  [n/Esc] 아니오  [Ctrl+C] 강제 종료"
       />
 
-      {/* Quit Confirmation Dialog */}
+      {/* 종료 확인 다이얼로그 */}
       <ConfirmationDialog
         visible={showQuitDialog}
-        title="Quit Ralph?"
-        message="Session will be saved and can be resumed later."
-        hint="[y] Yes  [n/Esc] Cancel"
+        title="Ralph를 종료하시겠습니까?"
+        message="세션이 저장되며 나중에 재개할 수 있습니다."
+        hint="[y] 예  [n/Esc] 취소"
       />
 
       {/* Help Overlay */}
@@ -2526,7 +2526,7 @@ export function RunApp({
       {/* Remote Config View */}
       <RemoteConfigView
         visible={showRemoteConfig}
-        remoteAlias={isViewingRemote ? (instanceTabs?.[selectedTabIndex]?.alias ?? instanceTabs?.[selectedTabIndex]?.label ?? 'remote') : 'Local'}
+        remoteAlias={isViewingRemote ? (instanceTabs?.[selectedTabIndex]?.alias ?? instanceTabs?.[selectedTabIndex]?.label ?? '원격') : '로컬'}
         configData={remoteConfigData}
         loading={remoteConfigLoading}
         error={remoteConfigError}
@@ -2555,7 +2555,7 @@ export function RunApp({
             if (success) {
               setShowEpicLoader(false);
             } else {
-              setEpicLoaderError(`Failed to load file: ${path}`);
+              setEpicLoaderError(`파일을 로드하지 못했습니다: ${path}`);
             }
           }
         }}
@@ -2568,14 +2568,14 @@ export function RunApp({
         existingRemote={editingRemote}
         onSave={async (data) => {
           if (!instanceManager) {
-            throw new Error('Instance manager not available');
+            throw new Error('인스턴스 매니저를 사용할 수 없습니다');
           }
 
           if (remoteManagementMode === 'add') {
-            // Add new remote to config
+            // 새 원격을 설정에 추가
             const result = await addRemote(data.alias, data.host, data.port, data.token);
             if (!result.success) {
-              throw new Error(result.error || 'Failed to add remote');
+              throw new Error(result.error || '원격 추가에 실패했습니다');
             }
             // Connect to the new remote via InstanceManager
             await instanceManager.addAndConnectRemote(data.alias, data.host, data.port, data.token);
@@ -2586,25 +2586,25 @@ export function RunApp({
             }
           } else {
             // Edit existing remote
-            // If alias changed, we need to remove old and add new
+            // 별칭이 변경된 경우 기존 것을 제거하고 새로 추가해야 함
             if (editingRemote && editingRemote.alias !== data.alias) {
-              // Remove old config
+              // 기존 설정 제거
               await removeRemote(editingRemote.alias);
-              // Remove old tab
+              // 기존 탭 제거
               instanceManager.removeTab(editingRemote.alias);
-              // Add new config
+              // 새 설정 추가
               const result = await addRemote(data.alias, data.host, data.port, data.token);
               if (!result.success) {
-                throw new Error(result.error || 'Failed to add remote');
+                throw new Error(result.error || '원격 추가에 실패했습니다');
               }
-              // Connect with new alias
+              // 새 별칭으로 연결
               await instanceManager.addAndConnectRemote(data.alias, data.host, data.port, data.token);
             } else {
-              // Same alias - just update config and reconnect
+              // 같은 별칭 - 설정만 업데이트하고 재연결
               await removeRemote(data.alias);
               const result = await addRemote(data.alias, data.host, data.port, data.token);
               if (!result.success) {
-                throw new Error(result.error || 'Failed to update remote');
+                throw new Error(result.error || '원격 업데이트에 실패했습니다');
               }
               await instanceManager.reconnectRemote(data.alias, data.host, data.port, data.token);
             }
@@ -2613,12 +2613,12 @@ export function RunApp({
         }}
         onDelete={async (alias) => {
           if (!instanceManager) {
-            throw new Error('Instance manager not available');
+            throw new Error('인스턴스 매니저를 사용할 수 없습니다');
           }
-          // Remove from config
+          // 설정에서 제거
           const result = await removeRemote(alias);
           if (!result.success) {
-            throw new Error(result.error || 'Failed to remove remote');
+            throw new Error(result.error || '원격 제거에 실패했습니다');
           }
           // Remove tab and disconnect
           instanceManager.removeTab(alias);
