@@ -131,7 +131,7 @@ describe('doctor command', () => {
 
       const output = capturedOutput.join('\n');
       expect(output).toContain('ralph-tui doctor');
-      expect(output).toContain('Usage:');
+      expect(output).toContain('사용법:');
       expect(output).toContain('--agent');
       expect(output).toContain('--json');
       expect(output).toContain('--cwd');
@@ -141,7 +141,7 @@ describe('doctor command', () => {
       printDoctorHelp();
 
       const output = capturedOutput.join('\n');
-      expect(output).toContain('Common Issues');
+      expect(output).toContain('일반적인 문제');
       expect(output).toContain('OpenCode');
       expect(output).toContain('Claude');
     });
@@ -150,9 +150,9 @@ describe('doctor command', () => {
       printDoctorHelp();
 
       const output = capturedOutput.join('\n');
-      expect(output).toContain('Exit Codes');
+      expect(output).toContain('종료 코드');
       expect(output).toContain('0');
-      expect(output).toContain('healthy');
+      expect(output).toContain('정상');
     });
   });
 
@@ -162,7 +162,7 @@ describe('doctor command', () => {
 
       const output = capturedOutput.join('\n');
       expect(output).toContain('ralph-tui doctor');
-      expect(output).toContain('Usage:');
+      expect(output).toContain('사용법:');
     });
 
     test('shows help when -h flag is provided', async () => {
@@ -203,7 +203,7 @@ describe('doctor command', () => {
       expect(result.healthy).toBe(true);
       expect(result.detection.available).toBe(true);
       expect(result.preflight?.success).toBe(true);
-      expect(result.message).toContain('healthy');
+      expect(result.message).toContain('정상');
     });
 
     test('reports unhealthy when detection fails', async () => {
@@ -263,9 +263,9 @@ describe('doctor command', () => {
       }
 
       const output = capturedOutput.join('\n');
-      expect(output).toContain('HEALTHY');
-      expect(output).toContain('Detection');
-      expect(output).toContain('Preflight');
+      expect(output).toContain('정상');
+      expect(output).toContain('감지');
+      expect(output).toContain('사전 점검');
     });
 
     test('human-readable output shows agent name', async () => {

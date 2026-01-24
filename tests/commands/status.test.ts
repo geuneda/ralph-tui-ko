@@ -510,7 +510,7 @@ describe('status command', () => {
     test('includes exit codes documentation', () => {
       printStatusHelp();
       const output = consoleOutput.join('\n');
-      expect(output).toContain('Exit Codes:');
+      expect(output).toContain('종료 코드:');
       expect(output).toContain('0');
       expect(output).toContain('1');
       expect(output).toContain('2');
@@ -519,7 +519,7 @@ describe('status command', () => {
     test('includes examples', () => {
       printStatusHelp();
       const output = consoleOutput.join('\n');
-      expect(output).toContain('Examples:');
+      expect(output).toContain('예시:');
       expect(output).toContain('ralph-tui status');
       expect(output).toContain('ralph-tui status --json');
     });
@@ -527,7 +527,7 @@ describe('status command', () => {
     test('includes CI/Script usage examples', () => {
       printStatusHelp();
       const output = consoleOutput.join('\n');
-      expect(output).toContain('CI/Script Usage:');
+      expect(output).toContain('CI/스크립트 사용:');
     });
   });
 

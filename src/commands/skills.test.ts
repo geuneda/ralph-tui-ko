@@ -141,8 +141,8 @@ describe('skills list command', () => {
     // Combine all log outputs
     const allOutput = consoleSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
 
-    // Should show "Bundled Skills" header
-    expect(allOutput).toContain('Bundled Skills');
+    // Should show "번들 스킬" header
+    expect(allOutput).toContain('번들 스킬');
   });
 
   test('shows installation status by agent', async () => {
@@ -150,8 +150,8 @@ describe('skills list command', () => {
 
     const allOutput = consoleSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
 
-    // Should show "Installation Status by Agent" section
-    expect(allOutput).toContain('Installation Status by Agent');
+    // Should show "에이전트별 설치 상태" section
+    expect(allOutput).toContain('에이전트별 설치 상태');
   });
 
   test('shows agent names and paths', async () => {
@@ -169,10 +169,10 @@ describe('skills list command', () => {
 
     // In CI environments, the agent registry should still show paths for all
     // registered agents. If somehow no paths appear, at minimum we should
-    // see the "Installation Status by Agent" section header.
+    // see the "에이전트별 설치 상태" section header.
     if (!hasAgentPaths) {
       // Fallback: ensure at least the section structure is present
-      expect(allOutput).toContain('Installation Status by Agent');
+      expect(allOutput).toContain('에이전트별 설치 상태');
     } else {
       expect(hasAgentPaths).toBe(true);
     }
@@ -204,15 +204,15 @@ describe('skills install command', () => {
 
     const allOutput = consoleSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
 
-    // In CI without agents installed, we get "No supported agents detected"
-    if (allOutput.includes('No supported agents detected')) {
-      expect(allOutput).toContain('Install Claude Code, OpenCode, or Factory Droid');
+    // In CI without agents installed, we get "지원되는 에이전트가 감지되지 않았습니다"
+    if (allOutput.includes('지원되는 에이전트가 감지되지 않았습니다')) {
+      expect(allOutput).toContain('스킬을 사용하려면 Claude Code, OpenCode 또는 Factory Droid를 설치하세요');
       return;
     }
 
-    // Should show "Installing all skills to N agent(s)"
-    expect(allOutput).toContain('Installing all skills');
-    expect(allOutput).toContain('agent');
+    // Should show "모든 스킬을(를) ... 설치 중"
+    expect(allOutput).toContain('모든 스킬');
+    expect(allOutput).toContain('에이전트');
   });
 
   test('installs specific skill by name', async () => {
@@ -226,9 +226,9 @@ describe('skills install command', () => {
 
     const allOutput = consoleSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
 
-    // In CI without agents installed, we get "No supported agents detected"
-    if (allOutput.includes('No supported agents detected')) {
-      expect(allOutput).toContain('Install Claude Code, OpenCode, or Factory Droid');
+    // In CI without agents installed, we get "지원되는 에이전트가 감지되지 않았습니다"
+    if (allOutput.includes('지원되는 에이전트가 감지되지 않았습니다')) {
+      expect(allOutput).toContain('스킬을 사용하려면 Claude Code, OpenCode 또는 Factory Droid를 설치하세요');
       return;
     }
 
@@ -255,7 +255,7 @@ describe('skills install command', () => {
     }
 
     const errorOutput = consoleErrorSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
-    expect(errorOutput).toContain('not found');
+    expect(errorOutput).toContain('찾을 수 없습니다');
 
     exitSpy.mockRestore();
   });
@@ -276,14 +276,14 @@ describe('skills install command', () => {
 
     const allOutput = consoleSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
 
-    // In CI without agents installed, we get "No supported agents detected"
-    if (allOutput.includes('No supported agents detected')) {
-      expect(allOutput).toContain('Install Claude Code, OpenCode, or Factory Droid');
+    // In CI without agents installed, we get "지원되는 에이전트가 감지되지 않았습니다"
+    if (allOutput.includes('지원되는 에이전트가 감지되지 않았습니다')) {
+      expect(allOutput).toContain('스킬을 사용하려면 Claude Code, OpenCode 또는 Factory Droid를 설치하세요');
       return;
     }
 
-    // Should show "Installed" not "Skipped" for at least some skills
-    expect(allOutput).toContain('Installed');
+    // Should show "설치됨" not "건너뜀" for at least some skills
+    expect(allOutput).toContain('설치됨');
   });
 
   test('accepts -f shorthand for --force', async () => {
@@ -297,14 +297,14 @@ describe('skills install command', () => {
 
     const allOutput = consoleSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
 
-    // In CI without agents installed, we get "No supported agents detected"
-    if (allOutput.includes('No supported agents detected')) {
-      expect(allOutput).toContain('Install Claude Code, OpenCode, or Factory Droid');
+    // In CI without agents installed, we get "지원되는 에이전트가 감지되지 않았습니다"
+    if (allOutput.includes('지원되는 에이전트가 감지되지 않았습니다')) {
+      expect(allOutput).toContain('스킬을 사용하려면 Claude Code, OpenCode 또는 Factory Droid를 설치하세요');
       return;
     }
 
     // Should show installation output
-    expect(allOutput).toContain('Installing all skills');
+    expect(allOutput).toContain('모든 스킬');
   });
 
   test('accepts --all flag explicitly', async () => {
@@ -318,14 +318,14 @@ describe('skills install command', () => {
 
     const allOutput = consoleSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
 
-    // In CI without agents installed, we get "No supported agents detected"
-    if (allOutput.includes('No supported agents detected')) {
-      expect(allOutput).toContain('Install Claude Code, OpenCode, or Factory Droid');
+    // In CI without agents installed, we get "지원되는 에이전트가 감지되지 않았습니다"
+    if (allOutput.includes('지원되는 에이전트가 감지되지 않았습니다')) {
+      expect(allOutput).toContain('스킬을 사용하려면 Claude Code, OpenCode 또는 Factory Droid를 설치하세요');
       return;
     }
 
     // Should show installing all
-    expect(allOutput).toContain('Installing all skills');
+    expect(allOutput).toContain('모든 스킬');
   });
 
   test('accepts --agent flag to install to specific agent', async () => {
@@ -379,7 +379,7 @@ describe('skills install command', () => {
     }
 
     const errorOutput = consoleErrorSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
-    expect(errorOutput).toContain('Unknown agent');
+    expect(errorOutput).toContain('알 수 없는 에이전트');
 
     exitSpy.mockRestore();
   });
@@ -395,13 +395,13 @@ describe('skills install command', () => {
 
     const allOutput = consoleSpy.mock.calls.map((c: unknown[]) => c[0]).join('\n');
 
-    // In CI without agents installed, we get "No supported agents detected"
-    if (allOutput.includes('No supported agents detected')) {
-      expect(allOutput).toContain('Install Claude Code, OpenCode, or Factory Droid');
+    // In CI without agents installed, we get "지원되는 에이전트가 감지되지 않았습니다"
+    if (allOutput.includes('지원되는 에이전트가 감지되지 않았습니다')) {
+      expect(allOutput).toContain('스킬을 사용하려면 Claude Code, OpenCode 또는 Factory Droid를 설치하세요');
       return;
     }
 
     // Should show summary with counts
-    expect(allOutput).toContain('Installed:');
+    expect(allOutput).toContain('설치됨:');
   });
 });

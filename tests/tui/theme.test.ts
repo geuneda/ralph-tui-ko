@@ -118,7 +118,7 @@ describe('theme', () => {
     test('should have quit shortcut', () => {
       const quitShortcut = keyboardShortcuts.find((s) => s.key === 'q');
       expect(quitShortcut).toBeDefined();
-      expect(quitShortcut?.description.toLowerCase()).toContain('quit');
+      expect(quitShortcut?.description).toContain('종료');
     });
 
     test('should have help shortcut', () => {
@@ -142,8 +142,8 @@ describe('theme', () => {
 
     test('should have common categories', () => {
       const categories = new Set(fullKeyboardShortcuts.map((s) => s.category));
-      expect(categories.has('General')).toBe(true);
-      expect(categories.has('Execution')).toBe(true);
+      expect(categories.has('일반')).toBe(true);
+      expect(categories.has('실행')).toBe(true);
     });
   });
 
@@ -281,30 +281,30 @@ describe('theme', () => {
 
   describe('formatElapsedTime', () => {
     test('should format seconds only', () => {
-      expect(formatElapsedTime(0)).toBe('0s');
-      expect(formatElapsedTime(1)).toBe('1s');
-      expect(formatElapsedTime(30)).toBe('30s');
-      expect(formatElapsedTime(59)).toBe('59s');
+      expect(formatElapsedTime(0)).toBe('0초');
+      expect(formatElapsedTime(1)).toBe('1초');
+      expect(formatElapsedTime(30)).toBe('30초');
+      expect(formatElapsedTime(59)).toBe('59초');
     });
 
     test('should format minutes and seconds', () => {
-      expect(formatElapsedTime(60)).toBe('1m 0s');
-      expect(formatElapsedTime(61)).toBe('1m 1s');
-      expect(formatElapsedTime(90)).toBe('1m 30s');
-      expect(formatElapsedTime(125)).toBe('2m 5s');
-      expect(formatElapsedTime(3599)).toBe('59m 59s');
+      expect(formatElapsedTime(60)).toBe('1분 0초');
+      expect(formatElapsedTime(61)).toBe('1분 1초');
+      expect(formatElapsedTime(90)).toBe('1분 30초');
+      expect(formatElapsedTime(125)).toBe('2분 5초');
+      expect(formatElapsedTime(3599)).toBe('59분 59초');
     });
 
     test('should format hours, minutes, and seconds', () => {
-      expect(formatElapsedTime(3600)).toBe('1h 0m 0s');
-      expect(formatElapsedTime(3661)).toBe('1h 1m 1s');
-      expect(formatElapsedTime(7200)).toBe('2h 0m 0s');
-      expect(formatElapsedTime(7325)).toBe('2h 2m 5s');
+      expect(formatElapsedTime(3600)).toBe('1시간 0분 0초');
+      expect(formatElapsedTime(3661)).toBe('1시간 1분 1초');
+      expect(formatElapsedTime(7200)).toBe('2시간 0분 0초');
+      expect(formatElapsedTime(7325)).toBe('2시간 2분 5초');
     });
 
     test('should handle large values', () => {
-      expect(formatElapsedTime(86400)).toBe('24h 0m 0s');
-      expect(formatElapsedTime(90061)).toBe('25h 1m 1s');
+      expect(formatElapsedTime(86400)).toBe('24시간 0분 0초');
+      expect(formatElapsedTime(90061)).toBe('25시간 1분 1초');
     });
   });
 });

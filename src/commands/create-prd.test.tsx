@@ -138,13 +138,13 @@ describe('printCreatePrdHelp', () => {
     printCreatePrdHelp();
     const output = capturedOutput.join('\n');
     expect(output).toContain('ralph-tui create-prd');
-    expect(output).toContain('Usage:');
+    expect(output).toContain('사용법:');
   });
 
   test('prints options section', () => {
     printCreatePrdHelp();
     const output = capturedOutput.join('\n');
-    expect(output).toContain('Options:');
+    expect(output).toContain('옵션:');
     expect(output).toContain('--cwd');
     expect(output).toContain('--agent');
     expect(output).toContain('--timeout');

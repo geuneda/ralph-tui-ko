@@ -275,7 +275,7 @@ describe('resume command', () => {
       await listSessions();
 
       const output = logs.join('\n');
-      expect(output).toContain('No resumable sessions found');
+      expect(output).toContain('재개 가능한 세션을 찾을 수 없습니다');
       expect(output).toContain('ralph-tui run');
     });
 
@@ -307,7 +307,7 @@ describe('resume command', () => {
       await listSessions();
 
       const output = logs.join('\n');
-      expect(output).toContain('Resumable sessions');
+      expect(output).toContain('재개 가능한 세션:');
       expect(output).toContain('a1b2c3d4');
       expect(output).toContain('b2c3d4e5');
       expect(output).toContain('/home/user/project1');
@@ -343,8 +343,8 @@ describe('resume command', () => {
       await cleanupRegistry();
 
       const output = logs.join('\n');
-      expect(output).toContain('Cleaning up stale session registry entries');
-      expect(output).toContain('No stale entries found');
+      expect(output).toContain('오래된 세션 레지스트리 항목 정리 중');
+      expect(output).toContain('오래된 항목을 찾을 수 없습니다');
       expect(output).toContain('/home/user/.config/ralph-tui/sessions.json');
     });
 
@@ -354,7 +354,7 @@ describe('resume command', () => {
       await cleanupRegistry();
 
       const output = logs.join('\n');
-      expect(output).toContain('Removed 1 stale session from registry');
+      expect(output).toContain('레지스트리에서 1개의 오래된 세션 제거됨');
     });
 
     test('shows message when multiple stale entries cleaned', async () => {
@@ -363,7 +363,7 @@ describe('resume command', () => {
       await cleanupRegistry();
 
       const output = logs.join('\n');
-      expect(output).toContain('Removed 5 stale sessions from registry');
+      expect(output).toContain('레지스트리에서 5개의 오래된 세션 제거됨');
     });
   });
 
@@ -461,7 +461,7 @@ describe('resume command', () => {
       expect(result).toBeNull();
       const output = errors.join('\n');
       expect(output).toContain("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
-      expect(output).toContain('session file is missing');
+      expect(output).toContain('세션 파일이 없습니다');
       expect(output).toContain('--cleanup');
     });
 
@@ -483,8 +483,8 @@ describe('resume command', () => {
 
       expect(result).toBeNull();
       const output = errors.join('\n');
-      expect(output).toContain("Multiple sessions match prefix");
-      expect(output).toContain('Please provide a more specific session ID');
+      expect(output).toContain("일치하는 세션이 여러 개 있습니다");
+      expect(output).toContain('더 구체적인 세션 ID를 제공하세요');
     });
 
     test('returns null when session ID not found', async () => {
@@ -504,7 +504,7 @@ describe('resume command', () => {
 
       expect(result).toBeNull();
       const output = errors.join('\n');
-      expect(output).toContain("not found in registry");
+      expect(output).toContain("레지스트리에서 찾을 수 없습니다");
     });
 
     test('resolves session from current directory when no session ID provided', async () => {
@@ -561,7 +561,7 @@ describe('resume command', () => {
 
       expect(result).toBeNull();
       const output = errors.join('\n');
-      expect(output).toContain('Session file not found');
+      expect(output).toContain('세션 파일을 찾을 수 없');
       expect(output).toContain('--cleanup');
     });
 
@@ -586,8 +586,8 @@ describe('resume command', () => {
 
       expect(result).toBeNull();
       const output = errors.join('\n');
-      expect(output).toContain('No session to resume');
-      expect(output).toContain('Available sessions in other directories');
+      expect(output).toContain('재개할 세션이 없습니다');
+      expect(output).toContain('다른 디렉토리의 사용 가능한 세션');
     });
 
     test('shows run suggestion when no sessions available anywhere', async () => {
@@ -632,7 +632,7 @@ describe('resume command', () => {
 
       expect(result).toBeNull();
       const output = errors.join('\n');
-      expect(output).toContain('... and 2 more');
+      expect(output).toContain('그리고 2개 더');
     });
   });
 
@@ -703,15 +703,15 @@ describe('resume command', () => {
     test('includes usage examples', () => {
       printResumeHelp();
       const output = logs.join('\n');
-      expect(output).toContain('Examples:');
+      expect(output).toContain('예시:');
       expect(output).toContain('ralph-tui resume');
     });
 
     test('explains cross-directory resume', () => {
       printResumeHelp();
       const output = logs.join('\n');
-      expect(output).toContain('Cross-directory');
-      expect(output).toContain('registry');
+      expect(output).toContain('디렉토리 간');
+      expect(output).toContain('레지스트리');
     });
 
     test('explains resumable states', () => {

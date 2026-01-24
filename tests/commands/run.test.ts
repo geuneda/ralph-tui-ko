@@ -359,7 +359,7 @@ describe('run command', () => {
     test('includes examples', () => {
       printRunHelp();
       const output = consoleOutput.join('\n');
-      expect(output).toContain('Examples:');
+      expect(output).toContain('예시:');
       expect(output).toContain('ralph-tui run');
     });
   });

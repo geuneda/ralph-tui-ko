@@ -204,8 +204,8 @@ describe('formatSystemInfo', () => {
   test('includes version info', () => {
     const output = formatSystemInfo(mockInfo);
 
-    expect(output).toContain('ralph-tui version: 0.2.1');
-    expect(output).toContain('Runtime: bun 1.3.5');
+    expect(output).toContain('ralph-tui 버전: 0.2.1');
+    expect(output).toContain('런타임: bun 1.3.5');
   });
 
   test('includes OS info', () => {
@@ -217,44 +217,44 @@ describe('formatSystemInfo', () => {
   test('includes config paths', () => {
     const output = formatSystemInfo(mockInfo);
 
-    expect(output).toContain('Global config: /home/user/.config/ralph-tui/config.toml');
-    expect(output).toContain('Project config: /project/.ralph-tui/config.toml');
+    expect(output).toContain('전역 설정: /home/user/.config/ralph-tui/config.toml');
+    expect(output).toContain('프로젝트 설정: /project/.ralph-tui/config.toml');
   });
 
   test('shows config existence status', () => {
     const output = formatSystemInfo(mockInfo);
 
-    expect(output).toContain('Exists: yes');
+    expect(output).toContain('존재: 예');
   });
 
   test('includes templates info', () => {
     const output = formatSystemInfo(mockInfo);
 
-    expect(output).toContain('Installed: default.hbs, beads.hbs');
+    expect(output).toContain('설치됨: default.hbs, beads.hbs');
   });
 
   test('includes agent info', () => {
     const output = formatSystemInfo(mockInfo);
 
-    expect(output).toContain('Configured: claude');
-    expect(output).toContain('Available: yes');
-    expect(output).toContain('Version: 2.1.0');
+    expect(output).toContain('설정됨: claude');
+    expect(output).toContain('사용 가능: 예');
+    expect(output).toContain('버전: 2.1.0');
   });
 
   test('includes tracker info', () => {
     const output = formatSystemInfo(mockInfo);
 
-    expect(output).toContain('Configured: beads');
+    expect(output).toContain('설정됨: beads');
   });
 
   test('includes skills info', () => {
     const output = formatSystemInfo(mockInfo);
 
-    expect(output).toContain('Skills:');
-    expect(output).toContain('Bundled: ralph-tui-prd, ralph-tui-create-beads');
+    expect(output).toContain('스킬:');
+    expect(output).toContain('번들: ralph-tui-prd, ralph-tui-create-beads');
     expect(output).toContain('Claude Code:');
-    expect(output).toContain('Path: /home/user/.claude/skills');
-    expect(output).toContain('Installed: ralph-tui-prd');
+    expect(output).toContain('경로: /home/user/.claude/skills');
+    expect(output).toContain('설치됨: ralph-tui-prd');
   });
 
   test('shows no project config when missing', () => {
@@ -269,7 +269,7 @@ describe('formatSystemInfo', () => {
 
     const output = formatSystemInfo(infoWithoutProject);
 
-    expect(output).toContain('Project config: (none found)');
+    expect(output).toContain('프로젝트 설정: (찾을 수 없음)');
   });
 
   test('shows no templates when none installed', () => {
@@ -283,7 +283,7 @@ describe('formatSystemInfo', () => {
 
     const output = formatSystemInfo(infoWithoutTemplates);
 
-    expect(output).toContain('Installed: (none)');
+    expect(output).toContain('설치됨: (없음)');
   });
 
   test('shows agent error when present', () => {
@@ -298,8 +298,8 @@ describe('formatSystemInfo', () => {
 
     const output = formatSystemInfo(infoWithError);
 
-    expect(output).toContain('Available: no');
-    expect(output).toContain('Error: Command not found');
+    expect(output).toContain('사용 가능: 아니오');
+    expect(output).toContain('오류: Command not found');
   });
 });
 

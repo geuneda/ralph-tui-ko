@@ -46,14 +46,14 @@ describe('config command', () => {
     test('prints help text', () => {
       printConfigHelp();
       const output = consoleOutput.join('\n');
-      expect(output).toContain('Ralph TUI Configuration');
+      expect(output).toContain('Ralph TUI 설정 명령어');
       expect(output).toContain('ralph-tui config');
     });
 
     test('includes commands documentation', () => {
       printConfigHelp();
       const output = consoleOutput.join('\n');
-      expect(output).toContain('Commands:');
+      expect(output).toContain('명령어:');
       expect(output).toContain('show');
       expect(output).toContain('help');
     });
@@ -69,15 +69,15 @@ describe('config command', () => {
     test('includes configuration files documentation', () => {
       printConfigHelp();
       const output = consoleOutput.join('\n');
-      expect(output).toContain('Configuration Files:');
-      expect(output).toContain('Global:');
-      expect(output).toContain('Project:');
+      expect(output).toContain('설정 파일:');
+      expect(output).toContain('전역:');
+      expect(output).toContain('프로젝트:');
     });
 
     test('includes example config.toml', () => {
       printConfigHelp();
       const output = consoleOutput.join('\n');
-      expect(output).toContain('Example config.toml:');
+      expect(output).toContain('config.toml 예시:');
       expect(output).toContain('defaultAgent');
       expect(output).toContain('defaultTracker');
       expect(output).toContain('maxIterations');
@@ -110,14 +110,14 @@ describe('config command', () => {
       const result = await executeConfigCommand(['help']);
       expect(result).toBe(true);
       const output = consoleOutput.join('\n');
-      expect(output).toContain('Ralph TUI Configuration');
+      expect(output).toContain('Ralph TUI 설정 명령어');
     });
 
     test('handles --help flag', async () => {
       const result = await executeConfigCommand(['--help']);
       expect(result).toBe(true);
       const output = consoleOutput.join('\n');
-      expect(output).toContain('Ralph TUI Configuration');
+      expect(output).toContain('Ralph TUI 설정 명령어');
     });
 
     test('handles no subcommand as help', async () => {
@@ -129,7 +129,7 @@ describe('config command', () => {
       const result = await executeConfigCommand(['unknown']);
       expect(result).toBe(true);
       const output = errorOutput.join('\n');
-      expect(output).toContain('Unknown config command');
+      expect(output).toContain('알 수 없는 config 명령어');
     });
   });
 
