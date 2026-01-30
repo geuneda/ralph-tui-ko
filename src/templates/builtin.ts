@@ -313,3 +313,111 @@ export const JSON_TEMPLATE = `{{!-- 프로젝트 컨텍스트를 위한 전체 P
 완료되면 (또는 이미 완료된 경우) 다음으로 완료 신호를 보내세요:
 <promise>COMPLETE</promise>
 `;
+
+/**
+ * 계층적 JSON 트래커 템플릿 - 5단계 계층 작업 분해용.
+ * 컨텍스트 우선 구조: 부모 컨텍스트 → 작업 상세 → 검증 게이트 → 워크플로우
+ */
+export const HIERARCHICAL_JSON_TEMPLATE = `{{!-- 작업 항목 상세 --}}
+## 현재 작업: {{taskId}} - {{taskTitle}}
+
+**유형:** {{workItemType}} | **깊이:** {{depth}} | **우선순위:** {{priority}}
+
+{{#if parentContext}}
+### 부모 컨텍스트
+- **부모:** {{parentContext.title}} ({{parentContext.id}})
+{{#if grandparentContext}}
+- **조부모:** {{grandparentContext.title}} ({{grandparentContext.id}})
+{{/if}}
+{{/if}}
+
+{{#if taskDescription}}
+### 설명
+{{taskDescription}}
+{{/if}}
+
+{{#if acceptanceCriteria}}
+### 완료 조건
+{{acceptanceCriteria}}
+{{/if}}
+
+{{#if componentSpec}}
+### 인터페이스 계약
+**컴포넌트:** {{componentSpec.name}}
+
+{{#if componentSpec.provides}}
+**제공:**
+{{#each componentSpec.provides}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if componentSpec.requires}}
+**필요:**
+{{#each componentSpec.requires}}
+- {{interface}}{{#if providedBy}} ({{providedBy}}에서 제공){{/if}}
+{{/each}}
+{{/if}}
+{{/if}}
+
+{{#if siblingProgress}}
+### 형제 진행률
+완료: {{siblingProgress.completed}}/{{siblingProgress.total}}
+{{/if}}
+
+{{#if validationGate}}
+## 검증 게이트
+**유형:** {{validationGate.type}}
+
+**검증 명령어:**
+{{#each validationGate.commands}}
+- \`{{this}}\`
+{{/each}}
+
+**통과 기준:**
+{{#each validationGate.criteria}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if recentProgress}}
+## 최근 진행 상황
+{{recentProgress}}
+{{/if}}
+
+## 워크플로우
+
+1. **컨텍스트 이해**
+   - 부모 작업 항목을 검토하여 더 넓은 컨텍스트 파악
+   - 완료 조건을 주의 깊게 확인
+
+2. **구현**
+   - 위에 설명된 작업 완료
+   - 프로젝트 코딩 표준 준수
+   - 이 {{workItemType}}에 집중하여 변경
+
+3. **검증**
+   - 검증 명령어 실행
+   - 모든 완료 조건 충족 확인
+
+4. **커밋**
+{{#if config.autoCommit}}
+   - git 커밋을 생성하지 마세요. 작업 완료 후 엔진이 자동으로 커밋합니다.
+{{else}}
+   - git 커밋을 생성하지 마세요. 수동 검토를 위해 모든 변경사항을 커밋하지 않은 상태로 두세요.
+{{/if}}
+
+5. **완료 신호**
+   - 완료되면: <promise>COMPLETE</promise>
+
+{{#if notes}}
+## 참고사항
+{{notes}}
+{{/if}}
+
+## 종료 조건
+**중요**: 작업이 이미 완료된 경우(이전 반복에서 구현되었거나 이미 존재하는 경우), 검증을 실행하고 즉시 완료 신호를 보내세요.
+
+완료되면 (또는 이미 완료된 경우) 다음으로 완료 신호를 보내세요:
+<promise>COMPLETE</promise>
+`;

@@ -1,0 +1,85 @@
+## Your Work Item: {{taskId}} - {{taskTitle}}
+
+**Type:** {{workItemType}} | **Depth:** {{depth}} | **Priority:** {{priority}}
+
+{{#if parentContext}}
+### Context
+- **Parent:** {{parentContext.title}} ({{parentContext.id}})
+{{#if grandparentContext}}
+- **Grandparent:** {{grandparentContext.title}} ({{grandparentContext.id}})
+{{/if}}
+{{/if}}
+
+{{#if taskDescription}}
+### Description
+{{taskDescription}}
+{{/if}}
+
+{{#if acceptanceCriteria}}
+### Acceptance Criteria
+{{#each acceptanceCriteria}}
+- [ ] {{this}}
+{{/each}}
+{{/if}}
+
+{{#if componentSpec}}
+### Interface Contract
+**Component:** {{componentSpec.name}}
+
+{{#if componentSpec.provides}}
+**Provides:**
+{{#each componentSpec.provides}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if componentSpec.requires}}
+**Requires:**
+{{#each componentSpec.requires}}
+- {{interface}}{{#if providedBy}} (from {{providedBy}}){{/if}}
+{{/each}}
+{{/if}}
+{{/if}}
+
+{{#if siblingProgress}}
+### Sibling Progress
+Completed: {{siblingProgress.completed}}/{{siblingProgress.total}}
+{{/if}}
+
+## Validation Gate
+**Type:** {{validationGate.type}}
+**Commands:**
+{{#each validationGate.commands}}
+- `{{this}}`
+{{/each}}
+
+**Criteria:**
+{{#each validationGate.criteria}}
+- {{this}}
+{{/each}}
+
+## Workflow
+
+1. **Understand Context**
+   - Review the parent work items for broader context
+   - Check acceptance criteria carefully
+
+2. **Implement**
+   - Complete the work described above
+   - Follow project coding standards
+   - Keep changes focused on this {{workItemType}}
+
+3. **Validate**
+   - Run validation commands: {{#each validationGate.commands}}`{{this}}` {{/each}}
+   - Ensure all acceptance criteria are met
+
+4. **Commit**
+   - Use conventional commit: `{{commitType}}: {{taskId}} - {{taskTitle}}`
+
+5. **Signal Completion**
+   - When done: <promise>COMPLETE</promise>
+
+{{#if notes}}
+## Notes
+{{notes}}
+{{/if}}

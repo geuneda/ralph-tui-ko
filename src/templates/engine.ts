@@ -21,6 +21,7 @@ import {
   BEADS_TEMPLATE,
   BEADS_BV_TEMPLATE,
   JSON_TEMPLATE,
+  HIERARCHICAL_JSON_TEMPLATE,
 } from './builtin.js';
 
 /**
@@ -41,6 +42,8 @@ export function getBuiltinTemplate(trackerType: BuiltinTemplateType): string {
       return BEADS_BV_TEMPLATE;
     case 'json':
       return JSON_TEMPLATE;
+    case 'hierarchical-json':
+      return HIERARCHICAL_JSON_TEMPLATE;
     case 'default':
     default:
       return DEFAULT_TEMPLATE;
@@ -58,6 +61,10 @@ export function getTemplateTypeFromPlugin(pluginName: string): BuiltinTemplateTy
   }
   if (pluginName.includes('beads')) {
     return 'beads';
+  }
+  // Check hierarchical-json before json to avoid false positive
+  if (pluginName.includes('hierarchical-json')) {
+    return 'hierarchical-json';
   }
   if (pluginName.includes('json')) {
     return 'json';

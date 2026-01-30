@@ -1956,3 +1956,35 @@ export {
   type RateLimitDetectionResult,
   type RateLimitDetectionInput,
 } from './rate-limit-detector.js';
+
+// Re-export validation gate types and utilities
+export type {
+  ValidationGateOptions,
+  CommandExecutionResult,
+  ValidationGateExecutionResult,
+  RollupResult,
+} from './validation-gate.js';
+
+export {
+  runValidationGateCommands,
+  toValidationResult,
+  canRollup,
+  ValidationGateExecutor,
+  runQuickValidation,
+  getCommitType,
+  generateCommitMessage,
+} from './validation-gate.js';
+
+// Re-export hierarchical executor types and utilities
+export type {
+  HierarchicalExecutorEventType,
+  HierarchicalExecutorEvent,
+  HierarchicalExecutorEventListener,
+  HierarchicalExecutorConfig,
+  HierarchicalExecutorState,
+} from './hierarchical-executor.js';
+
+export {
+  HierarchicalExecutor,
+  createHierarchicalExecutor,
+} from './hierarchical-executor.js';

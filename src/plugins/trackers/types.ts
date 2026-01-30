@@ -389,3 +389,182 @@ export interface TrackerPlugin {
  * Plugins export this function as their default export.
  */
 export type TrackerPluginFactory = () => TrackerPlugin;
+
+// =============================================================================
+// Hierarchical Tracker Extensions
+// =============================================================================
+
+import type {
+  HierarchicalWorkItem,
+  WorkItemType,
+  ValidationResult,
+} from '../../prd/hierarchical-types.js';
+
+import type { InterfaceValidationResult } from '../../prd/interface-types.js';
+
+/**
+ * Filter criteria for hierarchical work item queries.
+ * Extends TaskFilter with work item specific options.
+ */
+export interface WorkItemFilter extends TaskFilter {
+  /** Filter by work item type (epic, feature, story, task, subtask) */
+  workItemType?: WorkItemType | WorkItemType[];
+
+  /** Filter by depth level (0 = epic, 4 = subtask) */
+  depth?: number | number[];
+
+  /** Include children in the result (default: false) */
+  includeChildren?: boolean;
+
+  /** Maximum depth to traverse when including children */
+  maxChildDepth?: number;
+
+  /** Filter by validation gate status */
+  validationStatus?: 'pending' | 'passed' | 'failed';
+}
+
+/**
+ * Result of running a validation gate.
+ */
+export interface ValidationGateResult {
+  /** Work item ID that was validated */
+  workItemId: string;
+
+  /** Type of validation gate */
+  gateType: string;
+
+  /** Validation result */
+  result: ValidationResult;
+
+  /** Whether the work item status was updated */
+  statusUpdated: boolean;
+
+  /** New status if updated */
+  newStatus?: string;
+}
+
+/**
+ * Extended tracker plugin interface for hierarchical work items.
+ * Plugins that support full hierarchical tracking should implement this.
+ */
+export interface HierarchicalTrackerPlugin extends TrackerPlugin {
+  /**
+   * Whether this plugin supports full hierarchical operations.
+   * Must be true for HierarchicalTrackerPlugin implementations.
+   */
+  readonly supportsHierarchicalOperations: true;
+
+  /**
+   * Get the complete work item tree from a root ID.
+   * Returns the work item with all its descendants populated.
+   * @param rootId Optional root ID (defaults to all epics)
+   * @returns Array of hierarchical work items with children populated
+   */
+  getWorkItemTree(rootId?: string): Promise<HierarchicalWorkItem[]>;
+
+  /**
+   * Get work items at a specific level in the hierarchy.
+   * @param level The work item type to retrieve
+   * @param filter Optional filter to narrow results
+   * @returns Array of work items at that level
+   */
+  getWorkItemsByLevel(
+    level: WorkItemType,
+    filter?: WorkItemFilter
+  ): Promise<HierarchicalWorkItem[]>;
+
+  /**
+   * Get a single hierarchical work item by ID.
+   * @param id Work item ID
+   * @param includeChildren Whether to populate children
+   * @returns The work item or undefined
+   */
+  getWorkItem(
+    id: string,
+    includeChildren?: boolean
+  ): Promise<HierarchicalWorkItem | undefined>;
+
+  /**
+   * Get the next executable work item (lowest level ready to execute).
+   * Respects the hierarchy: subtask > task > story > feature > epic
+   * @param filter Optional filter
+   * @returns The next work item to execute
+   */
+  getNextWorkItem(filter?: WorkItemFilter): Promise<HierarchicalWorkItem | undefined>;
+
+  /**
+   * Run validation gate for a work item.
+   * Executes the configured validation commands and updates status.
+   * @param id Work item ID
+   * @returns Result of the validation
+   */
+  runValidationGate(id: string): Promise<ValidationGateResult>;
+
+  /**
+   * Get validation history for a work item.
+   * @param id Work item ID
+   * @param limit Maximum number of results (default: 10)
+   * @returns Array of past validation results
+   */
+  getValidationHistory(id: string, limit?: number): Promise<ValidationResult[]>;
+
+  /**
+   * Validate all interface contracts in the PRD.
+   * Checks that all required interfaces are provided by other work items.
+   * @returns Interface validation result
+   */
+  validateInterfaces(): Promise<InterfaceValidationResult>;
+
+  /**
+   * Get the ancestor chain for a work item.
+   * @param id Work item ID
+   * @returns Array of ancestors from root to parent
+   */
+  getAncestors(id: string): Promise<HierarchicalWorkItem[]>;
+
+  /**
+   * Update a work item's status and trigger rollup logic.
+   * When a work item is completed, checks if parent can be completed.
+   * @param id Work item ID
+   * @param status New status
+   * @returns The updated work item with potentially updated ancestors
+   */
+  updateWorkItemStatus(
+    id: string,
+    status: 'open' | 'in_progress' | 'blocked' | 'completed' | 'failed'
+  ): Promise<HierarchicalWorkItem | undefined>;
+
+  /**
+   * Get progress summary for a work item and its descendants.
+   * @param id Work item ID (or undefined for overall progress)
+   * @returns Progress information
+   */
+  getProgress(id?: string): Promise<{
+    /** Total work items */
+    total: number;
+    /** Completed work items */
+    completed: number;
+    /** In progress work items */
+    inProgress: number;
+    /** Blocked work items */
+    blocked: number;
+    /** Failed work items */
+    failed: number;
+    /** Completion percentage */
+    percentage: number;
+    /** Breakdown by level */
+    byLevel: Record<WorkItemType, { total: number; completed: number }>;
+  }>;
+}
+
+/**
+ * Type guard to check if a tracker plugin supports hierarchical operations.
+ */
+export function isHierarchicalTracker(
+  plugin: TrackerPlugin
+): plugin is HierarchicalTrackerPlugin {
+  return (
+    'supportsHierarchicalOperations' in plugin &&
+    (plugin as HierarchicalTrackerPlugin).supportsHierarchicalOperations === true
+  );
+}

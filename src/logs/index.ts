@@ -60,3 +60,26 @@ export {
   getCodebasePatternsForPrompt,
   clearProgress,
 } from './progress.js';
+
+// Hierarchical checkpoint system
+export type {
+  WorkItemCheckpoint,
+  PrdProgressSnapshot,
+} from './hierarchical-checkpoint.js';
+
+export {
+  CHECKPOINTS_DIR,
+  PROGRESS_CHARS,
+  STATUS_ICONS,
+  createWorkItemCheckpoint,
+  createProgressSnapshot,
+  renderProgressBar,
+  renderStatus,
+  renderProgressTree,
+  renderCompactSummary,
+  renderLevelSummary,
+  saveCheckpoint,
+  saveProgressSnapshot,
+  loadCheckpoint,
+  loadProgressSnapshot,
+} from './hierarchical-checkpoint.js';

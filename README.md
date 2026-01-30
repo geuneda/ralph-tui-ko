@@ -66,7 +66,7 @@ Ralph selects the highest-priority task, builds a prompt, executes your AI agent
 
 ## Features
 
-- **Task Trackers**: prd.json (simple), Beads (git-backed with dependencies)
+- **Task Trackers**: prd.json (simple), Beads (git-backed with dependencies), **Hierarchical JSON** (5-level work breakdown)
 - **AI Agents**: Claude Code, OpenCode, Factory Droid, Gemini CLI, Codex, Kiro CLI
 - **Session Persistence**: Pause anytime, resume later, survive crashes
 - **Real-time TUI**: Watch agent output, control execution with keyboard shortcuts
@@ -74,6 +74,7 @@ Ralph selects the highest-priority task, builds a prompt, executes your AI agent
 - **Cross-iteration Context**: Automatic progress tracking between tasks
 - **Flexible Skills**: Use PRD/task skills directly in your agent or via the TUI
 - **Remote Instances**: Monitor and control ralph-tui running on multiple machines from a single TUI
+- **Hierarchical Work Breakdown**: 5-level hierarchy (Epic -> Feature -> Story -> Task -> Subtask) with validation gates
 
 ## CLI Commands
 
@@ -182,9 +183,11 @@ After running `ralph-tui setup`, skills are installed to your agent's skills dir
 Use these slash commands in your agent:
 
 ```bash
-/ralph-tui-prd           # Create a PRD interactively
-/ralph-tui-create-json   # Convert PRD to prd.json
-/ralph-tui-create-beads  # Convert PRD to Beads issues
+/ralph-tui-prd                      # Create a simple PRD interactively
+/ralph-tui-hierarchical-prd         # Create a 5-level hierarchical PRD
+/ralph-tui-create-json              # Convert PRD to prd.json
+/ralph-tui-create-hierarchical-json # Convert hierarchical PRD to JSON
+/ralph-tui-create-beads             # Convert PRD to Beads issues
 ```
 
 This lets you create PRDs while referencing source files (`@filename`) and using your full conversation context—then use `ralph-tui run` for autonomous execution.
@@ -443,6 +446,40 @@ PRs must meet these requirements before being merged:
 
 See [CONTRIBUTING.md](CONTRIBUTING.md#pull-request-guidelines) for full PR guidelines.
 
+### Hierarchical Work Breakdown (v2.0)
+
+For complex projects, use the 5-level hierarchical work breakdown system:
+
+```
+Epic (E-001)           <- Large feature/system (2+ weeks)
+  └─ Feature (F-001.1)   <- Independent functional unit (3-5 days)
+       └─ Story (S-001.1.1)  <- User-facing functionality (1 day)
+            └─ Task (T-001.1.1.1)   <- Development work unit (2-4 hours)
+                 └─ Subtask (ST-001.1.1.1.1) <- Smallest unit (1 hour)
+```
+
+**Validation Gates:** Each level has validation commands that must pass before completion:
+- Subtask: Code compiles (`bun run typecheck`)
+- Task: Unit tests pass (`bun run test`)
+- Story: Integration tests pass
+- Feature: E2E tests pass
+- Epic: Full system integration
+
+**Usage:**
+
+```bash
+# 1. Create a hierarchical PRD (AI-assisted)
+# In your AI agent: "create hierarchical prd for player movement system"
+
+# 2. Convert to JSON
+# In your AI agent: "create hierarchical json from ./tasks/prd-*.md"
+
+# 3. Run with hierarchical tracker
+ralph-tui run --prd ./tasks/hierarchical-prd.json --tracker hierarchical-json
+```
+
+**Work items are processed bottom-up:** Ralph selects the deepest incomplete work item (Subtask) first, then rolls up completion to parent levels automatically.
+
 ### Project Structure
 
 ```
@@ -474,7 +511,9 @@ ralph-tui/
 │       └── components/   # React components (TabBar, Toast, etc.)
 ├── skills/               # Bundled skills for PRD/task creation
 │   ├── ralph-tui-prd/
+│   ├── ralph-tui-hierarchical-prd/
 │   ├── ralph-tui-create-json/
+│   ├── ralph-tui-create-hierarchical-json/
 │   └── ralph-tui-create-beads/
 ├── website/              # Documentation website (Next.js)
 └── docs/                 # Images and static assets
