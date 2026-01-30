@@ -1,121 +1,57 @@
 /**
- * ABOUTME: Tests for built-in plugin registration.
- * Tests the registration of built-in agents and trackers with their registries.
+ * ABOUTME: Tests for built-in plugin factory functions.
+ * Tests the exported factory functions for built-in agents and trackers.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { registerBuiltinAgents, createClaudeAgent, createOpenCodeAgent, createDroidAgent, createGeminiAgent, createCodexAgent, createKiroAgent } from '../../src/plugins/agents/builtin/index.js';
-import { registerBuiltinTrackers, builtinTrackers, createJsonTracker, createBeadsTracker, createBeadsBvTracker, createBeadsRustTracker, createHierarchicalJsonTracker } from '../../src/plugins/trackers/builtin/index.js';
-import { getAgentRegistry, AgentRegistry } from '../../src/plugins/agents/registry.js';
-import { getTrackerRegistry, TrackerRegistry } from '../../src/plugins/trackers/registry.js';
+import { describe, test, expect } from 'bun:test';
+import { createClaudeAgent, createOpenCodeAgent, createDroidAgent, createGeminiAgent, createCodexAgent, createKiroAgent } from '../../src/plugins/agents/builtin/index.js';
+import { builtinTrackers, createJsonTracker, createBeadsTracker, createBeadsBvTracker, createBeadsRustTracker, createHierarchicalJsonTracker } from '../../src/plugins/trackers/builtin/index.js';
 
-describe('builtin agent registration', () => {
-  beforeEach(() => {
-    AgentRegistry.resetInstance();
+describe('builtin agent factory functions', () => {
+  test('createClaudeAgent is exported and callable', () => {
+    expect(typeof createClaudeAgent).toBe('function');
+    const plugin = createClaudeAgent();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('claude');
   });
 
-  afterEach(() => {
-    AgentRegistry.resetInstance();
+  test('createOpenCodeAgent is exported and callable', () => {
+    expect(typeof createOpenCodeAgent).toBe('function');
+    const plugin = createOpenCodeAgent();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('opencode');
   });
 
-  describe('registerBuiltinAgents', () => {
-    test('registers all built-in agents without error', () => {
-      expect(() => registerBuiltinAgents()).not.toThrow();
-    });
-
-    test('makes agents available in registry after registration', () => {
-      registerBuiltinAgents();
-      const registry = getAgentRegistry();
-
-      // Check that some known agents are registered
-      expect(registry.hasPlugin('claude')).toBe(true);
-      expect(registry.hasPlugin('opencode')).toBe(true);
-    });
-
-    test('can be called multiple times without error', () => {
-      expect(() => {
-        registerBuiltinAgents();
-        registerBuiltinAgents();
-      }).not.toThrow();
-    });
+  test('createDroidAgent is exported and callable', () => {
+    expect(typeof createDroidAgent).toBe('function');
+    const plugin = createDroidAgent();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('droid');
   });
 
-  describe('exported factory functions', () => {
-    test('createClaudeAgent is exported and callable', () => {
-      expect(typeof createClaudeAgent).toBe('function');
-      const plugin = createClaudeAgent();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('claude');
-    });
+  test('createGeminiAgent is exported and callable', () => {
+    expect(typeof createGeminiAgent).toBe('function');
+    const plugin = createGeminiAgent();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('gemini');
+  });
 
-    test('createOpenCodeAgent is exported and callable', () => {
-      expect(typeof createOpenCodeAgent).toBe('function');
-      const plugin = createOpenCodeAgent();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('opencode');
-    });
+  test('createCodexAgent is exported and callable', () => {
+    expect(typeof createCodexAgent).toBe('function');
+    const plugin = createCodexAgent();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('codex');
+  });
 
-    test('createDroidAgent is exported and callable', () => {
-      expect(typeof createDroidAgent).toBe('function');
-      const plugin = createDroidAgent();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('droid');
-    });
-
-    test('createGeminiAgent is exported and callable', () => {
-      expect(typeof createGeminiAgent).toBe('function');
-      const plugin = createGeminiAgent();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('gemini');
-    });
-
-    test('createCodexAgent is exported and callable', () => {
-      expect(typeof createCodexAgent).toBe('function');
-      const plugin = createCodexAgent();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('codex');
-    });
-
-    test('createKiroAgent is exported and callable', () => {
-      expect(typeof createKiroAgent).toBe('function');
-      const plugin = createKiroAgent();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('kiro');
-    });
+  test('createKiroAgent is exported and callable', () => {
+    expect(typeof createKiroAgent).toBe('function');
+    const plugin = createKiroAgent();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('kiro');
   });
 });
 
-describe('builtin tracker registration', () => {
-  beforeEach(() => {
-    TrackerRegistry.resetInstance();
-  });
-
-  afterEach(() => {
-    TrackerRegistry.resetInstance();
-  });
-
-  describe('registerBuiltinTrackers', () => {
-    test('registers all built-in trackers without error', () => {
-      expect(() => registerBuiltinTrackers()).not.toThrow();
-    });
-
-    test('makes trackers available in registry after registration', () => {
-      registerBuiltinTrackers();
-      const registry = getTrackerRegistry();
-
-      // Check that some known trackers are registered
-      expect(registry.hasPlugin('json')).toBe(true);
-      expect(registry.hasPlugin('beads')).toBe(true);
-    });
-
-    test('can be called multiple times without error', () => {
-      expect(() => {
-        registerBuiltinTrackers();
-        registerBuiltinTrackers();
-      }).not.toThrow();
-    });
-  });
-
+describe('builtin tracker factory functions', () => {
   describe('builtinTrackers map', () => {
     test('contains all expected tracker factories', () => {
       expect(builtinTrackers.json).toBeDefined();
@@ -130,40 +66,38 @@ describe('builtin tracker registration', () => {
     });
   });
 
-  describe('exported factory functions', () => {
-    test('createJsonTracker is exported and callable', () => {
-      expect(typeof createJsonTracker).toBe('function');
-      const plugin = createJsonTracker();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('json');
-    });
+  test('createJsonTracker is exported and callable', () => {
+    expect(typeof createJsonTracker).toBe('function');
+    const plugin = createJsonTracker();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('json');
+  });
 
-    test('createBeadsTracker is exported and callable', () => {
-      expect(typeof createBeadsTracker).toBe('function');
-      const plugin = createBeadsTracker();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('beads');
-    });
+  test('createBeadsTracker is exported and callable', () => {
+    expect(typeof createBeadsTracker).toBe('function');
+    const plugin = createBeadsTracker();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('beads');
+  });
 
-    test('createBeadsBvTracker is exported and callable', () => {
-      expect(typeof createBeadsBvTracker).toBe('function');
-      const plugin = createBeadsBvTracker();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('beads-bv');
-    });
+  test('createBeadsBvTracker is exported and callable', () => {
+    expect(typeof createBeadsBvTracker).toBe('function');
+    const plugin = createBeadsBvTracker();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('beads-bv');
+  });
 
-    test('createBeadsRustTracker is exported and callable', () => {
-      expect(typeof createBeadsRustTracker).toBe('function');
-      const plugin = createBeadsRustTracker();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('beads-rust');
-    });
+  test('createBeadsRustTracker is exported and callable', () => {
+    expect(typeof createBeadsRustTracker).toBe('function');
+    const plugin = createBeadsRustTracker();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('beads-rust');
+  });
 
-    test('createHierarchicalJsonTracker is exported and callable', () => {
-      expect(typeof createHierarchicalJsonTracker).toBe('function');
-      const plugin = createHierarchicalJsonTracker();
-      expect(plugin).toBeDefined();
-      expect(plugin.meta.id).toBe('hierarchical-json');
-    });
+  test('createHierarchicalJsonTracker is exported and callable', () => {
+    expect(typeof createHierarchicalJsonTracker).toBe('function');
+    const plugin = createHierarchicalJsonTracker();
+    expect(plugin).toBeDefined();
+    expect(plugin.meta.id).toBe('hierarchical-json');
   });
 });

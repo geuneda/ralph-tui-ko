@@ -272,9 +272,9 @@ function recommendationToTask(rec: BvRecommendation): TrackerTask {
 export class BeadsBvTrackerPlugin extends BeadsTrackerPlugin {
   override readonly meta: TrackerPluginMeta = {
     id: 'beads-bv',
-    name: 'Beads + Beads Viewer (Smart Mode)',
+    name: 'Beads + Beads Viewer (스마트 모드)',
     description:
-      'Smart task selection using bv graph analysis (PageRank, critical path)',
+      'bv 그래프 분석을 사용한 스마트 작업 선택 (PageRank, 크리티컬 패스)',
     version: '1.0.0',
     supportsBidirectionalSync: true,
     supportsHierarchy: true,

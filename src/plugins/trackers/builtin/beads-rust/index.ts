@@ -230,8 +230,8 @@ function brTaskToTask(task: BrTaskJson): TrackerTask {
 export class BeadsRustTrackerPlugin extends BaseTrackerPlugin {
   readonly meta: TrackerPluginMeta = {
     id: 'beads-rust',
-    name: 'Beads Rust Issue Tracker',
-    description: 'Track issues using the br (beads-rust) CLI',
+    name: 'Beads Rust 이슈 트래커',
+    description: 'br (beads-rust) CLI를 사용하여 이슈를 추적합니다',
     version: '1.0.0',
     supportsBidirectionalSync: true,
     supportsHierarchy: true,

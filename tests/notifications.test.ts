@@ -97,12 +97,12 @@ describe('notifications module', () => {
       }).not.toThrow();
     });
 
-    test('does not throw with sound option', () => {
+    test('does not throw with sound off option', () => {
       expect(() => {
         sendNotification({
           title: 'Test Title',
           body: 'Test Body',
-          sound: 'system',
+          sound: 'off',
         });
       }).not.toThrow();
     });
@@ -118,12 +118,12 @@ describe('notifications module', () => {
       }).not.toThrow();
     });
 
-    test('does not throw with sound option', () => {
+    test('does not throw with sound off option', () => {
       expect(() => {
         sendCompletionNotification({
           durationMs: 120000,
           taskCount: 10,
-          sound: 'ralph',
+          sound: 'off',
         });
       }).not.toThrow();
     });
@@ -141,14 +141,14 @@ describe('notifications module', () => {
       }).not.toThrow();
     });
 
-    test('does not throw with sound option', () => {
+    test('does not throw with sound off option', () => {
       expect(() => {
         sendMaxIterationsNotification({
           iterationsRun: 100,
           tasksCompleted: 8,
           tasksRemaining: 1,
           durationMs: 600000,
-          sound: 'system',
+          sound: 'off',
         });
       }).not.toThrow();
     });
@@ -176,13 +176,13 @@ describe('notifications module', () => {
       }).not.toThrow();
     });
 
-    test('does not throw with sound option', () => {
+    test('does not throw with sound off option', () => {
       expect(() => {
         sendErrorNotification({
           errorSummary: 'Connection failed',
           tasksCompleted: 5,
           durationMs: 120000,
-          sound: 'ralph',
+          sound: 'off',
         });
       }).not.toThrow();
     });

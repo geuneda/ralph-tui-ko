@@ -30,7 +30,7 @@ export class KiroAgentPlugin extends BaseAgentPlugin {
   readonly meta: AgentPluginMeta = {
     id: 'kiro',
     name: 'Kiro CLI',
-    description: 'AWS Kiro CLI for AI-assisted coding',
+    description: 'AI 지원 코딩을 위한 AWS Kiro CLI',
     version: '1.0.0',
     author: 'AWS',
     defaultCommand: 'kiro-cli',

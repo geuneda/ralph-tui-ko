@@ -70,7 +70,7 @@ export class ClaudeAgentPlugin extends BaseAgentPlugin {
   readonly meta: AgentPluginMeta = {
     id: 'claude',
     name: 'Claude Code',
-    description: 'Anthropic Claude Code CLI for AI-assisted coding',
+    description: 'AI 지원 코딩을 위한 Anthropic Claude Code CLI',
     version: '1.0.0',
     author: 'Anthropic',
     defaultCommand: 'claude',

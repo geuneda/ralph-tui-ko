@@ -146,8 +146,8 @@ async function collectTrackerOptions(
     return {};
   }
 
-  printSection('Tracker Configuration');
-  printInfo(`Configure the ${trackerId} tracker:`);
+  printSection('트래커 설정');
+  printInfo(`${trackerId} 트래커를 설정합니다:`);
   console.log();
 
   const options: Record<string, unknown> = {};
@@ -214,10 +214,10 @@ export async function runSetupWizard(
       return {
         success: false,
         error:
-          'The setup wizard requires an interactive terminal. ' +
-          'Please run this command in a terminal that supports interactive input (TTY). ' +
-          'If running in a container or automated environment, consider creating the ' +
-          'configuration file manually at .ralph-tui/config.toml',
+          '설정 마법사는 대화형 터미널이 필요합니다. ' +
+          '대화형 입력(TTY)을 지원하는 터미널에서 이 명령을 실행해주세요. ' +
+          '컨테이너나 자동화 환경에서 실행 중이라면 ' +
+          '.ralph-tui/config.toml 설정 파일을 직접 생성하는 것을 고려해주세요.',
       };
     }
 
@@ -227,7 +227,7 @@ export async function runSetupWizard(
       if (exists) {
         return {
           success: false,
-          error: `Configuration file already exists: ${join(cwd, CONFIG_DIR, CONFIG_FILENAME)}. Use --force to overwrite.`,
+          error: `설정 파일이 이미 존재합니다: ${join(cwd, CONFIG_DIR, CONFIG_FILENAME)}. 덮어쓰려면 --force 옵션을 사용하세요.`,
         };
       }
     }
@@ -235,20 +235,20 @@ export async function runSetupWizard(
     // Print welcome banner
     console.log();
     console.log('╔════════════════════════════════════════════════════════════╗');
-    console.log('║                   Ralph TUI Setup Wizard                    ║');
+    console.log('║                   Ralph TUI 설정 마법사                      ║');
     console.log('╚════════════════════════════════════════════════════════════╝');
     console.log();
-    printInfo('This wizard will help you configure Ralph TUI for your project.');
-    printInfo('Press Ctrl+C at any time to cancel.');
+    printInfo('이 마법사가 프로젝트용 Ralph TUI 설정을 도와드립니다.');
+    printInfo('언제든지 Ctrl+C를 눌러 취소할 수 있습니다.');
 
     // === Step 1: Select Tracker ===
-    printSection('Issue Tracker Selection');
+    printSection('이슈 트래커 선택');
 
     const trackerPlugins = await detectTrackerPlugins();
     if (trackerPlugins.length === 0) {
       return {
         success: false,
-        error: 'No tracker plugins available. Please install a tracker plugin.',
+        error: '사용 가능한 트래커 플러그인이 없습니다. 트래커 플러그인을 설치해주세요.',
       };
     }
 
@@ -262,11 +262,11 @@ export async function runSetupWizard(
     }));
 
     const selectedTracker = await promptSelect(
-      'Which issue tracker do you want to use?',
+      '어떤 이슈 트래커를 사용하시겠습니까?',
       trackerChoices,
       {
         default: trackerPlugins.find((p) => p.available)?.id,
-        help: 'Ralph will use this tracker to manage tasks.',
+        help: 'Ralph가 이 트래커를 사용하여 작업을 관리합니다.',
       }
     );
 
@@ -274,13 +274,13 @@ export async function runSetupWizard(
     const trackerOptions = await collectTrackerOptions(selectedTracker);
 
     // === Step 2: Select Agent ===
-    printSection('Agent CLI Selection');
+    printSection('에이전트 CLI 선택');
 
     const agentPlugins = await detectAgentPlugins();
     if (agentPlugins.length === 0) {
       return {
         success: false,
-        error: 'No agent plugins available. Please install an agent plugin.',
+        error: '사용 가능한 에이전트 플러그인이 없습니다. 에이전트 플러그인을 설치해주세요.',
       };
     }
 
@@ -296,18 +296,18 @@ export async function runSetupWizard(
     // Find first available agent as default
     const defaultAgent = agentPlugins.find((p) => p.available)?.id;
 
-    printInfo('Ralph supports multiple AI coding agents.');
+    printInfo('Ralph는 여러 AI 코딩 에이전트를 지원합니다.');
     if (defaultAgent) {
-      printSuccess(`Auto-detected: ${agentPlugins.find((p) => p.id === defaultAgent)?.name}`);
+      printSuccess(`자동 감지됨: ${agentPlugins.find((p) => p.id === defaultAgent)?.name}`);
     }
     console.log();
 
     const selectedAgent = await promptSelect(
-      'Which agent CLI do you want to use?',
+      '어떤 에이전트 CLI를 사용하시겠습니까?',
       agentChoices,
       {
         default: defaultAgent,
-        help: 'The AI agent that will execute coding tasks.',
+        help: '코딩 작업을 실행할 AI 에이전트입니다.',
       }
     );
 
@@ -317,28 +317,28 @@ export async function runSetupWizard(
     const agentOptions: Record<string, unknown> = {};
 
     // === Step 3: Iteration Settings ===
-    printSection('Iteration Settings');
+    printSection('반복 설정');
 
     const maxIterations = await promptNumber(
-      'Maximum iterations per run?',
+      '실행당 최대 반복 횟수는?',
       {
         default: 10,
         min: 0,
         max: 1000,
-        help: 'How many tasks to process before stopping (0 = unlimited).',
+        help: '중지하기 전에 처리할 작업 수 (0 = 무제한).',
       }
     );
 
     const autoCommit = await promptBoolean(
-      'Auto-commit on task completion?',
+      '작업 완료 시 자동 커밋?',
       {
         default: false,
-        help: 'Automatically commit changes after each successful task.',
+        help: '각 작업이 성공적으로 완료된 후 자동으로 변경사항을 커밋합니다.',
       }
     );
 
     // === Step 4: Skills Installation ===
-    printSection('AI Skills Installation');
+    printSection('AI 스킬 설치');
 
     // Get the selected agent's skills paths from the registry
     const agentRegistry = getAgentRegistry();
@@ -346,26 +346,26 @@ export async function runSetupWizard(
     const skillsPaths = agentMeta?.skillsPaths;
 
     if (!skillsPaths) {
-      printInfo(`Agent "${agentMeta?.name ?? selectedAgent}" does not support skill installation.`);
+      printInfo(`에이전트 "${agentMeta?.name ?? selectedAgent}"는 스킬 설치를 지원하지 않습니다.`);
     } else {
       const bundledSkills = await listBundledSkills();
 
       if (bundledSkills.length > 0) {
         const personalDir = resolveSkillsPath(skillsPaths.personal);
-        printInfo('Ralph TUI includes AI skills that enhance agent capabilities.');
-        printInfo(`Skills will be installed to: ${personalDir}`);
+        printInfo('Ralph TUI에는 에이전트 기능을 향상시키는 AI 스킬이 포함되어 있습니다.');
+        printInfo(`스킬 설치 위치: ${personalDir}`);
         console.log();
 
         for (const skill of bundledSkills) {
           const alreadyInstalled = await isSkillInstalledAt(skill.name, personalDir);
-          const actionLabel = alreadyInstalled ? 'Update' : 'Install';
+          const actionLabel = alreadyInstalled ? '업데이트' : '설치';
 
           const installThisSkill = await promptBoolean(
-            `${actionLabel} skill: ${skill.name}?`,
+            `스킬 ${actionLabel}: ${skill.name}?`,
             {
               default: true,
               help: alreadyInstalled
-                ? `${skill.description} (currently installed - update to latest)`
+                ? `${skill.description} (현재 설치됨 - 최신 버전으로 업데이트)`
                 : skill.description,
             }
           );
@@ -382,20 +382,20 @@ export async function runSetupWizard(
             const skillResults = result.skills.get(skill.name);
             const personalResult = skillResults?.find(r => r.target === 'personal');
             if (personalResult?.result.success) {
-              printSuccess(`  ${alreadyInstalled ? 'Updated' : 'Installed'}: ${skill.name}`);
+              printSuccess(`  ${alreadyInstalled ? '업데이트됨' : '설치됨'}: ${skill.name}`);
               if (personalResult.result.path) {
-                printInfo(`    Location: ${personalResult.result.path}`);
+                printInfo(`    위치: ${personalResult.result.path}`);
               }
             } else {
-              const error = personalResult?.result.error ?? 'Unknown error';
-              printError(`  Failed to ${actionLabel.toLowerCase()} ${skill.name}: ${error}`);
+              const error = personalResult?.result.error ?? '알 수 없는 오류';
+              printError(`  ${skill.name} ${actionLabel} 실패: ${error}`);
             }
           } else if (alreadyInstalled) {
-            printInfo(`  ${skill.name}: Keeping existing version`);
+            printInfo(`  ${skill.name}: 기존 버전 유지`);
           }
         }
       } else {
-        printInfo('No bundled skills available for installation.');
+        printInfo('설치 가능한 번들 스킬이 없습니다.');
       }
     }
 
@@ -409,18 +409,18 @@ export async function runSetupWizard(
       autoCommit,
     };
 
-    printSection('Saving Configuration');
+    printSection('설정 저장');
 
     const configPath = await saveConfig(answers, cwd);
 
     console.log();
-    printSuccess(`Configuration saved to: ${configPath}`);
+    printSuccess(`설정이 저장되었습니다: ${configPath}`);
     console.log();
 
     // === Verify Agent Configuration ===
-    printSection('Verifying Agent Configuration');
+    printSection('에이전트 설정 검증');
 
-    printInfo('Running agent preflight check...');
+    printInfo('에이전트 사전 검사 실행 중...');
     console.log();
 
     // Get a fresh agent instance with the configured options
@@ -434,43 +434,43 @@ export async function runSetupWizard(
     const preflightResult = await agentInstance.preflight({ timeout: 30000 });
 
     if (preflightResult.success) {
-      printSuccess(`✓ Agent is configured correctly and responding`);
+      printSuccess(`✓ 에이전트가 올바르게 설정되어 응답 중입니다`);
       if (preflightResult.durationMs) {
-        printInfo(`  Response time: ${preflightResult.durationMs}ms`);
+        printInfo(`  응답 시간: ${preflightResult.durationMs}ms`);
       }
       console.log();
     } else {
-      printError(`✗ Agent preflight check failed`);
+      printError(`✗ 에이전트 사전 검사 실패`);
       if (preflightResult.error) {
         printError(`  ${preflightResult.error}`);
       }
       if (preflightResult.suggestion) {
         console.log();
-        printInfo('Suggestions:');
+        printInfo('제안사항:');
         // Split suggestion by newlines and print each line
         for (const line of preflightResult.suggestion.split('\n')) {
           console.log(`  ${line}`);
         }
       }
       console.log();
-      printInfo('Configuration saved, but the agent is not responding.');
-      printInfo('Run "ralph-tui doctor" to diagnose issues.');
+      printInfo('설정이 저장되었지만 에이전트가 응답하지 않습니다.');
+      printInfo('"ralph-tui doctor"를 실행하여 문제를 진단하세요.');
       console.log();
     }
 
     // Show tracker-specific instructions
     if (selectedTracker === 'json') {
-      printInfo('You can now run Ralph TUI with:');
+      printInfo('이제 다음 명령으로 Ralph TUI를 실행할 수 있습니다:');
       console.log();
-      console.log('  Create a PRD and tasks:        ralph-tui create-prd');
-      console.log('  Run Ralph on existing tasks:   ralph-tui run --prd <path-to-prd.json>');
+      console.log('  PRD와 작업 생성:               ralph-tui create-prd');
+      console.log('  기존 작업으로 Ralph 실행:      ralph-tui run --prd <prd.json 경로>');
     } else {
-      printInfo('You can now run Ralph TUI with:');
+      printInfo('이제 다음 명령으로 Ralph TUI를 실행할 수 있습니다:');
       console.log();
       console.log('  ralph-tui run');
     }
     console.log();
-    printInfo('Or edit the configuration with:');
+    printInfo('또는 다음 명령으로 설정을 확인할 수 있습니다:');
     console.log();
     console.log('  ralph-tui config show');
     console.log();
@@ -484,7 +484,7 @@ export async function runSetupWizard(
     // Check for user cancellation (Ctrl+C)
     if (error instanceof Error && error.message.includes('readline was closed')) {
       console.log();
-      printInfo('Setup cancelled.');
+      printInfo('설정이 취소되었습니다.');
       return {
         success: false,
         cancelled: true,
@@ -516,7 +516,7 @@ export async function checkAndRunSetup(
 
   if (options.skipSetup) {
     // User wants to skip setup
-    printInfo('No configuration found. Run "ralph-tui setup" to create one.');
+    printInfo('설정을 찾을 수 없습니다. "ralph-tui setup"을 실행하여 설정을 생성하세요.');
     return null;
   }
 

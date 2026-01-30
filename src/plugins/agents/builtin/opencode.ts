@@ -185,7 +185,7 @@ export class OpenCodeAgentPlugin extends BaseAgentPlugin {
   readonly meta: AgentPluginMeta = {
     id: 'opencode',
     name: 'OpenCode',
-    description: 'OpenCode AI coding assistant CLI',
+    description: 'OpenCode AI 코딩 어시스턴트 CLI',
     version: '1.0.0',
     author: 'SST',
     defaultCommand: 'opencode',

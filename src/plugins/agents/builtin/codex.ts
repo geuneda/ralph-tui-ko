@@ -125,7 +125,7 @@ export class CodexAgentPlugin extends BaseAgentPlugin {
   readonly meta: AgentPluginMeta = {
     id: 'codex',
     name: 'Codex CLI',
-    description: 'OpenAI Codex CLI for AI-assisted coding',
+    description: 'AI 지원 코딩을 위한 OpenAI Codex CLI',
     version: '1.0.0',
     author: 'OpenAI',
     defaultCommand: 'codex',

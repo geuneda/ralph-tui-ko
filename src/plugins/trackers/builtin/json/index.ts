@@ -322,8 +322,8 @@ const FALLBACK_TEMPLATE = `## Your Task: {{taskId}} - {{taskTitle}}
 export class JsonTrackerPlugin extends BaseTrackerPlugin {
   readonly meta: TrackerPluginMeta = {
     id: 'json',
-    name: 'JSON File Tracker',
-    description: 'Track tasks in a local prd.json file',
+    name: 'JSON 파일 트래커',
+    description: '로컬 prd.json 파일에서 작업을 추적합니다',
     version: '1.0.0',
     supportsBidirectionalSync: false,
     supportsHierarchy: true,

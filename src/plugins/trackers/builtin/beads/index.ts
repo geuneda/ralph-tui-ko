@@ -220,8 +220,8 @@ function beadToTask(bead: BeadJson): TrackerTask {
 export class BeadsTrackerPlugin extends BaseTrackerPlugin {
   readonly meta: TrackerPluginMeta = {
     id: 'beads',
-    name: 'Beads Issue Tracker',
-    description: 'Track issues using the bd (beads) CLI',
+    name: 'Beads 이슈 트래커',
+    description: 'bd (beads) CLI를 사용하여 이슈를 추적합니다',
     version: '1.0.0',
     supportsBidirectionalSync: true,
     supportsHierarchy: true,
@@ -323,19 +323,19 @@ export class BeadsTrackerPlugin extends BaseTrackerPlugin {
     return [
       {
         id: 'beadsDir',
-        prompt: 'Path to .beads directory:',
+        prompt: '.beads 디렉토리 경로:',
         type: 'path',
         default: '.beads',
         required: false,
-        help: 'Directory containing beads issues (default: .beads in project root)',
+        help: 'beads 이슈가 있는 디렉토리 (기본값: 프로젝트 루트의 .beads)',
       },
       {
         id: 'labels',
-        prompt: 'Labels to filter issues by (comma-separated):',
+        prompt: '필터링할 라벨 (쉼표로 구분):',
         type: 'text',
         default: '',
         required: false,
-        help: 'Only show issues with these labels (e.g., "ralph,frontend"). Leave empty to show all epics.',
+        help: '이 라벨이 있는 이슈만 표시합니다 (예: "ralph,frontend"). 모든 에픽을 표시하려면 비워두세요.',
       },
     ];
   }

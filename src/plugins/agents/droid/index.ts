@@ -23,7 +23,7 @@ export class DroidAgentPlugin extends BaseAgentPlugin {
   private readonly baseMeta: AgentPluginMeta = {
     id: 'droid',
     name: 'Factory Droid',
-    description: 'Factory Droid AI coding assistant CLI',
+    description: 'Factory Droid AI 코딩 어시스턴트 CLI',
     version: '1.0.0',
     author: 'Factory',
     defaultCommand: DROID_DEFAULT_COMMAND,

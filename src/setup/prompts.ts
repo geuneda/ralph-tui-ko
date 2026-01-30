@@ -84,7 +84,7 @@ export async function promptText(
       if (options.pattern && value) {
         const regex = new RegExp(options.pattern);
         if (!regex.test(value)) {
-          console.log(`${colors.yellow}Invalid format. Please try again.${colors.reset}`);
+          console.log(`${colors.yellow}형식이 올바르지 않습니다. 다시 시도해주세요.${colors.reset}`);
           resolve(promptText(prompt, options));
           return;
         }
@@ -92,7 +92,7 @@ export async function promptText(
 
       // Check required
       if (options.required && !value) {
-        console.log(`${colors.yellow}This field is required.${colors.reset}`);
+        console.log(`${colors.yellow}이 필드는 필수입니다.${colors.reset}`);
         resolve(promptText(prompt, options));
         return;
       }
@@ -143,7 +143,7 @@ export async function promptBoolean(
       }
 
       // Invalid input, try again
-      console.log(`${colors.yellow}Please enter 'y' or 'n'.${colors.reset}`);
+      console.log(`${colors.yellow}'y' 또는 'n'을 입력해주세요.${colors.reset}`);
       resolve(promptBoolean(prompt, options));
     });
   });
@@ -190,7 +190,7 @@ export async function promptSelect<T extends string = string>(
       ? ` ${colors.dim}(default: ${choices.find(c => c.value === options.default)?.label})${colors.reset}`
       : '';
 
-    rl.question(`  Enter number (1-${choices.length})${defaultHint}: `, (answer) => {
+    rl.question(`  번호를 입력하세요 (1-${choices.length})${defaultHint}: `, (answer) => {
       rl.close();
 
       const value = answer.trim();
@@ -204,7 +204,7 @@ export async function promptSelect<T extends string = string>(
       // Parse number
       const num = parseInt(value, 10);
       if (isNaN(num) || num < 1 || num > choices.length) {
-        console.log(`${colors.yellow}Please enter a number between 1 and ${choices.length}.${colors.reset}`);
+        console.log(`${colors.yellow}1에서 ${choices.length} 사이의 숫자를 입력해주세요.${colors.reset}`);
         resolve(promptSelect(prompt, choices, options));
         return;
       }
@@ -228,7 +228,7 @@ export async function promptPath(
   // Path input is essentially text input with different semantics
   return promptText(prompt, {
     ...options,
-    help: options.help || 'Enter a file or directory path',
+    help: options.help || '파일 또는 디렉토리 경로를 입력하세요',
   });
 }
 
@@ -269,20 +269,20 @@ export async function promptNumber(
       // Parse number
       const num = parseInt(value, 10);
       if (isNaN(num)) {
-        console.log(`${colors.yellow}Please enter a valid number.${colors.reset}`);
+        console.log(`${colors.yellow}유효한 숫자를 입력해주세요.${colors.reset}`);
         resolve(promptNumber(prompt, options));
         return;
       }
 
       // Validate range
       if (options.min !== undefined && num < options.min) {
-        console.log(`${colors.yellow}Value must be at least ${options.min}.${colors.reset}`);
+        console.log(`${colors.yellow}값은 최소 ${options.min} 이상이어야 합니다.${colors.reset}`);
         resolve(promptNumber(prompt, options));
         return;
       }
 
       if (options.max !== undefined && num > options.max) {
-        console.log(`${colors.yellow}Value must be at most ${options.max}.${colors.reset}`);
+        console.log(`${colors.yellow}값은 최대 ${options.max} 이하여야 합니다.${colors.reset}`);
         resolve(promptNumber(prompt, options));
         return;
       }

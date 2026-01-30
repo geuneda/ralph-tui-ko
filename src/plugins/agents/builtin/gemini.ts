@@ -118,7 +118,7 @@ export class GeminiAgentPlugin extends BaseAgentPlugin {
   readonly meta: AgentPluginMeta = {
     id: 'gemini',
     name: 'Gemini CLI',
-    description: 'Google Gemini CLI for AI-assisted coding',
+    description: 'AI 지원 코딩을 위한 Google Gemini CLI',
     version: '1.0.0',
     author: 'Google',
     defaultCommand: 'gemini',
