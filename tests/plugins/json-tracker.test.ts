@@ -67,7 +67,7 @@ describe('JsonTrackerPlugin', () => {
     });
 
     test('has correct name', () => {
-      expect(plugin.meta.name).toBe('JSON File Tracker');
+      expect(plugin.meta.name).toBe('JSON 파일 트래커');
     });
 
     test('supports hierarchy', () => {

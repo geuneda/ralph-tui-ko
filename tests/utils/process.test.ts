@@ -62,7 +62,10 @@ describe('process utility', () => {
         cwd: testDir,
       });
       expect(result.success).toBe(true);
-      expect(result.stdout.trim()).toBe(testDir);
+      // macOS: /var is a symlink to /private/var, so use realpath for comparison
+      const { realpathSync } = await import('node:fs');
+      const expectedDir = realpathSync(testDir);
+      expect(result.stdout.trim()).toBe(expectedDir);
     });
 
     test('uses custom environment variables', async () => {

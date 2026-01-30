@@ -27,7 +27,7 @@ describe('BeadsTrackerPlugin', () => {
     });
 
     test('has correct name', () => {
-      expect(plugin.meta.name).toBe('Beads Issue Tracker');
+      expect(plugin.meta.name).toBe('Beads 이슈 트래커');
     });
 
     test('supports bidirectional sync', () => {
